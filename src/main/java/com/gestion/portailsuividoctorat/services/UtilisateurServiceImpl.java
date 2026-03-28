@@ -5,6 +5,8 @@ import com.gestion.portailsuividoctorat.repositories.UtilisateurRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class UtilisateurServiceImpl implements UtilisateurService {
     @Autowired
@@ -13,6 +15,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     public Utilisateur createUtilisateur(Utilisateur u) {
         return utilisateurRepo.save(u);
     }
+
     @Override
     public Utilisateur updateUtilisateur(Utilisateur u, Long id) {
         Utilisateur existing = utilisateurRepo.findById(id).orElseThrow(() -> new RuntimeException("Utilisateur not found"));
@@ -28,6 +31,10 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     @Override
     public Utilisateur findUtilisateur(Long id) {
         return utilisateurRepo.findById(id).orElseThrow(() -> new RuntimeException("Utilisateur not found"));
+    }
+    @Override
+    public List<Utilisateur> findAllUtilisateurs() {
+        return utilisateurRepo.findAll();
     }
     @Override
     public void DeleteUtilisateur(Long id) {
