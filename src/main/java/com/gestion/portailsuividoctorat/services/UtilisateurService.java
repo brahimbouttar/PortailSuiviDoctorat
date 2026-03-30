@@ -7,8 +7,8 @@ public interface UtilisateurService {
     //creation
     Utilisateur createUtilisateur(String role, String password, String telephone, String adresse, String prenom, String email, String nom);
     //modification
-
     //lecture
     Utilisateur findUtilisateur(Long id);
     //Suppression
+
 }
