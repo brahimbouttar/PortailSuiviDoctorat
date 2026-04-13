@@ -4,33 +4,52 @@ import com.gestion.portailsuividoctorat.entites.Doctorant;
 import com.gestion.portailsuividoctorat.services.DoctorantServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-@RequestMapping("/api/Doctorant")
-@RestController
+
 @Controller
+@RequestMapping("/doctorants")
 public class DoctorantController {
+
     @Autowired
-    DoctorantServiceImpl DoctorantService;
-    @PostMapping ("/create")
-    public Doctorant CreateDoctorant(@RequestBody Doctorant u) {
-        return DoctorantService.createDoctorant(u);
+    private DoctorantServiceImpl doctorantService;
+
+    @GetMapping
+    public String listDoctorants(Model model) {
+        model.addAttribute("doctorants", doctorantService.findAllDoctorants());
+        return "list";
     }
-    @GetMapping("/details/{id}")
-    public Doctorant trouverDoctorant(@PathVariable Long id){
-        return DoctorantService.findDoctorant(id);
+
+    @GetMapping("/form")
+    public String showForm(@RequestParam(required = false) Long id, Model model) {
+        Doctorant doctorant = (id != null)
+                ? doctorantService.findDoctorant(id)
+                : new Doctorant();
+        model.addAttribute("doctorant", doctorant);
+        return "form";
     }
-    @GetMapping("/all")
-    public List<Doctorant> findAllDoctorants() {
-        return DoctorantService.findAllDoctorants();
+
+    @PostMapping("/save")
+    public String saveDoctorant(@ModelAttribute Doctorant doctorant) {
+        if (doctorant.getId() != 0) {
+            doctorantService.updateDoctorant(doctorant, doctorant.getId());
+        } else {
+            doctorantService.createDoctorant(doctorant);
+        }
+        return "redirect:/doctorants";
     }
-    @DeleteMapping("/delete/{id}")
-    public void deleteDoctorant(@PathVariable Long id){
-        DoctorantService.DeleteDoctorant(id);
+
+    @GetMapping("/detail")
+    public String detailDoctorant(@RequestParam Long id, Model model) {
+        model.addAttribute("doctorant", doctorantService.findDoctorant(id));
+        return "detail";
     }
-    @PutMapping("/update/{id}")
-    public Doctorant UpdateDoctorant(@PathVariable Long id, @RequestBody Doctorant u) {
-        return DoctorantService.updateDoctorant(u,id);
+
+    @PostMapping("/delete/{id}")
+    public String deleteDoctorant(@PathVariable Long id) {
+        doctorantService.DeleteDoctorant(id);
+        return "redirect:/doctorants";
     }
 }
