@@ -18,9 +18,9 @@ public class EncadrantServiceImpl implements EncadrantService {
     @Override
     public Encadrant updateEncadrant(Encadrant u, Long id) {
         Encadrant existing = EncadrantRepo.findById(id).orElseThrow(() -> new RuntimeException("Encadrant not found"));
-        if (u.getspecialite() != null) {existing.setspecialite(u.getspecialite());}
-        if (u.getgrade() != null) {existing.setgrade(u.getgrade());}
-        if (u.getEtablissement) != null) {existing.setEtablissement(u.getEtablissement());}
+        if (u.getSpecialite() != null) {existing.setSpecialite(u.getSpecialite());}
+        if (u.getGrade() != null) {existing.setGrade(u.getGrade());}
+        if (u.getEtablissement() != null) {existing.setEtablissement(u.getEtablissement());}
         return EncadrantRepo.save(existing);
     }
 

@@ -15,7 +15,6 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     public Utilisateur createUtilisateur(Utilisateur u) {
         return utilisateurRepo.save(u);
     }
-
     @Override
     public Utilisateur updateUtilisateur(Utilisateur u, Long id) {
         Utilisateur existing = utilisateurRepo.findById(id).orElseThrow(() -> new RuntimeException("Utilisateur not found"));
@@ -27,7 +26,6 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         if (u.getPassword() != null) {existing.setPassword(u.getPassword());}
         return utilisateurRepo.save(existing);
     }
-
     @Override
     public Utilisateur findUtilisateur(Long id) {
         return utilisateurRepo.findById(id).orElseThrow(() -> new RuntimeException("Utilisateur not found"));
@@ -41,6 +39,4 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         Utilisateur user = utilisateurRepo.findById(id).orElseThrow(() -> new RuntimeException("Utilisateur not found"));
         utilisateurRepo.delete(user);
     }
-
-
 }

@@ -18,10 +18,10 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public Notification updateNotification(Notification u, Long id) {
         Notification existing = NotificationRepo.findById(id).orElseThrow(() -> new RuntimeException("Notification  not found"));
-        if (u.getmessage() != null) {existing.setmessage(u.getmessage());}
-        if (u.getdate() != null) {existing.setdate(u.getdate());}
-        if (u.getlu() != null) {existing.setlu(u.getlu());}
-        return Notification Repo.save(existing);
+        if (u.getMessage() != null) {existing.setMessage(u.getMessage());}
+        if (u.getDate() != null) {existing.setDate(u.getDate());}
+        if (u.getLu() != null) {existing.setLu(u.getLu());}
+        return NotificationRepo.save(existing);
     }
 
     @Override
@@ -33,7 +33,7 @@ public class NotificationServiceImpl implements NotificationService {
         return NotificationRepo.findAll();
     }
     @Override
-    public void DeleteNotification(Long id) {
+    public void deleteNotification(Long id) {
         Notification  user = NotificationRepo.findById(id).orElseThrow(() -> new RuntimeException("Notification  not found"));
         NotificationRepo.delete(user);
     }

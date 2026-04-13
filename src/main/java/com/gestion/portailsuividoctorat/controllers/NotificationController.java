@@ -14,11 +14,11 @@ public class NotificationController {
     @Autowired
     NotificationServiceImpl NotificationService;
     @PostMapping ("/create")
-    public Notification CreateNotification(@RequestBody Notificationu) {
+    public Notification CreateNotification(@RequestBody Notification u) {
         return NotificationService.createNotification(u);
     }
     @GetMapping("/details/{id}")
-    public Notification trouverNotification@PathVariable Long id){
+    public Notification trouverNotification(@PathVariable Long id){
         return NotificationService.findNotification(id);
     }
     @GetMapping("/all")
@@ -27,7 +27,7 @@ public class NotificationController {
     }
     @DeleteMapping("/delete/{id}")
     public void deleteNotification(@PathVariable Long id){
-        NotificationService.DeleteNotification(id);
+        NotificationService.deleteNotification(id);
     }
     @PutMapping("/update/{id}")
     public Notification UpdateNotification(@PathVariable Long id, @RequestBody Notification u) {
