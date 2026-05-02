@@ -1,5 +1,9 @@
 <nav xmlns:th="http://www.thymeleaf.org"
-th:fragment="navbar">
-    <a th:href="@{/}">Accueil</a>
-    <a th:href="@{/Utilisateur/all}">Liste Utilisateur</a>
+th:fragment="navbar" class="navbar navbar-dark bg-primary">
+    <div class="container-fluid">
+    <span class="navbar-brand" th:href="@{/}">
+      <i class="fas fa-graduation-cap me-2"></i>Portail Doctorat
+    </span>
+    </div>
+
 </nav>
