@@ -11,7 +11,7 @@ public interface DoctorantService {
     //modification
     Utilisateur updateDoctorant(Doctorant u, Long id);
     //lecture
-    Utilisateur findDoctorant(Long id);
+    Doctorant findDoctorant(Long id);
     //list all
     List<Doctorant> findAllDoctorants();
     //Suppression

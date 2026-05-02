@@ -26,7 +26,7 @@ public class DoctorantServiceImpl implements DoctorantService {
 
     @Override
     public Doctorant findDoctorant(Long id) {
-        return DoctorantRepo.findById(id).orElseThrow(() -> new RuntimeException("Doctorant not found"));
+        return DoctorantRepo.findById(id).orElseThrow();
     }
     @Override
     public List<Doctorant> findAllDoctorants() {

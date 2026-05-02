@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Soutenances</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+
+  <style>
+    body { background: #f0f4f8; }
+
+    .card          { border: none; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    .card-header   { background: #0d6efd; color: #fff; border-radius: 10px 10px 0 0 !important; }
+    .card-header h5 { margin: 0; font-size: 1rem; font-weight: 600; }
+
+    .table thead th {
+      font-size: .75rem; text-transform: uppercase;
+      letter-spacing: .08em; color: #6c757d;
+      background: #f8f9fa; border-bottom: 2px solid #dee2e6;
+    }
+    .table td { vertical-align: middle; }
+    .badge-note {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 50%;
+      font-weight: 700; font-size: .8rem;
+    }
+    .badge-note.high { background: #d1e7dd; color: #0a3622; }
+    .badge-note.mid  { background: #fff3cd; color: #664d03; }
+    .badge-note.low  { background: #f8d7da; color: #58151c; }
+    .search-wrap            { position: relative; }
+    .search-wrap .bi-search { position: absolute; left: .8rem; top: 50%; transform: translateY(-50%); color: #adb5bd; }
+    .search-wrap input      { padding-left: 2.2rem; }
+    .modal-content  { border: none; border-radius: 10px; }
+    .modal-header   { background: #0d6efd; color: #fff; border-radius: 10px 10px 0 0; }
+    .modal-header .btn-close { filter: invert(1) brightness(2); }
+    .form-label     { font-size: .8rem; font-weight: 600; color: #495057; }
+  </style>
+</head>
+<body>
+
+<th:block th:replace="~{fragments/navbar :: navbar}"></th:block>
+
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="mb-0 fw-bold text-primary">
+        Soutenances
+      </h4>
+      <small class="text-muted">Gestion des soutenances de doctorat</small>
+    </div>
+    <button class="btn btn-primary" data-bs-toggle="modal"
+            data-bs-target="#soutenanceModal" onclick="openModal(null)">
+      <i class="bi bi-plus-lg me-1"></i> Nouvelle soutenance
+    </button>
+  </div>
+  <div class="card">
+    <div class="card-header d-flex align-items-center justify-content-between py-3 px-4">
+      <h5><i class="bi bi-table me-2"></i>Liste des soutenances</h5>
+      <span class="badge bg-white text-primary fw-semibold"
+            th:text="${#lists.size(soutenances)} + ' enregistrement(s)'">0</span>
+    </div>
+    <div class="card-body p-3">
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <div class="search-wrap">
+            <i class="bi bi-search"></i>
+            <input type="text" id="searchInput" class="form-control"
+                   placeholder="Rechercher par lieu…" oninput="filterTable()"/>
+          </div>
+        </div>
+        <div class="col-md-8 d-flex align-items-center justify-content-end">
+          <small class="text-muted" id="countLabel"></small>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover table-bordered mb-0">
+          <thead>
+          <tr>
+            <th style="width:50px;">#</th>
+            <th><i class="bi bi-calendar3 me-1"></i>Date</th>
+            <th><i class="bi bi-geo-alt me-1"></i>Lieu</th>
+            <th><i class="bi bi-star me-1"></i>Note</th>
+            <th><i class="bi bi-journals me-1"></i>Publications</th>
+            <th class="text-center" style="width:110px;">Actions</th>
+          </tr>
+          </thead>
+          <tbody id="tableBody">
+
+          <tr th:each="s, stat : ${soutenances}" class="data-row"
+              th:data-id="${s.id}"
+              th:data-date="${s.date}"
+              th:data-lieu="${s.lieu}"
+              th:data-note="${s.note}"
+              th:data-pub="${s.nbrPublication}">
+
+            <td class="text-muted fw-semibold" th:text="${stat.count}"></td>
+            <td>
+                  <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold"
+                        th:text="${s.date != null ? #temporals.format(s.date,'dd/MM/yyyy') : '—'}">—</span>
+            </td>
+            <td class="lieu-cell fw-semibold" th:text="${s.lieu != null ? s.lieu : '—'}">—</td>
+            <td>
+                  <span th:if="${s.note != null}">
+                    <span class="badge-note"
+                          th:classappend="${s.note >= 16} ? 'high' : (${s.note >= 12} ? 'mid' : 'low')"
+                          th:text="${s.note}"></span>
+                    <small class="text-muted ms-1"
+                           th:text="${s.note >= 16} ? 'TB' : (${s.note >= 12} ? 'Bien' : 'Passable')"></small>
+                  </span>
+              <span th:unless="${s.note != null}" class="text-muted">—</span>
+            </td>
+            <td>
+                  <span th:if="${s.nbrPublication != null}">
+                    <i class="bi bi-journal-bookmark text-primary me-1"></i>
+                    <strong th:text="${s.nbrPublication}"></strong>
+                  </span>
+              <span th:unless="${s.nbrPublication != null}" class="text-muted">—</span>
+            </td>
+            <td class="text-center">
+              <div class="d-flex justify-content-center gap-1">
+                <button class="btn btn-sm btn-outline-primary"
+                        title="Modifier"
+                        data-bs-toggle="modal" data-bs-target="#soutenanceModal"
+                        th:onclick="'openModal(' + ${s.id} + ', this)'">
+                  <i class="bi bi-pencil-fill"></i>
+                </button>
+                <form th:action="@{/soutenances/delete(id=${s.id})}" method="post"
+                      class="d-inline"
+                      onsubmit="return confirm('Supprimer cette soutenance ?')">
+                  <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                    <i class="bi bi-trash-fill"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Empty state -->
+          <tr th:if="${#lists.isEmpty(soutenances)}">
+            <td colspan="6" class="text-center py-5">
+              <i class="bi bi-inbox text-muted" style="font-size:2.5rem;"></i>
+              <p class="text-muted mt-2 mb-2">Aucune soutenance enregistrée.</p>
+              <button class="btn btn-primary btn-sm"
+                      data-bs-toggle="modal" data-bs-target="#soutenanceModal"
+                      onclick="openModal(null)">
+                <i class="bi bi-plus-lg me-1"></i> Ajouter la première
+              </button>
+            </td>
+          </tr>
+          <tr id="noResults" style="display:none;">
+            <td colspan="6" class="text-center py-4">
+              <i class="bi bi-search text-muted" style="font-size:2rem;"></i>
+              <p class="text-muted mt-2 mb-0">Aucun résultat pour cette recherche.</p>
+            </td>
+          </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+<div class="modal fade" id="soutenanceModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header py-3 px-4">
+        <h5 class="modal-title">
+          <i class="bi bi-pencil-square me-2"></i>
+          <span id="modalTitleText">Nouvelle soutenance</span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body p-4">
+        <form id="soutenanceForm" action="/soutenances/save" method="post">
+          <input type="hidden" id="formId" name="id"/>
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <label for="formDate" class="form-label">
+                <i class="bi bi-calendar3 me-1 text-primary"></i>Date <span class="text-danger">*</span>
+              </label>
+              <input type="date" id="formDate" name="date" class="form-control" required/>
+              <div class="invalid-feedback">Date obligatoire.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="formLieu" class="form-label">
+                <i class="bi bi-geo-alt me-1 text-primary"></i>Lieu <span class="text-danger">*</span>
+              </label>
+              <input type="text" id="formLieu" name="lieu" class="form-control"
+                     placeholder="Ex : Amphi A…" required maxlength="200"/>
+              <div class="invalid-feedback">Lieu obligatoire.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="formNote" class="form-label">
+                <i class="bi bi-star me-1 text-primary"></i>Note (sur 20)
+              </label>
+              <div class="input-group">
+                <input type="number" id="formNote" name="note" class="form-control"
+                       placeholder="0 – 20" min="0" max="20" step="0.25"/>
+                <span class="input-group-text">/20</span>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="formPub" class="form-label">
+                <i class="bi bi-journals me-1 text-primary"></i>Publications
+              </label>
+              <input type="number" id="formPub" name="nbrPublication"
+                     class="form-control" placeholder="0" min="0"/>
+              <div class="form-text">Facultatif.</div>
+            </div>
+
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-lg me-1"></i> Annuler
+        </button>
+        <button type="button" class="btn btn-primary" onclick="submitForm()">
+          <i class="bi bi-floppy me-1"></i>
+          <span id="submitLabel">Créer</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function filterTable() {
+    const q    = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#tableBody .data-row');
+    let count  = 0;
+    rows.forEach(r => {
+      const show = (r.querySelector('.lieu-cell')?.textContent.toLowerCase() || '').includes(q);
+      r.style.display = show ? '' : 'none';
+      if (show) count++;
+    });
+    document.getElementById('noResults').style.display =
+            (count === 0 && rows.length > 0) ? '' : 'none';
+    document.getElementById('countLabel').textContent =
+            rows.length > 0 ? count + ' / ' + rows.length + ' résultat(s)' : '';
+  }
+  window.addEventListener('DOMContentLoaded', filterTable);
+
+  function openModal(id, btn) {
+    const form = document.getElementById('soutenanceForm');
+    form.classList.remove('was-validated');
+    if (id) {
+      const row = btn.closest('tr');
+      document.getElementById('formId').value   = id;
+      document.getElementById('formDate').value = row.dataset.date || '';
+      document.getElementById('formLieu').value = row.dataset.lieu || '';
+      document.getElementById('formNote').value = row.dataset.note || '';
+      document.getElementById('formPub').value  = row.dataset.pub  || '';
+      document.getElementById('modalTitleText').textContent = 'Modifier la soutenance';
+      document.getElementById('submitLabel').textContent    = 'Enregistrer';
+      form.action = '/soutenances/update';
+      updatePreview(row.dataset.note);
+    } else {
+      ['formId','formDate','formLieu','formNote','formPub']
+              .forEach(i => document.getElementById(i).value = '');
+      document.getElementById('notePreview').innerHTML = '';
+      document.getElementById('modalTitleText').textContent = 'Nouvelle soutenance';
+      document.getElementById('submitLabel').textContent    = 'Créer';
+      form.action = '/soutenances/save';
+    }
+  }
+
+  function submitForm() {
+    const form = document.getElementById('soutenanceForm');
+    form.classList.add('was-validated');
+    if (form.checkValidity()) form.submit();
+  }
+
+</script>
+
+</body>
+</html>

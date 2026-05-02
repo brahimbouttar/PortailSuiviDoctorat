@@ -1,7 +1,6 @@
 package com.gestion.portailsuividoctorat.services;
 
 import com.gestion.portailsuividoctorat.entites.Demande;
-
 import java.util.List;
 
 public interface DemandeService {
