@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des Jurys</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        body {
+            background: #eef2f7;
+            color: #1e293b;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e66f5, #2563eb);
+            color: white;
+            text-align: center;
+            padding: 35px 20px;
+        }
+
+        .header p {
+            margin-top: 5px;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1050px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .add-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #2563eb;
+            color: white;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+
+        tbody tr:hover {
+            background: #f1f5ff;
+        }
+
+        .edit {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        .del {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            width: 400px;
+            border-radius: 12px;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .save {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .cancel {
+            background: #999;
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <h2>Gestion des Jurys</h2>
+    <p>Lister tous les jurys enregistrés</p>
+</div>
+
+<div class="container">
+    <!-- Messages flash -->
+    <div th:if="${successMessage}" class="alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert-error" th:text="${errorMessage}"></div>
+
+    <div class="card">
+        <div class="top">
+            <strong>Total : <span th:text="${#lists.size(jurys)}">0</span></strong>
+            <button class="add-btn" onclick="openAdd()">+ Ajouter</button>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Nom Complet</th>
+                <th>Email</th>
+                <th>Type</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="j, stat : ${jurys}">
+                <td th:text="${stat.index + 1}"></td>
+                <td th:text="${j.prenom + ' ' + j.nom}"></td>
+                <td th:text="${j.email}"></td>
+                <td th:text="${j.type}"></td>
+                <td>
+                    <button class="edit" th:onclick="'openEdit(' + ${j.id} + ', \'' + ${j.nom} + '\', \'' + ${j.prenom} + '\', \'' + ${j.email} + '\', \'' + ${j.type} + '\')'">
+                        Modifier
+                    </button>
+                    <a th:href="@{/jury/delete/{id}(id=${j.id})}" onclick="return confirm('Supprimer ce jury ?')" class="del">
+                        Supprimer
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal" id="modal">
+    <div class="modal-content">
+        <h3 id="title">Ajouter Jury</h3>
+        <form id="form" method="post">
+            <input type="hidden" id="id" name="id">
+            <input type="text" id="nom" name="nom" placeholder="Nom" required>
+            <input type="text" id="prenom" name="prenom" placeholder="Prénom" required>
+            <input type="email" id="email" name="email" placeholder="Email" required>
+            <input type="text" id="type" name="type" placeholder="Type" required>
+            <div class="actions">
+                <button type="button" class="cancel" onclick="closeModal()">Annuler</button>
+                <button type="submit" class="save">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const BASE_URL = 'http://localhost:8081';
+
+    function openAdd() {
+        document.getElementById("form").action = BASE_URL + "/jury/create";
+        document.getElementById("form").method = "post";
+        document.getElementById("title").innerText = "Ajouter Jury";
+
+        document.getElementById("id").value = "";
+        document.getElementById("nom").value = "";
+        document.getElementById("prenom").value = "";
+        document.getElementById("email").value = "";
+        document.getElementById("type").value = "";
+
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    function openEdit(id, nom, prenom, email, type) {
+        document.getElementById("form").action = BASE_URL + "/jury/update/" + id;
+        document.getElementById("form").method = "post";
+        document.getElementById("title").innerText = "Modifier Jury";
+
+        document.getElementById("id").value = id;
+        document.getElementById("nom").value = nom;
+        document.getElementById("prenom").value = prenom;
+        document.getElementById("email").value = email;
+        document.getElementById("type").value = type;
+
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    function closeModal() {
+        document.getElementById("modal").style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        var modal = document.getElementById("modal");
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+</script>
+
+</body>
+</html>

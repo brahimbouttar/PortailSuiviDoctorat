@@ -20,7 +20,7 @@ public class JuryServiceImpl
     @Override
     public Jury updateJury(Jury u, Long id) {
         Jury existing = JuryRepo.findById(id).orElseThrow(() -> new RuntimeException("Jury not found"));
-        if (u.getNomJury() != null) {existing.setNomJury(u.getNomJury());}
+        if (u.getNom() != null) {existing.setNom(u.getNom());}
         if (u.getType()!= null) {existing.setType(u.getType());}
         return JuryRepo.save(existing);
     }

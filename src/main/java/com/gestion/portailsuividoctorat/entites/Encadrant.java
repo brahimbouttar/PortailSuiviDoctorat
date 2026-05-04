@@ -12,9 +12,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@DiscriminatorValue("ENCADRANT")
 public class Encadrant extends Utilisateur {
     private String specialite;
     private String grade;
-    private String Etablissement;
-
+    private String etablissement;
 }

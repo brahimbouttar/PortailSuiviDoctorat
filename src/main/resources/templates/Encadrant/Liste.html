@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Encadrants</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        body {
+            background: #eef2fb;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0d6efd, #1a7fff);
+            color: white;
+            text-align: center;
+            padding: 25px;
+            border-radius: 0 0 25px 25px;
+            box-shadow: 0 4px 20px rgba(13,110,253,0.25);
+        }
+
+        .header h2 { font-size: 22px; font-weight: 700; }
+        .header p  { font-size: 13px; opacity: 0.85; margin-top: 4px; }
+
+        .container {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 15px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 24px rgba(13,110,253,0.09);
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .add-btn {
+            background: #0d6efd;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #0d6efd;
+            color: white;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        tbody tr:hover {
+            background: #f0f5ff;
+        }
+
+        .edit {
+            background: #1e90ff;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .delete {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            width: 450px;
+            border-radius: 12px;
+        }
+
+        .modal-content input {
+            width: 100%;
+            margin: 8px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        .modal-content input:focus {
+            outline: none;
+            border-color: #0d6efd;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .save {
+            background: #0d6efd;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .cancel {
+            background: #ccc;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <h2>Gestion des Encadrants</h2>
+    <p>Lister toutes les encadrants enregistrés</p>
+</div>
+
+<div class="container">
+    <div th:if="${successMessage}" class="alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert-error" th:text="${errorMessage}"></div>
+
+    <div class="top-bar">
+        <h3>Liste des Encadrants</h3>
+        <button class="add-btn" onclick="openAdd()">+ Ajouter</button>
+    </div>
+
+    <div class="card">
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Email</th>
+                <th>Spécialité</th>
+                <th>Grade</th>
+                <th>Établissement</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="encadrant : ${encadrants}">
+                <td th:text="${encadrant.id}">...</td>
+                <td th:text="${encadrant.nom}">...</td>
+                <td th:text="${encadrant.prenom}">...</td>
+                <td th:text="${encadrant.email}">...</td>
+                <td th:text="${encadrant.specialite}">...</td>
+                <td th:text="${encadrant.grade}">...</td>
+                <td th:text="${encadrant.etablissement}">...</td>
+                <td>
+                    <button class="edit" th:onclick="'openEdit(' + ${encadrant.id} + ', \'' + ${encadrant.nom} + '\', \'' + ${encadrant.prenom} + '\', \'' + ${encadrant.email} + '\', \'' + ${encadrant.specialite} + '\', \'' + ${encadrant.grade} + '\', \'' + ${encadrant.etablissement} + '\')'">
+                        Modifier
+                    </button>
+                    <a th:href="@{/encadrant/delete/{id}(id=${encadrant.id})}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet encadrant ?')">
+                        <button class="delete" type="button">Supprimer</button>
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+    <div class="modal-content">
+        <h3 id="title">Ajouter Encadrant</h3>
+        <form id="form" method="post" accept-charset="UTF-8">
+            <input type="hidden" id="id" name="id">
+            <input type="text" id="nom" name="nom" placeholder="Nom" required>
+            <input type="text" id="prenom" name="prenom" placeholder="Prénom" required>
+            <input type="email" id="email" name="email" placeholder="Email" required>
+            <input type="text" id="specialite" name="specialite" placeholder="Spécialité" required>
+            <input type="text" id="grade" name="grade" placeholder="Grade" required>
+            <input type="text" id="etablissement" name="etablissement" placeholder="Établissement" required>
+            <div class="modal-actions">
+                <button type="button" class="cancel" onclick="closeModal()">Annuler</button>
+                <button type="submit" class="save">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const BASE_URL = 'http://localhost:8081';
+
+    function openAdd() {
+        document.getElementById("form").action = BASE_URL + "/encadrant/create";
+        document.getElementById("form").method = "post";
+        document.getElementById("title").innerText = "Ajouter Encadrant";
+
+        document.getElementById("id").value = "";
+        document.getElementById("nom").value = "";
+        document.getElementById("prenom").value = "";
+        document.getElementById("email").value = "";
+        document.getElementById("specialite").value = "";
+        document.getElementById("grade").value = "";
+        document.getElementById("etablissement").value = "";
+
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    function openEdit(id, nom, prenom, email, specialite, grade, etablissement) {
+        document.getElementById("form").action = BASE_URL + "/encadrant/update/" + id;
+        document.getElementById("form").method = "post";
+        document.getElementById("title").innerText = "Modifier Encadrant";
+
+        document.getElementById("id").value = id;
+        document.getElementById("nom").value = nom;
+        document.getElementById("prenom").value = prenom;
+        document.getElementById("email").value = email;
+        document.getElementById("specialite").value = specialite;
+        document.getElementById("grade").value = grade;
+        document.getElementById("etablissement").value = etablissement;
+
+        document.getElementById("modal").style.display = "flex";
+    }
+    function closeModal() {
+        document.getElementById("modal").style.display = "none";
+    }
+    window.onclick = function(event) {
+        var modal = document.getElementById("modal");
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+</script>
+
+</body>
+</html>
