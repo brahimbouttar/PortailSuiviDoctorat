@@ -9,7 +9,7 @@ public interface NotificationService {
     // création
     Notification createNotification(Notification n);
     // modification
-    Notification updateNotification(Notification n, Long id);
+
     // lecture
     Notification findNotification(Long id);
     // liste de tous
