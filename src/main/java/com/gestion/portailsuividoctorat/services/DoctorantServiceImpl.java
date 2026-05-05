@@ -11,16 +11,16 @@ public class DoctorantServiceImpl implements DoctorantService {
     @Autowired
     DoctorantRepo DoctorantRepo;
     @Override
-    public Doctorant createDoctorant(Doctorant u) {
-        return DoctorantRepo.save(u);
+    public Doctorant createDoctorant(Doctorant d) {
+        return DoctorantRepo.save(d);
     }
 
     @Override
-    public Doctorant updateDoctorant(Doctorant u, Long id) {
+    public Doctorant updateDoctorant(Doctorant d, Long id) {
         Doctorant existing = DoctorantRepo.findById(id).orElseThrow(() -> new RuntimeException("Doctorant not found"));
-        if (u.getSujetThese() != null) {existing.setSujetThese(u.getSujetThese());}
-        if (u.getCV() != null) {existing.setCV(u.getCV());}
-        if (u.getLettreMotivation() != null) {existing.setLettreMotivation(u.getLettreMotivation());}
+        if (d.getSujetThese() != null) {existing.setSujetThese(d.getSujetThese());}
+        if (d.getCV() != null) {existing.setCV(d.getCV());}
+        if (d.getLettreMotivation() != null) {existing.setLettreMotivation(d.getLettreMotivation());}
         return DoctorantRepo.save(existing);
     }
 

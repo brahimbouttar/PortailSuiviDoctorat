@@ -18,7 +18,7 @@ public class PortailSuiviDoctoratApplication implements CommandLineRunner {
     public static void main(String[] args) {
         SpringApplication.run(PortailSuiviDoctoratApplication.class, args);
     }
-    Utilisateur u1 = new Utilisateur("brahim","bouttar","brahimbouttar@gmail.com","casablanca","+212677862028","123456","admin");
+    Utilisateur u1 = new Utilisateur("Utilisateur","bouttar","brahimbouttar@gmail.com","casablanca","+212677862028","123456","admin");
     Doctorant d1 = new Doctorant("brahim","bouttar","brahimbouttar@gmail.com","casablanca","+212677862028","123456","admin","hello","hhhhh","dhhjfk");
 
     @Override

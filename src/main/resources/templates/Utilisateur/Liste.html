@@ -1,102 +1,294 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="fr">
 <head>
-    <meta charset="UTF-8"/>
+    <meta charset="UTF-8">
     <title>Liste Utilisateur</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        body { background:#f5f6fa; }
-        .card { border-radius:10px; }
-        .table th { font-size:0.8rem; text-transform:uppercase; }
+        body {
+            background: #f5f6fa;
+        }
+
+        .card {
+            border-radius: 10px;
+        }
+
+        tr {
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+
 <div th:replace="~{/fragments/navbar::navbar}"></div>
+
 <div class="container mt-4">
 
-<!-- Header -->
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4>Utilisateur</h4>
-    <a th:href="@{/Utilisateur/form}" class="btn btn-primary btn-sm">
-        <i class="fas fa-plus"></i> Ajouter
-    </a>
-</div>
-<!-- Search -->
-<div class="mb-3">
-    <input id="searchInput" class="form-control" placeholder="Rechercher..." oninput="filterTable()"/>
-</div>
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>Utilisateur</h4>
 
+        <button class="btn btn-primary btn-sm"
+                data-bs-toggle="modal"
+                data-bs-target="#addModal">
+            <i class="fas fa-plus"></i> Ajouter
+        </button>
+    </div>
 
+    <!-- SEARCH -->
+    <input id="searchInput"
+           class="form-control mb-3"
+           placeholder="Rechercher..."
+           oninput="filterTable()">
 
+    <!-- TABLE -->
+    <div class="card">
+        <div class="card-body p-0">
 
-<br><br>
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Email</th>
+                    <th>Adresse</th>
+                    <th>Téléphone</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
 
-<!-- Table -->
-<div class="card">
-    <div class="card-body p-0">
-        <table class="table table-hover mb-0">
-            <thead class="table-light">
-            <tr>
-                <th>Nom</th>
-                <th>Prenom</th>
-                <th>Email</th>
-                <th>Adresse</th>
-                <th>Telephone</th>
-                <th class="text-center">Actions</th>
-            </tr>
-            </thead>
-            <tbody id="tableBody">
-            <tr th:each="u : ${Utilisateur}" th:onclick="|window.location.href='@{/Utilisateur/Details/{id}(id=${u.id})}'|" >
-                <td th:text="${u.nom}"></td>
-                <td th:text="${u.prenom}"></td>
-                <td th:text="${u.email}"></td>
-                <td th:text="${u.adresse}"></td>
-                <td th:text="${u.telephone}"></td>
-                <td class="text-center">
-                    <a th:href="@{'/Utilisateur/update/' + ${u.id}}" class="btn btn-sm btn-primary" onclick="event.stopPropagation()">
-                        <i class="fas fa-edit"></i>
-                    </a>
-                    <button class="btn btn-sm btn-danger"
-                            th:onclick="'deleteUtilisateur(event, ' + ${u.id} + ')'">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            </tr>
+                <tbody id="tableBody">
 
-            <!-- Empty state -->
-            <tr th:if="${#lists.isEmpty(Utilisateur)}">
-                <td colspan="6" class="text-center text-muted py-4">
-                    Aucun Utilisateur trouvé.
-                </td>
-            </tr>
-            </tbody>
-        </table>
+                <tr th:each="u : ${Utilisateur}"
+                    th:onclick="|window.location.href='@{/Utilisateur/details/{id}(id=${u.id})}'|">
+
+                    <td th:text="${u.nom}"></td>
+                    <td th:text="${u.prenom}"></td>
+                    <td th:text="${u.email}"></td>
+                    <td th:text="${u.adresse}"></td>
+                    <td th:text="${u.telephone}"></td>
+                    <td th:text="${u.role}"></td>
+
+                    <td>
+
+                        <!-- UPDATE -->
+                        <button class="btn btn-primary btn-sm"
+                                onclick="event.stopPropagation()"
+                                th:attr="onclick=
+                                'event.stopPropagation();openUpdateModal('+
+                                ${u.id}+','+
+                                '\''+${u.nom}+'\','+
+                                '\''+${u.prenom}+'\','+
+                                '\''+${u.email}+'\','+
+                                '\''+${u.adresse}+'\','+
+                                '\''+${u.telephone}+'\','+
+                                '\''+${u.role}+'\''+
+                                ')'">
+
+                            <i class="fas fa-edit"></i>
+                        </button>
+
+                        <!-- DELETE -->
+                        <button class="btn btn-danger btn-sm"
+                                th:onclick="'deleteUtilisateur(event,' + ${u.id} + ')'">
+                            <i class="fas fa-trash"></i>
+                        </button>
+
+                    </td>
+                </tr>
+
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
+
+<!-- ADD MODAL -->
+<div class="modal fade" id="addModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5>Ajouter Utilisateur</h5>
+                <button class="btn-close"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <form th:action="@{/Utilisateur/save}"
+                  method="post"
+                  th:object="${newUtilisateur}">
+
+                <div class="modal-body">
+
+                    <input th:field="*{nom}" class="form-control mb-2" placeholder="Nom">
+                    <input th:field="*{prenom}" class="form-control mb-2" placeholder="Prénom">
+                    <input th:field="*{email}" class="form-control mb-2" placeholder="Email">
+                    <input th:field="*{adresse}" class="form-control mb-2" placeholder="Adresse">
+                    <input th:field="*{telephone}" class="form-control mb-2" placeholder="Téléphone">
+
+                    <input type="password"
+                           th:field="*{password}"
+                           class="form-control mb-2"
+                           placeholder="Mot de passe">
+
+                    <select th:field="*{role}"
+                            class="form-control mb-2">
+                        <option value="">Choisir rôle</option>
+                        <option value="ADMIN">ADMIN</option>
+                        <option value="DOCTORANT">DOCTORANT</option>
+                        <option value="ENCADRANT">ENCADRANT</option>
+                    </select>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Annuler
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-success">
+                        Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
+
+
+<!-- UPDATE MODAL -->
+<div class="modal fade" id="updateModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5>Modifier Utilisateur</h5>
+                <button class="btn-close"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <form id="updateForm" method="post">
+
+                <div class="modal-body">
+
+                    <input id="updateNom" name="nom"
+                           class="form-control mb-2">
+
+                    <input id="updatePrenom" name="prenom"
+                           class="form-control mb-2">
+
+                    <input id="updateEmail" name="email"
+                           class="form-control mb-2">
+
+                    <input id="updateAdresse" name="adresse"
+                           class="form-control mb-2">
+
+                    <input id="updateTelephone" name="telephone"
+                           class="form-control mb-2">
+
+                    <select id="updateRole"
+                            name="role"
+                            class="form-control mb-2">
+
+                        <option value="ADMIN">ADMIN</option>
+                        <option value="DOCTORANT">DOCTORANT</option>
+                        <option value="ENCADRANT">ENCADRANT</option>
+                    </select>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Annuler
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-success">
+                        Mettre à jour
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
+
     function filterTable() {
-        const query = document.getElementById('searchInput').value.toLowerCase();
-        const rows = document.querySelectorAll('#tableBody tr');
+        const query = document.getElementById("searchInput").value.toLowerCase();
+        const rows = document.querySelectorAll("#tableBody tr");
+
         rows.forEach(row => {
-            row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+            row.style.display =
+                row.textContent.toLowerCase().includes(query)
+                    ? ""
+                    : "none";
         });
     }
 
-    function deleteUtilisateur(event,id) {
+    function deleteUtilisateur(event, id) {
         event.stopPropagation();
-        if (!confirm('Supprimer ce Utilisateur ?')) return;
-        fetch(`/Utilisateur/delete/${id}`, { method: 'DELETE' })
-            .then(res => {
-                if (res.ok){
-                    location.reload()
-                }else{
-                    alert('Erreur lors de la suppression.');
+
+        if (!confirm("Supprimer cet utilisateur ?")) {
+            return;
+        }
+
+        fetch("/Utilisateur/delete/" + id, {
+            method: "DELETE"
+        })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert("Erreur suppression");
                 }
             });
     }
+
+    function openUpdateModal(
+        id,
+        nom,
+        prenom,
+        email,
+        adresse,
+        telephone,
+        role
+    ) {
+        document.getElementById("updateNom").value = nom;
+        document.getElementById("updatePrenom").value = prenom;
+        document.getElementById("updateEmail").value = email;
+        document.getElementById("updateAdresse").value = adresse;
+        document.getElementById("updateTelephone").value = telephone;
+        document.getElementById("updateRole").value = role;
+
+        document.getElementById("updateForm").action =
+            "/Utilisateur/update/" + id;
+
+        let modal = new bootstrap.Modal(
+            document.getElementById("updateModal")
+        );
+
+        modal.show();
+    }
+
 </script>
+
 </body>
 </html>

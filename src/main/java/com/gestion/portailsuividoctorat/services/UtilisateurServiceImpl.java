@@ -24,6 +24,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         if (u.getTelephone() != null) {existing.setTelephone(u.getTelephone());}
         if (u.getEmail() != null) {existing.setEmail(u.getEmail());}
         if (u.getPassword() != null) {existing.setPassword(u.getPassword());}
+        if (u.getRole() != null) {existing.setRole(u.getRole());}
         return utilisateurRepo.save(existing);
     }
     @Override
