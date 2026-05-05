@@ -118,15 +118,19 @@
 
                 <td class="text-center">
                   <div class="d-flex justify-content-center gap-2">
-                    <i class="bi bi-file-text" th:title="Demande manuscrite"
+                    <i class="bi bi-file-text" th:title="'Demande manuscrite'"
                        th:classappend="${d.demandeManus != null} ? 'text-success' : 'text-secondary'"></i>
-                    <i class="bi bi-book" th:title="Rapport thèse"
+
+                    <i class="bi bi-book" th:title="'Rapport thèse'"
                        th:classappend="${d.rapportThese != null} ? 'text-success' : 'text-secondary'"></i>
-                    <i class="bi bi-shield-check" th:title="Anti-plagiat"
+
+                    <i class="bi bi-shield-check" th:title="'Anti-plagiat'"
                        th:classappend="${d.rapportAntiPlagiat != null} ? 'text-success' : 'text-secondary'"></i>
-                    <i class="bi bi-journals" th:title="Publications"
+
+                    <i class="bi bi-journals" th:title="'Publications'"
                        th:classappend="${d.rapportPublications != null} ? 'text-success' : 'text-secondary'"></i>
-                    <i class="bi bi-award" th:title="Attestations"
+
+                    <i class="bi bi-award" th:title="'Attestations'"
                        th:classappend="${d.attestations != null} ? 'text-success' : 'text-secondary'"></i>
                   </div>
                 </td>
