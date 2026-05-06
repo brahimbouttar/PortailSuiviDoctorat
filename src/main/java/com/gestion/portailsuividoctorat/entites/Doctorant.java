@@ -2,6 +2,7 @@ package com.gestion.portailsuividoctorat.entites;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,4 +22,6 @@ public class Doctorant extends Utilisateur{
         this.CV = CV;
         this.LettreMotivation = LettreMotivation;
     }
+    @ManyToOne
+    private Utilisateur encadrant;
 }

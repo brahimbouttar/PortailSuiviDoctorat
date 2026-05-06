@@ -1,16 +1,26 @@
 package com.gestion.portailsuividoctorat.services;
 
+import com.gestion.portailsuividoctorat.entites.Doctorant;
 import com.gestion.portailsuividoctorat.entites.Utilisateur;
+import com.gestion.portailsuividoctorat.repositories.DoctorantRepo;
 import com.gestion.portailsuividoctorat.repositories.UtilisateurRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UtilisateurServiceImpl implements UtilisateurService {
-    @Autowired
+
     UtilisateurRepo utilisateurRepo;
+    DoctorantRepo  doctorantRepo;
+    public UtilisateurServiceImpl(UtilisateurRepo utilisateurRepo,
+                                  DoctorantRepo doctorantRepo) {
+        this.utilisateurRepo = utilisateurRepo;
+        this.doctorantRepo   = doctorantRepo;
+    }
+
     @Override
     public Utilisateur createUtilisateur(Utilisateur u) {
         return utilisateurRepo.save(u);
@@ -39,4 +49,17 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         Utilisateur user = utilisateurRepo.findById(id).orElseThrow(() -> new RuntimeException("Utilisateur not found"));
         utilisateurRepo.delete(user);
     }
+    @Override
+    public Optional<Utilisateur> findByEmail(String email) {
+        return utilisateurRepo.findByEmail(email);
+    }
+
+    @Override
+    public Utilisateur inscrire(Doctorant doctorant) {
+        if (utilisateurRepo.findByEmail(doctorant.getEmail()).isPresent()) {
+            throw new RuntimeException("Un compte existe déjà avec cet email.");
+        }
+        return doctorantRepo.save(doctorant);
+    }
+
 }
