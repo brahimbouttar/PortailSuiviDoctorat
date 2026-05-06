@@ -19,7 +19,7 @@ public class DoctorantController {
     @GetMapping
     public String listDoctorants(Model model) {
         model.addAttribute("doctorants", doctorantService.findAllDoctorants());
-        return "list";
+        return "doctorant/Liste";
     }
 
     @GetMapping("/form")
