@@ -1,5 +1,50 @@
 <nav xmlns:th="http://www.thymeleaf.org"
-th:fragment="navbar">
-    <a th:href="@{/}">Accueil</a>
-    <a th:href="@{/Utilisateur/all}">Liste Utilisateur</a>
+     th:fragment="navbar"
+     class="navbar navbar-expand-md navbar-dark bg-primary sticky-top shadow-sm">
+
+    <div class="container">
+
+        <a class="navbar-brand fw-bold" th:href="@{/}">
+            <i class="bi bi-mortarboard-fill me-2"></i>Portail Doctorat
+        </a>
+
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse" data-bs-target="#navMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav ms-auto gap-1">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/}">
+                        <i class="bi bi-house me-1"></i>Accueil
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/soutenances}">
+                        <i class="bi bi-shield-check me-1"></i>Soutenances
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/doctorants}">
+                        <i class="bi bi-people me-1"></i>Doctorants
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/Diplomes}">
+                        <i class="bi bi-award me-1"></i>Diplômes
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/Utilisateur/all}">
+                        <i class="bi bi-person me-1"></i>Utilisateurs
+                    </a>
+                </li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/demandes}"><i class="bi bi-share me-1"></i>Demandes</a>
+                </li>
+
+            </ul>
+        </div>
+
+    </div>
 </nav>

@@ -29,8 +29,4 @@ public class NotificationController {
     public void deleteNotification(@PathVariable Long id){
         NotificationService.deleteNotification(id);
     }
-    @PutMapping("/update/{id}")
-    public Notification UpdateNotification(@PathVariable Long id, @RequestBody Notification u) {
-        return NotificationService.updateNotification(u,id);
-    }
 }

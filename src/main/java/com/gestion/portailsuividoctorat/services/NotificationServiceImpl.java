@@ -16,15 +16,6 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public Notification updateNotification(Notification u, Long id) {
-        Notification existing = NotificationRepo.findById(id).orElseThrow(() -> new RuntimeException("Notification  not found"));
-        if (u.getMessage() != null) {existing.setMessage(u.getMessage());}
-        if (u.getDate() != null) {existing.setDate(u.getDate());}
-        if (u.getLu() != null) {existing.setLu(u.getLu());}
-        return NotificationRepo.save(existing);
-    }
-
-    @Override
     public Notification findNotification (Long id) {
         return NotificationRepo.findById(id).orElseThrow(() -> new RuntimeException("Notification  not found"));
     }

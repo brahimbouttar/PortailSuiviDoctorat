@@ -1,31 +1,50 @@
 package com.gestion.portailsuividoctorat.services;
-
 import com.gestion.portailsuividoctorat.entites.Demande;
 import com.gestion.portailsuividoctorat.repositories.DemandeRepo;
 import org.springframework.stereotype.Service;
+import com.gestion.portailsuividoctorat.kafka.DemandeEvent;
+import com.gestion.portailsuividoctorat.kafka.DemandeEventProducer;
 
 import java.util.List;
 
 @Service
 public class DemandeServiceImpl implements DemandeService {
+    private final DemandeEventProducer demandeEventProducer; //declaration producer
+
 
     private final DemandeRepo repository;
 
-    public DemandeServiceImpl(DemandeRepo repository) {
+    public DemandeServiceImpl(DemandeRepo repository,
+                              DemandeEventProducer demandeEventProducer) {
         this.repository = repository;
+        this.demandeEventProducer = demandeEventProducer;
     }
+//     injection constructeur
 
     @Override
     public Demande createDemande(Demande demande) {
         validerPrerequisSoutenance(demande);
-        return repository.save(demande);
-    }
+        Demande saved = repository.save(demande);
 
+        DemandeEvent event = new DemandeEvent();
+        event.setDemandeId(saved.getId());
+        event.setStatut(saved.getStatut());
+        event.setDoctorantId(saved.getDoctorant().getId());
+        event.setNomDoctorant(saved.getDoctorant().getNom());
+        event.setEmailDoctorant(saved.getDoctorant().getEmail());
+
+        demandeEventProducer.publishDemandeEvent(event);
+
+        return saved;
+    }
     @Override
     public Demande updateDemande(Long id, Demande demande) {
+
         Demande existing = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Demande introuvable : " + id));
+
         validerPrerequisSoutenance(demande);
+
         existing.setNbrArticlesQ1Q2(demande.getNbrArticlesQ1Q2());
         existing.setNbrConferences(demande.getNbrConferences());
         existing.setHeuresFormation(demande.getHeuresFormation());
@@ -35,7 +54,19 @@ public class DemandeServiceImpl implements DemandeService {
         existing.setRapportPublications(demande.getRapportPublications());
         existing.setAttestations(demande.getAttestations());
         existing.setStatut(demande.getStatut());
-        return repository.save(existing);
+
+        Demande updated = repository.save(existing);
+
+        DemandeEvent event = new DemandeEvent();
+        event.setDemandeId(updated.getId());
+        event.setStatut(updated.getStatut());
+        event.setDoctorantId(updated.getDoctorant().getId());
+        event.setNomDoctorant(updated.getDoctorant().getNom());
+        event.setEmailDoctorant(updated.getDoctorant().getEmail());
+
+        demandeEventProducer.publishDemandeEvent(event);
+
+        return updated;
     }
 
     @Override
