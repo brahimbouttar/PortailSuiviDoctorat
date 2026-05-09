@@ -5,7 +5,6 @@ import com.gestion.portailsuividoctorat.entites.Notification;
 import com.gestion.portailsuividoctorat.repositories.NotificationRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import java.util.Date;
 
@@ -16,11 +15,6 @@ public class DemandeEventConsumer {
 
     private final NotificationRepo notificationRepo;
 
-    @KafkaListener(
-            topics = KafkaConfig.TOPIC_DEMANDE,
-            groupId = "${spring.kafka.consumer.group-id}",
-            containerFactory = "kafkaListenerContainerFactory"
-    )
 
     public void consume(DemandeEvent event) {
         if (!"ADMIN".equals(event.getRoleAction())) {

@@ -2,215 +2,480 @@
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion des Jurys</title>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet"/>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Segoe UI", sans-serif;
+        :root {
+            --primary:    #1a56db;
+            --primary-lt: #e8f0fe;
+            --primary-md: #3b82f6;
+            --accent:     #1e40af;
+            --bg:         #f0f4ff;
+            --surface:    #ffffff;
+            --surface2:   #f5f8ff;
+            --border:     #dce7ff;
+            --text:       #1e2d4d;
+            --muted:      #6b7fa3;
+            --danger:     #dc2626;
+            --danger-lt:  #fef2f2;
+            --success:    #16a34a;
+            --success-lt: #f0fdf4;
         }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background: #eef2f7;
-            color: #1e293b;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Nunito', sans-serif;
+            font-weight: 400;
+            min-height: 100vh;
         }
 
-        .header {
-            background: linear-gradient(135deg, #1e66f5, #2563eb);
-            color: white;
-            text-align: center;
-            padding: 35px 20px;
-        }
-
-        .header p {
-            margin-top: 5px;
-            opacity: 0.9;
-        }
-
-        .container {
-            max-width: 1050px;
-            margin: 20px auto;
-            padding: 0 15px;
-        }
-
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border-left: 4px solid #28a745;
-        }
-
-        .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border-left: 4px solid #dc3545;
-        }
-
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 14px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        }
-
-        .top {
+        nav {
+            background: var(--primary);
+            padding: 14px 24px;
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
             align-items: center;
         }
+        nav span {
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-        .add-btn {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 10px 16px;
+        .page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 28px 80px;
+        }
+
+        .page-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 28px;
+            animation: fadeUp 0.45s ease both;
+        }
+
+        .alert {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 13px 16px;
             border-radius: 10px;
-            cursor: pointer;
+            font-size: 0.875rem;
+            margin-bottom: 22px;
+            animation: fadeUp 0.4s ease both;
+        }
+        .alert-success {
+            background: var(--success-lt);
+            border: 1px solid #bbf7d0;
+            color: var(--success);
+        }
+        .alert-danger {
+            background: var(--danger-lt);
+            border: 1px solid #fecaca;
+            color: var(--danger);
         }
 
-        table {
+        .stats-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 18px;
+            animation: fadeUp 0.45s 0.08s ease both;
+        }
+        .stat-pill {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 9px 16px;
+            font-size: 0.8rem;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            box-shadow: 0 1px 4px rgba(26,86,219,0.06);
+        }
+        .stat-pill strong { color: var(--text); font-size: 1rem; font-weight: 700; }
+        .stat-pill i { color: var(--primary); }
+
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 18px;
+            animation: fadeUp 0.45s 0.12s ease both;
+        }
+        .search-wrap { flex: 1; position: relative; }
+        .search-wrap i {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 0.8rem;
+            pointer-events: none;
+        }
+        .search-wrap input {
             width: 100%;
-            border-collapse: collapse;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 13px 10px 36px;
+            border-radius: 9px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.875rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 1px 4px rgba(26,86,219,0.05);
+        }
+        .search-wrap input:focus {
+            border-color: var(--primary-md);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
         }
 
-        thead {
-            background: #2563eb;
-            color: white;
-        }
-
-        th, td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            text-align: left;
-        }
-
-        tbody tr:hover {
-            background: #f1f5ff;
-        }
-
-        .edit {
-            background: #3b82f6;
-            color: white;
+        .btn-add {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--primary);
+            color: #fff;
             border: none;
-            padding: 6px 12px;
-            border-radius: 8px;
+            padding: 10px 20px;
+            border-radius: 9px;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 600;
+            font-size: 0.875rem;
             cursor: pointer;
-            margin-right: 5px;
+            white-space: nowrap;
+            transition: background 0.2s, transform 0.15s;
+            box-shadow: 0 2px 8px rgba(26,86,219,0.25);
         }
+        .btn-add:hover { background: var(--accent); transform: translateY(-1px); }
+        .btn-add:active { transform: translateY(0); }
 
-        .del {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            text-decoration: none;
+        .table-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 2px 16px rgba(26,86,219,0.07);
+            animation: fadeUp 0.45s 0.18s ease both;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        thead tr {
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border);
+        }
+        thead th {
+            padding: 13px 18px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+        thead th:last-child { text-align: center; }
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.12s;
+        }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: var(--primary-lt); }
+        tbody td {
+            padding: 14px 18px;
+            font-size: 0.875rem;
+            color: var(--text);
+            vertical-align: middle;
+        }
+        tbody td:last-child { text-align: center; }
+
+        .index-cell { color: var(--muted); font-size: 0.78rem; font-weight: 600; }
+        .name-cell  { font-weight: 700; }
+        .email-cell { color: var(--muted); font-size: 0.82rem; }
+
+        .type-badge {
             display: inline-block;
+            padding: 3px 11px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            background: var(--primary-lt);
+            border: 1px solid #c7d7fb;
+            color: var(--primary);
         }
 
-        .modal {
+        .empty-row td {
+            text-align: center;
+            padding: 56px 20px;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+        .empty-row td i { display: block; font-size: 2rem; margin-bottom: 12px; opacity: 0.3; color: var(--primary); }
+
+        .action-btn {
+            border: none;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.78rem;
+            transition: opacity 0.15s, transform 0.15s;
+            margin: 0 2px;
+        }
+        .action-btn:hover { opacity: 0.8; transform: scale(1.08); }
+        .btn-edit {
+            background: var(--primary-lt);
+            color: var(--primary);
+            border: 1px solid #c7d7fb;
+        }
+        .btn-del {
+            background: var(--danger-lt);
+            color: var(--danger);
+            border: 1px solid #fecaca;
+        }
+
+        .modal-overlay {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.4);
-            justify-content: center;
+            background: rgba(30,45,77,0.4);
+            backdrop-filter: blur(5px);
+            z-index: 500;
             align-items: center;
-            z-index: 1000;
+            justify-content: center;
+        }
+        .modal-overlay.open { display: flex; }
+
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 460px;
+            max-width: 95vw;
+            overflow: hidden;
+            box-shadow: 0 24px 60px rgba(26,86,219,0.18);
+            animation: popIn 0.25s cubic-bezier(0.175,0.885,0.32,1.275) both;
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.93) translateY(14px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
         }
 
-        .modal-content {
-            background: white;
-            padding: 20px;
-            width: 400px;
-            border-radius: 12px;
+        .modal-header {
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--surface2);
         }
+        .modal-header-left { display: flex; align-items: center; gap: 12px; }
+        .modal-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--primary);
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 0.88rem;
+        }
+        .modal-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+        .modal-close {
+            width: 30px;
+            height: 30px;
+            background: var(--border);
+            border: none;
+            border-radius: 7px;
+            color: var(--muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            transition: background 0.15s, color 0.15s;
+        }
+        .modal-close:hover { background: #dce7ff; color: var(--text); }
 
-        .modal-content input {
+        .modal-body { padding: 22px 24px; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+        .form-group:last-of-type { margin-bottom: 0; }
+        .form-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+        .form-control {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 13px;
+            border-radius: 9px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.875rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
             width: 100%;
-            padding: 10px;
-            margin: 6px 0;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            box-sizing: border-box;
+        }
+        .form-control:focus {
+            border-color: var(--primary-md);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
         }
 
-        .actions {
+        .modal-footer {
+            padding: 14px 24px;
+            border-top: 1px solid var(--border);
             display: flex;
             justify-content: flex-end;
             gap: 10px;
-            margin-top: 10px;
+            background: var(--surface2);
         }
-
-        .save {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 10px 14px;
-            border-radius: 8px;
+        .btn-cancel {
+            padding: 9px 18px;
+            border-radius: 9px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.875rem;
             cursor: pointer;
+            transition: color 0.15s, border-color 0.15s;
         }
-
-        .cancel {
-            background: #999;
-            color: white;
+        .btn-cancel:hover { color: var(--text); border-color: #b0c4f8; }
+        .btn-save {
+            padding: 9px 22px;
+            border-radius: 9px;
             border: none;
-            padding: 10px 14px;
-            border-radius: 8px;
+            background: var(--primary);
+            color: #fff;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 0.875rem;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            transition: background 0.2s;
+            box-shadow: 0 2px 8px rgba(26,86,219,0.2);
+        }
+        .btn-save:hover { background: var(--accent); }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
+<body th:data-create-url="@{/jury/create}">
 
-<body>
+<nav>
+    <span>
+        <i class="fas fa-graduation-cap"></i>Portail Doctorat
+    </span>
+</nav>
 
-<div class="header">
-    <h2>Gestion des Jurys</h2>
-    <p>Lister tous les jurys enregistrés</p>
-</div>
+<div class="page">
 
-<div class="container">
-    <!-- Messages flash -->
-    <div th:if="${successMessage}" class="alert-success" th:text="${successMessage}"></div>
-    <div th:if="${errorMessage}" class="alert-error" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage}" class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
 
-    <div class="card">
-        <div class="top">
-            <strong>Total : <span th:text="${#lists.size(jurys)}">0</span></strong>
-            <button class="add-btn" onclick="openAdd()">+ Ajouter</button>
+    <h1 class="page-title">Jurys</h1>
+
+    <div class="stats-bar">
+        <div class="stat-pill">
+            <i class="fas fa-users"></i>
+            <strong th:text="${#lists.size(jurys)}">0</strong> jurys enregistrés
         </div>
+    </div>
 
+    <div class="toolbar">
+        <div class="search-wrap">
+            <i class="fas fa-search"></i>
+            <input id="searchInput" oninput="filterTable()"/>
+        </div>
+        <button class="btn-add" onclick="openAdd()">
+            <i class="fas fa-plus"></i> Ajouter un jury
+        </button>
+    </div>
+
+    <div class="table-card">
         <table>
             <thead>
             <tr>
                 <th>#</th>
-                <th>Nom Complet</th>
+                <th>Nom</th>
+                <th>Prénom</th>
                 <th>Email</th>
                 <th>Type</th>
                 <th>Actions</th>
             </tr>
             </thead>
-            <tbody>
+            <tbody id="tableBody">
             <tr th:each="j, stat : ${jurys}">
-                <td th:text="${stat.index + 1}"></td>
-                <td th:text="${j.prenom + ' ' + j.nom}"></td>
-                <td th:text="${j.email}"></td>
-                <td th:text="${j.type}"></td>
+                <td class="index-cell" th:text="${stat.count}"></td>
+                <td class="name-cell"  th:text="${j.nom}"></td>
+                <td th:text="${j.prenom}"></td>
+                <td class="email-cell" th:text="${j.email != null ? j.email : '—'}"></td>
                 <td>
-                    <button class="edit" th:onclick="'openEdit(' + ${j.id} + ', \'' + ${j.nom} + '\', \'' + ${j.prenom} + '\', \'' + ${j.email} + '\', \'' + ${j.type} + '\')'">
-                        Modifier
+                    <span class="type-badge" th:text="${j.type != null ? j.type : '—'}"></span>
+                </td>
+                <td>
+                    <button class="action-btn btn-edit"
+                            th:data-id="${j.id}"
+                            th:data-nom="${j.nom}"
+                            th:data-prenom="${j.prenom}"
+                            th:data-email="${j.email}"
+                            th:data-type="${j.type}"
+                            th:data-url="@{/jury/update/{id}(id=${j.id})}"
+                            onclick="openEdit(this)"
+                            type="button"
+                            title="Modifier">
+                        <i class="fas fa-pen"></i>
                     </button>
-                    <a th:href="@{/jury/delete/{id}(id=${j.id})}" onclick="return confirm('Supprimer ce jury ?')" class="del">
-                        Supprimer
+                    <a th:href="@{/jury/delete/{id}(id=${j.id})}"
+                       onclick="return confirm('Supprimer ce jury ?')"
+                       style="text-decoration:none;">
+                        <button class="action-btn btn-del" type="button" title="Supprimer">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </a>
+                </td>
+            </tr>
+            <tr class="empty-row" th:if="${#lists.isEmpty(jurys)}">
+                <td colspan="6">
+                    <i class="fas fa-folder-open"></i>
+                    Aucun jury enregistré pour le moment.
                 </td>
             </tr>
             </tbody>
@@ -218,64 +483,91 @@
     </div>
 </div>
 
-<div class="modal" id="modal">
-    <div class="modal-content">
-        <h3 id="title">Ajouter Jury</h3>
-        <form id="form" method="post">
-            <input type="hidden" id="id" name="id">
-            <input type="text" id="nom" name="nom" placeholder="Nom" required>
-            <input type="text" id="prenom" name="prenom" placeholder="Prénom" required>
-            <input type="email" id="email" name="email" placeholder="Email" required>
-            <input type="text" id="type" name="type" placeholder="Type" required>
-            <div class="actions">
-                <button type="button" class="cancel" onclick="closeModal()">Annuler</button>
-                <button type="submit" class="save">Enregistrer</button>
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-header-left">
+                <div class="modal-icon"><i class="fas fa-user-tie"></i></div>
+                <span class="modal-title" id="modalTitle">Ajouter Jury</span>
+            </div>
+            <button class="modal-close" type="button" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form id="juryForm" method="post" th:action="@{/jury/create}">
+            <div class="modal-body">
+                <input type="hidden" id="juryId" name="id"/>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="juryNom">Nom</label>
+                        <input type="text" class="form-control" id="juryNom" name="nom" required/>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="juryPrenom">Prénom</label>
+                        <input type="text" class="form-control" id="juryPrenom" name="prenom" required/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="juryEmail">Email</label>
+                    <input type="email" class="form-control" id="juryEmail" name="email" required/>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="juryType">Type</label>
+                    <input type="text" class="form-control" id="juryType" name="type" required/>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeModal()">Annuler</button>
+                <button type="submit" class="btn-save">
+                    <i class="fas fa-check"></i> Enregistrer
+                </button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-    const BASE_URL = 'http://localhost:8081';
+    var createUrl = document.body.dataset.createUrl;
 
-    function openAdd() {
-        document.getElementById("form").action = BASE_URL + "/jury/create";
-        document.getElementById("form").method = "post";
-        document.getElementById("title").innerText = "Ajouter Jury";
-
-        document.getElementById("id").value = "";
-        document.getElementById("nom").value = "";
-        document.getElementById("prenom").value = "";
-        document.getElementById("email").value = "";
-        document.getElementById("type").value = "";
-
-        document.getElementById("modal").style.display = "flex";
+    function filterTable() {
+        var q = document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll('#tableBody tr').forEach(function(row) {
+            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
     }
 
-    function openEdit(id, nom, prenom, email, type) {
-        document.getElementById("form").action = BASE_URL + "/jury/update/" + id;
-        document.getElementById("form").method = "post";
-        document.getElementById("title").innerText = "Modifier Jury";
+    function openAdd() {
+        document.getElementById('modalTitle').textContent = 'Ajouter un Jury';
+        document.getElementById('juryForm').action = createUrl;
+        ['juryId','juryNom','juryPrenom','juryEmail','juryType'].forEach(function(id) {
+            document.getElementById(id).value = '';
+        });
+        document.getElementById('modalOverlay').classList.add('open');
+    }
 
-        document.getElementById("id").value = id;
-        document.getElementById("nom").value = nom;
-        document.getElementById("prenom").value = prenom;
-        document.getElementById("email").value = email;
-        document.getElementById("type").value = type;
-
-        document.getElementById("modal").style.display = "flex";
+    function openEdit(btn) {
+        document.getElementById('modalTitle').textContent = 'Modifier le Jury';
+        document.getElementById('juryForm').action  = btn.dataset.url;
+        document.getElementById('juryId').value     = btn.dataset.id;
+        document.getElementById('juryNom').value    = btn.dataset.nom;
+        document.getElementById('juryPrenom').value = btn.dataset.prenom;
+        document.getElementById('juryEmail').value  = btn.dataset.email;
+        document.getElementById('juryType').value   = btn.dataset.type;
+        document.getElementById('modalOverlay').classList.add('open');
     }
 
     function closeModal() {
-        document.getElementById("modal").style.display = "none";
+        document.getElementById('modalOverlay').classList.remove('open');
     }
 
-    window.onclick = function(event) {
-        var modal = document.getElementById("modal");
-        if (event.target == modal) {
-            closeModal();
-        }
-    }
+    document.getElementById('modalOverlay').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
 </script>
 
 </body>

@@ -8,17 +8,21 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/encadrant")
 public class EncadrantController {
 
     @Autowired
     EncadrantServiceImpl encadrantService;
+
     @GetMapping("/liste")
     public String showList(Model model) {
         model.addAttribute("encadrants", encadrantService.findAllEncadrants());
         return "encadrant/liste";
     }
+
     @PostMapping("/create")
     public String createEncadrant(@ModelAttribute Encadrant encadrant, RedirectAttributes ra) {
         try {
@@ -29,8 +33,11 @@ public class EncadrantController {
         }
         return "redirect:/encadrant/liste";
     }
+
     @PostMapping("/update/{id}")
-    public String updateEncadrant(@PathVariable Long id, @ModelAttribute Encadrant encadrant, RedirectAttributes ra) {
+    public String updateEncadrant(@PathVariable Long id,
+                                  @ModelAttribute Encadrant encadrant,
+                                  RedirectAttributes ra) {
         try {
             encadrantService.updateEncadrant(encadrant, id);
             ra.addFlashAttribute("successMessage", "Encadrant modifié avec succès !");
@@ -39,7 +46,8 @@ public class EncadrantController {
         }
         return "redirect:/encadrant/liste";
     }
-    @GetMapping("/delete/{id}")
+
+    @PostMapping("/delete/{id}")
     public String deleteEncadrant(@PathVariable Long id, RedirectAttributes ra) {
         try {
             encadrantService.DeleteEncadrant(id);
@@ -49,14 +57,16 @@ public class EncadrantController {
         }
         return "redirect:/encadrant/liste";
     }
+
     @GetMapping("/details/{id}")
     @ResponseBody
     public Encadrant trouverEncadrant(@PathVariable Long id) {
         return encadrantService.findEncadrant(id);
     }
+
     @GetMapping("/all")
     @ResponseBody
-    public java.util.List<Encadrant> findAllEncadrants() {
+    public List<Encadrant> findAllEncadrants() {
         return encadrantService.findAllEncadrants();
     }
 }

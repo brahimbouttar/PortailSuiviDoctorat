@@ -3,21 +3,19 @@ import com.gestion.portailsuividoctorat.entites.Demande;
 import com.gestion.portailsuividoctorat.repositories.DemandeRepo;
 import org.springframework.stereotype.Service;
 import com.gestion.portailsuividoctorat.kafka.DemandeEvent;
-import com.gestion.portailsuividoctorat.kafka.DemandeEventProducer;
+
 
 import java.util.List;
 
 @Service
 public class DemandeServiceImpl implements DemandeService {
-    private final DemandeEventProducer demandeEventProducer; //declaration producer
+ //declaration producer
 
 
     private final DemandeRepo repository;
 
-    public DemandeServiceImpl(DemandeRepo repository,
-                              DemandeEventProducer demandeEventProducer) {
+    public DemandeServiceImpl(DemandeRepo repository) {
         this.repository = repository;
-        this.demandeEventProducer = demandeEventProducer;
     }
 //     injection constructeur
 
@@ -33,7 +31,6 @@ public class DemandeServiceImpl implements DemandeService {
         event.setNomDoctorant(saved.getDoctorant().getNom());
         event.setEmailDoctorant(saved.getDoctorant().getEmail());
 
-        demandeEventProducer.publishDemandeEvent(event);
 
         return saved;
     }
@@ -64,7 +61,6 @@ public class DemandeServiceImpl implements DemandeService {
         event.setNomDoctorant(updated.getDoctorant().getNom());
         event.setEmailDoctorant(updated.getDoctorant().getEmail());
 
-        demandeEventProducer.publishDemandeEvent(event);
 
         return updated;
     }
