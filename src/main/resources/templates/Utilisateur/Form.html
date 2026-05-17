@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${utilisateur.id != 0 ? 'Modifier utilisateur' : 'Ajouter utilisateur'}">Utilisateur</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+</head>
+<body class="bg-light">
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<main class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="fw-bold mb-0" th:text="${utilisateur.id != 0 ? 'Modifier utilisateur' : 'Ajouter utilisateur'}">Utilisateur</h4>
+            <small class="text-muted">Informations du compte utilisateur</small>
+        </div>
+        <a th:href="@{/Utilisateur/all}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Retour
+        </a>
+    </div>
+
+    <form th:action="@{/Utilisateur/save}" th:object="${utilisateur}" method="post" class="card border-0 shadow-sm">
+        <div class="card-body">
+            <input type="hidden" th:field="*{id}"/>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Nom</label>
+                    <input th:field="*{nom}" class="form-control" required/>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Prénom</label>
+                    <input th:field="*{prenom}" class="form-control" required/>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    <input th:field="*{email}" type="email" class="form-control" required/>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Téléphone</label>
+                    <input th:field="*{telephone}" class="form-control"/>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Adresse</label>
+                    <input th:field="*{adresse}" class="form-control"/>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Rôle</label>
+                    <select th:field="*{role}" class="form-select">
+                        <option value="ADMIN">ADMIN</option>
+                        <option value="DOCTORANT">DOCTORANT</option>
+                        <option value="ENCADRANT">ENCADRANT</option>
+                        <option value="JURY">JURY</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Mot de passe</label>
+                    <input th:field="*{password}" type="password" class="form-control"/>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-white text-end">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save me-1"></i>Enregistrer
+            </button>
+        </div>
+    </form>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr"
+      th:replace="~{fragments/admin-layout :: layout('Gestion des doctorants', 'Suivi des profils doctorants', 'doctorants', ~{::section})}">
+<body>
+<section>
+  <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+  <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+  <div class="card">
+    <div class="card-body p-3">
+      <div th:if="${#lists.isEmpty(doctorants)}" class="text-center py-4">
+        <i class="bi bi-mortarboard text-muted" style="font-size:2rem;"></i>
+        <p class="text-muted mt-2 mb-0">Aucun doctorant trouvé.</p>
+      </div>
+
+      <div class="table-responsive" th:unless="${#lists.isEmpty(doctorants)}">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+          <tr>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Sujet de thèse</th>
+            <th>Encadrant</th>
+            <th class="text-center">Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="d : ${doctorants}">
+            <td th:text="${d.prenom + ' ' + d.nom}">-</td>
+            <td th:text="${d.email}">-</td>
+            <td th:text="${d.sujetThese != null ? d.sujetThese : '-'}">-</td>
+            <td>
+              <span th:if="${d.encadrant != null}" th:text="${d.encadrant.prenom + ' ' + d.encadrant.nom}">-</span>
+              <span th:unless="${d.encadrant != null}" class="text-muted">Non assigné</span>
+            </td>
+            <td class="text-center">
+              <form th:action="@{/admin/doctorants/{id}/delete(id=${d.id})}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+</body>
+</html>

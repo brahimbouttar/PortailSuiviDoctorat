@@ -16,10 +16,10 @@ public class EncadrantController {
 
     @Autowired
     EncadrantServiceImpl encadrantService;
-    @GetMapping("/liste")
+    @GetMapping
     public String showList(Model model) {
         model.addAttribute("encadrants", encadrantService.findAllEncadrants());
-        return "encadrant/liste";
+        return "Encadrant/Dashboard";
     }
     @PostMapping("/create")
     public String createEncadrant(@ModelAttribute Encadrant encadrant, RedirectAttributes ra) {

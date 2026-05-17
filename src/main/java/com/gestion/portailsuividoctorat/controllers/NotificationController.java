@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-@RequestMapping("/api/Notification")
+@RequestMapping("/Notification")
 @RestController
 @Controller
 public class NotificationController {
