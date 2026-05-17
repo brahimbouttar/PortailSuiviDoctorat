@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface DiplomesService {
     //creation
-    Diplomes createDiplome(Diplomes u);
+    Diplomes createDiplome(Diplomes d);
     //modification
-    Diplomes updateDiplome(Diplomes u, Long id);
+    Diplomes updateDiplome(Diplomes d, Long id);
     //lecture
     Diplomes findDiplome(Long id);
     //list all

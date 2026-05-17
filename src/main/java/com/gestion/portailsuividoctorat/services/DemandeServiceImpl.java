@@ -2,22 +2,18 @@ package com.gestion.portailsuividoctorat.services;
 import com.gestion.portailsuividoctorat.entites.Demande;
 import com.gestion.portailsuividoctorat.repositories.DemandeRepo;
 import org.springframework.stereotype.Service;
-import com.gestion.portailsuividoctorat.kafka.DemandeEvent;
-import com.gestion.portailsuividoctorat.kafka.DemandeEventProducer;
+
 
 import java.util.List;
 
 @Service
 public class DemandeServiceImpl implements DemandeService {
-    private final DemandeEventProducer demandeEventProducer; //declaration producer
 
 
     private final DemandeRepo repository;
 
-    public DemandeServiceImpl(DemandeRepo repository,
-                              DemandeEventProducer demandeEventProducer) {
+    public DemandeServiceImpl(DemandeRepo repository) {
         this.repository = repository;
-        this.demandeEventProducer = demandeEventProducer;
     }
 //     injection constructeur
 
@@ -25,15 +21,6 @@ public class DemandeServiceImpl implements DemandeService {
     public Demande createDemande(Demande demande) {
         validerPrerequisSoutenance(demande);
         Demande saved = repository.save(demande);
-
-        DemandeEvent event = new DemandeEvent();
-        event.setDemandeId(saved.getId());
-        event.setStatut(saved.getStatut());
-        event.setDoctorantId(saved.getDoctorant().getId());
-        event.setNomDoctorant(saved.getDoctorant().getNom());
-        event.setEmailDoctorant(saved.getDoctorant().getEmail());
-
-        demandeEventProducer.publishDemandeEvent(event);
 
         return saved;
     }
@@ -57,14 +44,6 @@ public class DemandeServiceImpl implements DemandeService {
 
         Demande updated = repository.save(existing);
 
-        DemandeEvent event = new DemandeEvent();
-        event.setDemandeId(updated.getId());
-        event.setStatut(updated.getStatut());
-        event.setDoctorantId(updated.getDoctorant().getId());
-        event.setNomDoctorant(updated.getDoctorant().getNom());
-        event.setEmailDoctorant(updated.getDoctorant().getEmail());
-
-        demandeEventProducer.publishDemandeEvent(event);
 
         return updated;
     }

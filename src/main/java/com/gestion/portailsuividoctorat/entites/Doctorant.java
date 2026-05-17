@@ -14,8 +14,7 @@ public class Doctorant extends Utilisateur{
     private String SujetThese;
     private String CV;
     private String LettreMotivation;
-    public Doctorant(String email, String password, String telephone, String adresse,
-                     String prenom, String nom, String role,
+    public Doctorant(String role, String password, String telephone, String adresse, String prenom, String email, String nom,
                      String SujetThese, String CV, String LettreMotivation) {
         super(nom, prenom, email, telephone, password, role, adresse);
         this.SujetThese = SujetThese;

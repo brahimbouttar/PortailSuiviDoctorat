@@ -8,6 +8,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/encadrant")
 public class EncadrantController {
@@ -38,6 +40,11 @@ public class EncadrantController {
             ra.addFlashAttribute("errorMessage", "Erreur lors de la modification : " + e.getMessage());
         }
         return "redirect:/encadrant/liste";
+    }
+    @GetMapping("/dashboard")
+    public String dashboard(Model model) {
+        List<Encadrant> tous = encadrantService.findAllEncadrants();
+        return "Encadrant/Dashboard";
     }
     @GetMapping("/delete/{id}")
     public String deleteEncadrant(@PathVariable Long id, RedirectAttributes ra) {
