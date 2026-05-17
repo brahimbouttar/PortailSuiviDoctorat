@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${doctorant.id != 0 ? 'Modifier doctorant' : 'Ajouter doctorant'}">Doctorant</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+</head>
+<body class="bg-light">
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<main class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="fw-bold mb-0" th:text="${doctorant.id != 0 ? 'Modifier doctorant' : 'Ajouter doctorant'}">Doctorant</h4>
+            <small class="text-muted">Informations du profil doctorant</small>
+        </div>
+        <a th:href="@{/doctorants}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Retour
+        </a>
+    </div>
+
+    <form th:action="@{/doctorants/save}" th:object="${doctorant}" method="post" class="card border-0 shadow-sm">
+        <div class="card-body">
+            <input type="hidden" th:field="*{id}"/>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Nom</label>
+                    <input th:field="*{nom}" class="form-control" required/>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Prénom</label>
+                    <input th:field="*{prenom}" class="form-control" required/>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    <input th:field="*{email}" type="email" class="form-control" required/>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Téléphone</label>
+                    <input th:field="*{telephone}" class="form-control"/>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Adresse</label>
+                    <input th:field="*{adresse}" class="form-control"/>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Mot de passe</label>
+                    <input th:field="*{password}" type="password" class="form-control"/>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Sujet de thèse</label>
+                    <textarea th:field="*{sujetThese}" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">CV</label>
+                    <input th:field="*{CV}" class="form-control"/>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Lettre de motivation</label>
+                    <input th:field="*{lettreMotivation}" class="form-control"/>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-white text-end">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save me-1"></i>Enregistrer
+            </button>
+        </div>
+    </form>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

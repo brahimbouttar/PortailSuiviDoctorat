@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr"
+      th:replace="~{layouts/admin-layout :: layout(
+          'Utilisateurs',
+          'Gestion des comptes utilisateurs',
+          'users'
+      )}">
+<head><title>Utilisateurs</title></head>
+<body>
+
+<section th:fragment="content">
+  <style>
+    .search-bar { position: relative; margin-bottom: 16px; }
+    .search-bar i { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: .78rem; pointer-events: none; }
+    .search-bar input {
+      width: 100%; padding: 8px 12px 8px 32px;
+      border: 1px solid var(--border); border-radius: 7px;
+      font-size: .81rem; color: var(--text); background: var(--surface);
+      font-family: inherit; transition: border-color .12s;
+    }
+    .search-bar input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,110,244,.1); }
+
+    .btn-primary { background: var(--accent); color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-size: .78rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: opacity .13s; text-decoration: none; }
+    .btn-primary:hover { opacity: .88; }
+
+    tbody tr.clickable { cursor: pointer; }
+  </style>
+
+  <!-- HEADER -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div class="search-bar" style="flex:1;max-width:320px;margin-bottom:0">
+      <i class="fas fa-search"></i>
+      <input id="searchInput" placeholder="Rechercher un utilisateur…" oninput="filterTable()"/>
+    </div>
+    <a th:href="@{/Utilisateur/form}" class="btn-primary">
+      <i class="fas fa-plus"></i> Ajouter
+    </a>
+  </div>
+
+  <!-- TABLE CARD -->
+  <div class="card">
+    <div class="card-head">
+      <h6><i class="fas fa-users"></i> Liste des utilisateurs</h6>
+    </div>
+    <table>
+      <thead>
+      <tr>
+        <th>Nom</th><th>Prénom</th><th>Email</th>
+        <th>Adresse</th><th>Téléphone</th>
+        <th style="text-align:center">Actions</th>
+      </tr>
+      </thead>
+      <tbody id="tableBody">
+
+      <tr th:if="${#lists.isEmpty(Utilisateur)}">
+        <td colspan="6" style="text-align:center;padding:48px 20px;color:var(--muted);font-size:.8rem">
+          <i class="fas fa-inbox" style="font-size:2rem;color:#d1d5db;display:block;margin-bottom:10px"></i>
+          Aucun utilisateur trouvé.
+        </td>
+      </tr>
+
+      <tr th:unless="${#lists.isEmpty(Utilisateur)}"
+          th:each="u : ${Utilisateur}"
+          class="clickable"
+          th:onclick="|window.location.href='@{/Utilisateur/Details/{id}(id=${u.id})}'|">
+        <td th:text="${u.nom}"></td>
+        <td th:text="${u.prenom}"></td>
+        <td th:text="${u.email}"></td>
+        <td th:text="${u.adresse}"></td>
+        <td th:text="${u.telephone}"></td>
+        <td>
+          <div class="act">
+            <a th:href="@{'/Utilisateur/update/' + ${u.id}}"
+               onclick="event.stopPropagation()"
+               style="display:inline-flex">
+              <button type="button" class="act-btn ok" title="Modifier">
+                <i class="fas fa-pencil"></i>
+              </button>
+            </a>
+            <button class="act-btn no" title="Supprimer"
+                    th:onclick="'deleteUtilisateur(event,' + ${u.id} + ')'">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function filterTable() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      document.querySelectorAll('#tableBody tr').forEach(r => {
+        r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none';
+      });
+    }
+    function deleteUtilisateur(event, id) {
+      event.stopPropagation();
+      if (!confirm('Supprimer cet utilisateur ?')) return;
+      fetch('/Utilisateur/delete/' + id, { method: 'DELETE' })
+              .then(r => r.ok ? location.reload() : alert('Erreur lors de la suppression.'));
+    }
+  </script>
+
+</section>
+</body>
+</html>

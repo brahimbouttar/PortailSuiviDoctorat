@@ -16,28 +16,14 @@ public class EncadrantController {
 
     @Autowired
     EncadrantServiceImpl encadrantService;
-
-    @GetMapping("/liste")
+    @GetMapping
     public String showList(Model model) {
         model.addAttribute("encadrants", encadrantService.findAllEncadrants());
-        return "encadrant/liste";
-    }
-
-    @PostMapping("/create")
-    public String createEncadrant(@ModelAttribute Encadrant encadrant, RedirectAttributes ra) {
-        try {
-            encadrantService.createEncadrant(encadrant);
-            ra.addFlashAttribute("successMessage", "Encadrant créé avec succès !");
-        } catch (Exception e) {
-            ra.addFlashAttribute("errorMessage", "Erreur lors de la création : " + e.getMessage());
-        }
-        return "redirect:/encadrant/liste";
+        return "Encadrant/Dashboard";
     }
 
     @PostMapping("/update/{id}")
-    public String updateEncadrant(@PathVariable Long id,
-                                  @ModelAttribute Encadrant encadrant,
-                                  RedirectAttributes ra) {
+    public String updateEncadrant(@PathVariable Long id, @ModelAttribute Encadrant encadrant, RedirectAttributes ra) {
         try {
             encadrantService.updateEncadrant(encadrant, id);
             ra.addFlashAttribute("successMessage", "Encadrant modifié avec succès !");
@@ -46,8 +32,12 @@ public class EncadrantController {
         }
         return "redirect:/encadrant/liste";
     }
-
-    @PostMapping("/delete/{id}")
+    @GetMapping("/dashboard")
+    public String dashboard(Model model) {
+        List<Encadrant> tous = encadrantService.findAllEncadrants();
+        return "Encadrant/Dashboard";
+    }
+    @GetMapping("/delete/{id}")
     public String deleteEncadrant(@PathVariable Long id, RedirectAttributes ra) {
         try {
             encadrantService.DeleteEncadrant(id);
@@ -57,21 +47,14 @@ public class EncadrantController {
         }
         return "redirect:/encadrant/liste";
     }
-
     @GetMapping("/details/{id}")
     @ResponseBody
     public Encadrant trouverEncadrant(@PathVariable Long id) {
         return encadrantService.findEncadrant(id);
     }
-
     @GetMapping("/all")
     @ResponseBody
-    public List<Encadrant> findAllEncadrants() {
+    public java.util.List<Encadrant> findAllEncadrants() {
         return encadrantService.findAllEncadrants();
-    }
-    @GetMapping("/dashboard")
-    public String dashboard(Model model) {
-        List<Encadrant> tous = encadrantService.findAllEncadrants();
-        return "encadrant/dashboard";
     }
 }

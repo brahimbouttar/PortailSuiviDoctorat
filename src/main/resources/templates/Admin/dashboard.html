@@ -1,125 +1,104 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="fr">
-<head>
-  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard Admin</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
-  <style>
-    body { background:#f0f4f8; }
-    .card { border:none; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
-    .stat-card { border-radius:12px; padding:1.2rem 1.5rem; display:flex; align-items:center; gap:1rem; background:#fff; }
-    .stat-icon { width:50px; height:50px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; }
-    .stat-value { font-size:1.8rem; font-weight:700; }
-    .stat-label { font-size:.75rem; color:#888; text-transform:uppercase; letter-spacing:.08em; }
-  </style>
-</head>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr"
+      th:replace="~{layouts/admin-layout :: layout(
+          'Tableau de bord',
+          'Vue d\'ensemble de l\'activité du portail doctoral',
+          'dashboard'
+      )}">
+<head><title>Tableau de bord</title></head>
 <body>
-<th:block th:replace="~{fragments/navbar :: navbar}"></th:block>
 
+<section th:fragment="content">
 
-
-<div class="container py-4">
-  <div class="mb-4">
-    <h4 class="fw-bold mb-0">Tableau de bord administrateur</h4>
-    <small class="text-muted">Vue d'ensemble du portail doctoral</small>
-  </div>
-
-  <div class="row g-3 mb-4">
-    <div class="col-sm-6 col-lg-3">
-      <div class="stat-card card">
-        <div class="stat-icon" style="background:#e8f4fd;"><i class="bi bi-people-fill" style="color:#0d6efd;"></i></div>
-        <div>
-          <div class="stat-value text-primary" th:text="${totalUsers}">0</div>
-          <div class="stat-label">Utilisateurs</div>
-        </div>
+  <!-- KPI CARDS -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-icon blue"><i class="fas fa-users"></i></div>
+      <div>
+        <div class="kpi-val" th:text="${totalUsers}">248</div>
+        <div class="kpi-lbl">Utilisateurs</div>
       </div>
     </div>
-    <div class="col-sm-6 col-lg-3">
-      <div class="stat-card card">
-        <div class="stat-icon" style="background:#d4edda;"><i class="bi bi-mortarboard-fill" style="color:#198754;"></i></div>
-        <div>
-          <div class="stat-value text-success" th:text="${totalDoctorants}">0</div>
-          <div class="stat-label">Doctorants</div>
-        </div>
+    <div class="kpi">
+      <div class="kpi-icon green"><i class="fas fa-user-graduate"></i></div>
+      <div>
+        <div class="kpi-val" th:text="${totalDoctorants}">184</div>
+        <div class="kpi-lbl">Doctorants</div>
       </div>
     </div>
-    <div class="col-sm-6 col-lg-3">
-      <div class="stat-card card">
-        <div class="stat-icon" style="background:#fff3cd;"><i class="bi bi-hourglass-split" style="color:#ffc107;"></i></div>
-        <div>
-          <div class="stat-value text-warning" th:text="${demandesEnAttente}">0</div>
-          <div class="stat-label">Demandes à traiter</div>
-        </div>
+    <div class="kpi">
+      <div class="kpi-icon amber"><i class="fas fa-hourglass-half"></i></div>
+      <div>
+        <div class="kpi-val" th:text="${demandesEnAttente}">12</div>
+        <div class="kpi-lbl">Demandes à traiter</div>
       </div>
     </div>
-    <div class="col-sm-6 col-lg-3">
-      <div class="stat-card card">
-        <div class="stat-icon" style="background:#d4edda;"><i class="bi bi-shield-check" style="color:#198754;"></i></div>
-        <div>
-          <div class="stat-value text-success" th:text="${demandesAutorisees}">0</div>
-          <div class="stat-label">Soutenances autorisées</div>
-        </div>
+    <div class="kpi">
+      <div class="kpi-icon teal"><i class="fas fa-circle-check"></i></div>
+      <div>
+        <div class="kpi-val" th:text="${demandesAutorisees}">37</div>
+        <div class="kpi-lbl">Soutenances autorisées</div>
       </div>
     </div>
   </div>
 
+  <!-- PENDING REQUESTS TABLE -->
   <div class="card">
-    <div class="card-header bg-primary text-white py-3 px-4 d-flex justify-content-between align-items-center" style="border-radius:10px 10px 0 0;">
-      <h6 class="mb-0 fw-bold"><i class="bi bi-bell me-2"></i>Demandes en attente de validation admin</h6>
-      <a href="/admin/demandes" class="btn btn-sm btn-light" style="font-size:.78rem;">Gérer tout</a>
+    <div class="card-head">
+      <h6><i class="fas fa-bell"></i> Demandes en attente de validation</h6>
+      <a th:href="@{/admin/demandes}" class="link-btn">
+        <i class="fas fa-arrow-right"></i> Gérer tout
+      </a>
     </div>
-    <div class="card-body p-3">
-      <div th:if="${#lists.isEmpty(derniersDemandes)}" class="text-center py-4">
-        <i class="bi bi-check-all text-success" style="font-size:2rem;"></i>
-        <p class="text-muted mt-2 mb-0">Aucune demande en attente. Tout est à jour !</p>
-      </div>
-      <div class="table-responsive" th:unless="${#lists.isEmpty(derniersDemandes)}">
-        <table class="table table-hover mb-0">
-          <thead class="table-light">
-          <tr>
-            <th style="font-size:.72rem;text-transform:uppercase;color:#888;">Doctorant</th>
-            <th style="font-size:.72rem;text-transform:uppercase;color:#888;">Date dépôt</th>
-            <th style="font-size:.72rem;text-transform:uppercase;color:#888;">Articles</th>
-            <th style="font-size:.72rem;text-transform:uppercase;color:#888;">Statut</th>
-            <th class="text-center" style="font-size:.72rem;text-transform:uppercase;color:#888;">Actions</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr th:each="d : ${derniersDemandes}">
-            <td style="font-size:.85rem;">
-                  <span th:if="${d.doctorant != null}"
-                        th:text="${d.doctorant.prenom + ' ' + d.doctorant.nom}">—</span>
-              <span th:unless="${d.doctorant != null}" class="text-muted">—</span>
-            </td>
-            <td style="font-size:.85rem;"
-                th:text="${d.dateDepot != null ? #temporals.format(d.dateDepot,'dd/MM/yyyy') : '—'}">—</td>
-            <td style="font-size:.85rem;" th:text="${d.nbrArticlesQ1Q2 != null ? d.nbrArticlesQ1Q2 : '—'}">—</td>
-            <td>
-              <span class="badge bg-info" th:text="${d.statut}">—</span>
-            </td>
-            <td class="text-center">
-              <div class="d-flex justify-content-center gap-1">
-                <form th:action="@{/admin/demandes/{id}/autoriser(id=${d.id})}" method="post" class="d-inline">
-                  <button type="submit" class="btn btn-sm btn-outline-success" title="Autoriser">
-                    <i class="bi bi-check-lg"></i>
-                  </button>
-                </form>
-                <form th:action="@{/admin/demandes/{id}/refuser(id=${d.id})}" method="post" class="d-inline">
-                  <button type="submit" class="btn btn-sm btn-outline-danger" title="Refuser">
-                    <i class="bi bi-x-lg"></i>
-                  </button>
-                </form>
-              </div>
-            </td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="empty" th:if="${#lists.isEmpty(derniersDemandes)}">
+      <i class="fas fa-check-double"></i>
+      Aucune demande en attente — tout est à jour !
+    </div>
+
+    <table th:unless="${#lists.isEmpty(derniersDemandes)}">
+      <thead>
+      <tr>
+        <th>Doctorant</th>
+        <th>Date de dépôt</th>
+        <th>Articles Q1/Q2</th>
+        <th>Statut</th>
+        <th style="text-align:center">Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="d : ${derniersDemandes}">
+        <td>
+            <span th:if="${d.doctorant != null}"
+                  th:text="${d.doctorant.prenom + ' ' + d.doctorant.nom}">—</span>
+          <span th:unless="${d.doctorant != null}" style="color:var(--muted)">—</span>
+        </td>
+        <td th:text="${d.dateDepot != null ? #temporals.format(d.dateDepot,'dd/MM/yyyy') : '—'}">—</td>
+        <td th:text="${d.nbrArticlesQ1Q2 != null ? d.nbrArticlesQ1Q2 : '—'}">—</td>
+        <td>
+          <span class="badge badge-info" th:text="${d.statut}">En attente</span>
+        </td>
+        <td>
+          <div class="act">
+            <form th:action="@{/admin/demandes/{id}/autoriser(id=${d.id})}"
+                  method="post" style="display:inline">
+              <button type="submit" class="act-btn ok" title="Autoriser">
+                <i class="fas fa-check"></i>
+              </button>
+            </form>
+            <form th:action="@{/admin/demandes/{id}/refuser(id=${d.id})}"
+                  method="post" style="display:inline">
+              <button type="submit" class="act-btn no" title="Refuser">
+                <i class="fas fa-xmark"></i>
+              </button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+</section>
 </body>
 </html>

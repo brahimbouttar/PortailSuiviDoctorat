@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr"
+      th:replace="~{layouts/admin-layout :: layout(
+          'Encadrants',
+          'Gestion des encadrants enregistrés',
+          'encadrants'
+      )}">
+<head><title>Encadrants</title></head>
+<body>
+
+<section th:fragment="content">
+  <style>
+    .search-bar { position: relative; margin-bottom: 16px; }
+    .search-bar i { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: .78rem; pointer-events: none; }
+    .search-bar input {
+      width: 100%; padding: 8px 12px 8px 32px;
+      border: 1px solid var(--border); border-radius: 7px;
+      font-size: .81rem; color: var(--text); background: var(--surface);
+      font-family: inherit; transition: border-color .12s;
+    }
+    .search-bar input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,110,244,.1); }
+
+    .alert { padding: 10px 14px; border-radius: 7px; font-size: .8rem; display: flex; align-items: center; gap: 8px; margin-bottom: 16px; border: 1px solid transparent; }
+    .alert-success { background: #f0fdf4; border-color: #bbf7d0; color: #15803d; }
+    .alert-error   { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+
+    .btn-primary { background: var(--accent); color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-size: .78rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: opacity .13s; }
+    .btn-primary:hover { opacity: .88; }
+    .btn-ghost   { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 5px 11px; border-radius: 6px; font-size: .75rem; font-weight: 500; cursor: pointer; transition: all .13s; }
+    .btn-ghost:hover { border-color: #c7d9fd; color: var(--accent); background: #eff6ff; }
+
+    .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(15,20,35,.45); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+    .modal-backdrop.open { display: flex; }
+    .modal-box { background: var(--surface); border-radius: 10px; width: 100%; max-width: 500px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,.18); animation: modalIn .18s ease; }
+    @keyframes modalIn { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+    .modal-head { padding: 15px 20px; background: var(--navy); border-radius: 10px 10px 0 0; display: flex; align-items: center; gap: 9px; color: #fff; flex-shrink: 0; }
+    .modal-head h5 { font-size: .88rem; font-weight: 600; margin: 0; flex: 1; }
+    .modal-head .close-btn { background: none; border: none; color: rgba(255,255,255,.45); font-size: .85rem; cursor: pointer; padding: 2px 5px; transition: color .12s; }
+    .modal-head .close-btn:hover { color: #fff; }
+    .modal-body { padding: 22px 24px; overflow-y: auto; flex: 1; }
+    .modal-foot { padding: 13px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; background: var(--bg); border-radius: 0 0 10px 10px; flex-shrink: 0; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-group label { font-size: .71rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+    .form-group input { border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; font-size: .81rem; color: var(--text); background: var(--surface); transition: border-color .12s; font-family: inherit; }
+    .form-group input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,110,244,.1); }
+  </style>
+
+  <!-- ALERTS -->
+  <div class="alert alert-success" th:if="${successMessage}">
+    <i class="fas fa-check-circle"></i><span th:text="${successMessage}"></span>
+  </div>
+  <div class="alert alert-error" th:if="${errorMessage}">
+    <i class="fas fa-triangle-exclamation"></i><span th:text="${errorMessage}"></span>
+  </div>
+
+  <!-- HEADER -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div class="search-bar" style="flex:1;max-width:320px;margin-bottom:0">
+      <i class="fas fa-search"></i>
+      <input id="searchInput" placeholder="Rechercher un encadrant…" oninput="filterTable()"/>
+    </div>
+    <button class="btn-primary" onclick="openAdd()">
+      <i class="fas fa-plus"></i> Ajouter
+    </button>
+  </div>
+
+  <!-- TABLE CARD -->
+  <div class="card">
+    <div class="card-head">
+      <h6><i class="fas fa-chalkboard-teacher"></i> Liste des encadrants</h6>
+    </div>
+    <table>
+      <thead>
+      <tr>
+        <th>#</th><th>Nom</th><th>Prénom</th><th>Email</th>
+        <th>Spécialité</th><th>Grade</th><th>Établissement</th>
+        <th style="text-align:center">Actions</th>
+      </tr>
+      </thead>
+      <tbody id="tableBody">
+
+      <tr th:if="${#lists.isEmpty(encadrants)}">
+        <td colspan="8" style="text-align:center;padding:48px 20px;color:var(--muted);font-size:.8rem">
+          <i class="fas fa-inbox" style="font-size:2rem;color:#d1d5db;display:block;margin-bottom:10px"></i>
+          Aucun encadrant trouvé.
+        </td>
+      </tr>
+
+      <tr th:unless="${#lists.isEmpty(encadrants)}"
+          th:each="e : ${encadrants}">
+        <td style="color:var(--muted);font-weight:600" th:text="${e.id}"></td>
+        <td th:text="${e.nom}"></td>
+        <td th:text="${e.prenom}"></td>
+        <td th:text="${e.email}"></td>
+        <td th:text="${e.specialite}"></td>
+        <td th:text="${e.grade}"></td>
+        <td th:text="${e.etablissement}"></td>
+        <td>
+          <div class="act">
+            <button class="act-btn ok" title="Modifier"
+                    th:attr="onclick='openEdit('+${e.id}+',\''+${e.nom}+'\',\''+${e.prenom}+'\',\''+${e.email}+'\',\''+${e.specialite}+'\',\''+${e.grade}+'\',\''+${e.etablissement}+'\')'">
+              <i class="fas fa-pencil"></i>
+            </button>
+            <a th:href="@{/encadrant/delete/{id}(id=${e.id})}"
+               onclick="return confirm('Supprimer cet encadrant ?')"
+               style="display:inline-flex">
+              <button type="button" class="act-btn no" title="Supprimer">
+                <i class="fas fa-trash"></i>
+              </button>
+            </a>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══ MODAL ═══════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="encadrantModal" onclick="closeOnBackdrop(event,'encadrantModal')">
+    <div class="modal-box">
+      <div class="modal-head">
+        <i class="fas fa-chalkboard-teacher" style="font-size:.82rem"></i>
+        <h5 id="modalTitle">Ajouter un encadrant</h5>
+        <button class="close-btn" onclick="closeModal('encadrantModal')"><i class="fas fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="encadrantForm" method="post">
+          <input type="hidden" id="encId" name="id"/>
+          <div class="form-grid">
+            <div class="form-group"><label>Nom</label><input type="text" id="encNom" name="nom" placeholder="Nom" required/></div>
+            <div class="form-group"><label>Prénom</label><input type="text" id="encPrenom" name="prenom" placeholder="Prénom" required/></div>
+            <div class="form-group"><label>Email</label><input type="email" id="encEmail" name="email" placeholder="Email" required/></div>
+            <div class="form-group"><label>Spécialité</label><input type="text" id="encSpecialite" name="specialite" placeholder="Spécialité" required/></div>
+            <div class="form-group"><label>Grade</label><input type="text" id="encGrade" name="grade" placeholder="Grade" required/></div>
+            <div class="form-group"><label>Établissement</label><input type="text" id="encEtablissement" name="etablissement" placeholder="Établissement" required/></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-ghost" onclick="closeModal('encadrantModal')">Annuler</button>
+        <button class="btn-primary" onclick="document.getElementById('encadrantForm').submit()">
+          <i class="fas fa-check"></i> Enregistrer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function filterTable() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      document.querySelectorAll('#tableBody tr').forEach(r => {
+        r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none';
+      });
+    }
+    function openAdd() {
+      document.getElementById('modalTitle').textContent     = 'Ajouter un encadrant';
+      document.getElementById('encadrantForm').action       = 'encadrants/create';
+      ['encId','encNom','encPrenom','encEmail','encSpecialite','encGrade','encEtablissement']
+              .forEach(id => document.getElementById(id).value = '');
+      document.getElementById('encadrantModal').classList.add('open');
+    }
+    function openEdit(id, nom, prenom, email, specialite, grade, etablissement) {
+      document.getElementById('modalTitle').textContent     = 'Modifier l\'encadrant';
+      document.getElementById('encadrantForm').action       = '/encadrant/update/' + id;
+      document.getElementById('encId').value                = id;
+      document.getElementById('encNom').value               = nom;
+      document.getElementById('encPrenom').value            = prenom;
+      document.getElementById('encEmail').value             = email;
+      document.getElementById('encSpecialite').value        = specialite;
+      document.getElementById('encGrade').value             = grade;
+      document.getElementById('encEtablissement').value     = etablissement;
+      document.getElementById('encadrantModal').classList.add('open');
+    }
+    function closeModal(id)         { document.getElementById(id).classList.remove('open'); }
+    function closeOnBackdrop(e, id) { if (e.target === e.currentTarget) closeModal(id); }
+  </script>
+
+</section>
+</body>
+</html>

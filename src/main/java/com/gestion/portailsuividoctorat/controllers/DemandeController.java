@@ -17,7 +17,6 @@ public class DemandeController {
         this.service = service;
     }
 
-    // ── Liste ────────────────────────────────────────────────────
     @GetMapping
     public String list(Model model) {
         model.addAttribute("demandes", service.getAllDemandes());
@@ -25,7 +24,6 @@ public class DemandeController {
         return "Demande/demandes";
     }
 
-    // ── Créer ────────────────────────────────────────────────────
     @PostMapping("/save")
     public String save(@ModelAttribute Demande demande, RedirectAttributes ra) {
         try {
@@ -37,7 +35,6 @@ public class DemandeController {
         return "redirect:/demandes";
     }
 
-    // ── Modifier ─────────────────────────────────────────────────
     @PostMapping("/update")
     public String update(@ModelAttribute Demande demande, RedirectAttributes ra) {
         try {
