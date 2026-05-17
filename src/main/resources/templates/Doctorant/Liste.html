@@ -5,6 +5,8 @@
     <title>Doctorants</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+
     <style>
         body { background:#f5f6fa; }
         .card { border-radius:10px; }
@@ -19,15 +21,18 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4>Doctorants</h4>
-        <a th:href="@{/doctorants/form}" class="btn btn-primary btn-sm">
+        <button class="btn btn-primary btn-sm"
+                data-bs-toggle="modal"
+                data-bs-target="#addModal">
             <i class="fas fa-plus"></i> Ajouter
-        </a>
+        </button>
     </div>
 
     <!-- Search -->
-    <div class="mb-3">
-        <input id="searchInput" class="form-control" placeholder="Rechercher..." oninput="filterTable()"/>
-    </div>
+    <input id="searchInput"
+           class="form-control mb-3"
+           placeholder="Rechercher..."
+           oninput="filterTable()">
 
     <!-- Table -->
     <div class="card">
@@ -35,32 +40,49 @@
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                 <tr>
-                    <th>#</th>
                     <th>Nom</th>
+                    <th>Prenom</th>
                     <th>Email</th>
+                    <th>Adresse</th>
                     <th>Téléphone</th>
                     <th>Sujet</th>
                     <th class="text-center">Actions</th>
                 </tr>
                 </thead>
                 <tbody id="tableBody">
-                <tr th:each="d, stat : ${doctorants}">
-                    <td th:text="${stat.count}"></td>
-                    <td th:text="${d.prenom + ' ' + d.nom}"></td>
+                <tr th:each="d, stat : ${doctorants}"
+                    th:onclick="|window.location.href='@{/doctorants/details/{id}(id=${d.id})}'|">
+                    <td th:text="${d.nom}"></td>
+                    <td th:text="${d.prenom}"></td>
                     <td th:text="${d.email != null ? d.email : '-'}"></td>
-                    <td th:text="${d.telephone != null ? d.telephone : '-'}"></td>
-                    <td th:text="${d.sujetThese != null ? d.sujetThese : '-'}"></td>
-                    <td class="text-center">
-                        <a th:href="@{/doctorants/detail(id=${d.id})}" class="btn btn-sm btn-info">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        <a th:href="@{/doctorants/form(id=${d.id})}" class="btn btn-sm btn-primary">
+                    <td th:text="${d.adresse}"></td>
+                    <td th:text="${d.telephone}"></td>
+                    <td th:text="${d.sujetThese}"></td>
+                    <td>
+
+                        <!-- UPDATE -->
+                        <button class="btn btn-primary btn-sm"
+                                onclick="event.stopPropagation()"
+                                th:attr="onclick=
+                                'event.stopPropagation();openUpdateModal('+
+                                ${d.id}+','+
+                                '\''+${d.nom}+'\','+
+                                '\''+${d.prenom}+'\','+
+                                '\''+${d.email}+'\','+
+                                '\''+${d.adresse}+'\','+
+                                '\''+${d.telephone}+'\','+
+                                '\''+${d.sujetThese}+'\''+
+                                ')'">
+
                             <i class="fas fa-edit"></i>
-                        </a>
-                        <button class="btn btn-sm btn-danger"
-                                th:onclick="'deleteDoc(' + ${d.id} + ')'">
+                        </button>
+
+                        <!-- DELETE -->
+                        <button class="btn btn-danger btn-sm"
+                                th:onclick="'deleteDoctorant(event,' + ${d.id} + ')'">
                             <i class="fas fa-trash"></i>
                         </button>
+
                     </td>
                 </tr>
 
@@ -76,6 +98,109 @@
     </div>
 
 </div>
+<!-- ADD MODAL -->
+<div class="modal fade" id="addModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5>Ajouter Doctorant</h5>
+                <button class="btn-close"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <form th:action="@{/doctorants/save}"
+                  method="post"
+                  th:object="${newDoctorant}">
+
+                <div class="modal-body">
+
+                    <input th:field="*{nom}" class="form-control mb-2" placeholder="Nom">
+                    <input th:field="*{prenom}" class="form-control mb-2" placeholder="Prénom">
+                    <input th:field="*{email}" class="form-control mb-2" placeholder="Email">
+                    <input th:field="*{adresse}" class="form-control mb-2" placeholder="Adresse">
+                    <input th:field="*{telephone}" class="form-control mb-2" placeholder="Téléphone">
+                    <input th:field="*{sujetThese}" class="form-control mb-2" placeholder="Sujet">
+
+
+                    <input type="password"
+                           th:field="*{password}"
+                           class="form-control mb-2"
+                           placeholder="Mot de passe">
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Annuler
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-success">
+                        Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- UPDATE MODAL -->
+<div class="modal fade" id="updateModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5>Modifier Doctorant</h5>
+                <button class="btn-close"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <form id="updateForm" method="post">
+
+                <div class="modal-body">
+
+                    <input id="updateNom" name="nom"
+                           class="form-control mb-2">
+
+                    <input id="updatePrenom" name="prenom"
+                           class="form-control mb-2">
+
+                    <input id="updateEmail" name="email"
+                           class="form-control mb-2">
+
+                    <input id="updateAdresse" name="adresse"
+                           class="form-control mb-2">
+
+                    <input id="updateTelephone" name="telephone"
+                           class="form-control mb-2">
+
+                    <input id="updateSujetThese" name="sujetThese"
+                           class="form-control mb-2">
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Annuler
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-success">
+                        Mettre à jour
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
     function filterTable() {
@@ -86,13 +211,49 @@
         });
     }
 
-    function deleteDoc(id) {
-        if (!confirm('Supprimer ce doctorant ?')) return;
-        fetch(`/doctorants/${id}`, { method: 'DELETE' })
-            .then(res => {
-                if (res.ok) location.reload();
-                else alert('Erreur lors de la suppression.');
+    function deleteDoctorant(event, id) {
+        event.stopPropagation();
+
+        if (!confirm("Supprimer cet Doctorant ?")) {
+            return;
+        }
+
+        fetch("/doctorants/delete/" + id, {
+            method: "DELETE"
+        })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert("Erreur suppression");
+                }
             });
+    }
+
+    function openUpdateModal(
+        id,
+        nom,
+        prenom,
+        email,
+        adresse,
+        telephone,
+        sujetThese
+    ) {
+        document.getElementById("updateNom").value = nom;
+        document.getElementById("updatePrenom").value = prenom;
+        document.getElementById("updateEmail").value = email;
+        document.getElementById("updateAdresse").value = adresse;
+        document.getElementById("updateTelephone").value = telephone;
+        document.getElementById("updateSujetThese").value = sujetThese;
+
+        document.getElementById("updateForm").action =
+            "/doctorants/update/" + id;
+
+        let modal = new bootstrap.Modal(
+            document.getElementById("updateModal")
+        );
+
+        modal.show();
     }
 </script>
 
