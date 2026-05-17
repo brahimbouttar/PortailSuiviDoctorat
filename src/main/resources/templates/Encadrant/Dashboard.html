@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Dashboard — Encadrants</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --navy:       #0b1437;
+            --navy-light: #1e2d60;
+            --accent:     #4f8ef7;
+            --accent-glow:#3b7de8;
+            --gold: #4f8ef7;
+            --gold-lt:    #fdf6e3;
+            --emerald: #4f8ef7;
+            --emerald-lt: #ecfdf5;
+            --violet: #4f8ef7;
+            --violet-lt:  #f5f3ff;
+            --bg:         #f2f5fb;
+            --surface:    #ffffff;
+            --border:     #e2e8f5;
+            --text:       #0b1437;
+            --muted:      #64748b;
+            --sidebar-w:  240px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--navy);
+            min-height: 100vh;
+            position: fixed; top: 0; left: 0; bottom: 0;
+            display: flex; flex-direction: column;
+            z-index: 200;
+            box-shadow: 4px 0 30px rgba(11,20,55,.25);
+        }
+        .sidebar-brand {
+            padding: 28px 24px 24px;
+            border-bottom: 1px solid rgba(255,255,255,.07);
+        }
+        .brand-logo { display: flex; align-items: center; gap: 12px; }
+        .brand-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent), #2563eb);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: .95rem;
+            box-shadow: 0 4px 12px rgba(79,142,247,.4);
+        }
+        .brand-name {
+            font-family: 'Playfair Display', serif;
+            font-size: .95rem; font-weight: 700; color: #fff; line-height: 1.2;
+        }
+        .brand-sub { font-size: .68rem; color: rgba(255,255,255,.4); }
+
+        .sidebar-nav { flex: 1; padding: 20px 12px; display: flex; flex-direction: column; gap: 4px; }
+        .nav-section-label {
+            font-size: .6rem; font-weight: 700; letter-spacing: .12em;
+            color: rgba(255,255,255,.3); text-transform: uppercase;
+            padding: 14px 12px 6px;
+        }
+        .nav-item {
+            display: flex; align-items: center; gap: 11px;
+            padding: 10px 14px; border-radius: 10px;
+            color: rgba(255,255,255,.55); text-decoration: none;
+            font-size: .82rem; font-weight: 500;
+            transition: all .2s;
+        }
+        .nav-item i { width: 16px; text-align: center; font-size: .85rem; }
+        .nav-item:hover { background: rgba(255,255,255,.07); color: rgba(255,255,255,.9); }
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(79,142,247,.18), rgba(79,142,247,.06));
+            color: #fff; border-left: 3px solid var(--accent); padding-left: 11px;
+        }
+        .nav-item.active i { color: var(--accent); }
+
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255,255,255,.07);
+        }
+        .user-row { display: flex; align-items: center; gap: 10px; }
+        .user-avatar {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: linear-gradient(135deg, #4f8ef7, #8b5cf6);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: .7rem; font-weight: 700;
+        }
+        .user-name { font-size: .78rem; color: rgba(255,255,255,.8); font-weight: 600; }
+        .user-role { font-size: .65rem; color: rgba(255,255,255,.35); }
+
+        .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+
+        .topbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            height: 64px; padding: 0 36px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 1px 12px rgba(11,20,55,.06);
+        }
+        .breadcrumb {
+            display: flex; align-items: center; gap: 7px;
+            font-size: .76rem; color: var(--muted);
+        }
+        .breadcrumb-sep { opacity: .4; font-size: .65rem; }
+        .breadcrumb .current { color: var(--text); font-weight: 600; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .topbar-btn {
+            width: 36px; height: 36px; border-radius: 9px;
+            border: 1px solid var(--border); background: var(--surface); color: var(--muted);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: .82rem; transition: all .15s;
+        }
+        .topbar-btn:hover { background: var(--bg); color: var(--text); }
+        .topbar-date {
+            font-size: .74rem; color: var(--muted);
+            background: var(--bg); padding: 6px 14px; border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .content { padding: 36px 36px 80px; flex: 1; }
+
+        .page-head { margin-bottom: 36px; animation: fadeUp .5s ease both; }
+        .page-head h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.1rem; font-weight: 800; line-height: 1.1; color: var(--navy);
+        }
+        .page-head h1 em { font-style: italic; color: var(--accent); }
+        .page-head p { font-size: .83rem; color: var(--muted); margin-top: 6px; }
+
+        .kpi-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 18px; margin-bottom: 28px;
+        }
+        .kpi-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; padding: 24px 22px;
+            box-shadow: 0 2px 16px rgba(11,20,55,.05);
+            transition: transform .2s, box-shadow .2s;
+            position: relative; overflow: hidden;
+        }
+        .kpi-card::after {
+            content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+            height: 3px; border-radius: 0 0 16px 16px;
+        }
+        .kpi-card.blue::after   { background: linear-gradient(90deg, var(--accent), #2563eb); }
+        .kpi-card.green::after  { background: linear-gradient(90deg, var(--emerald), #2563eb); }
+        .kpi-card.gold::after   { background: linear-gradient(90deg, var(--gold), #2563eb); }
+        .kpi-card.violet::after { background: linear-gradient(90deg, var(--violet), #2563eb); }
+        .kpi-card:hover { transform: translateY(-4px); box-shadow: 0 10px 32px rgba(11,20,55,.1); }
+        .kpi-card:nth-child(1) { animation: fadeUp .5s .05s ease both; }
+        .kpi-card:nth-child(2) { animation: fadeUp .5s .10s ease both; }
+        .kpi-card:nth-child(3) { animation: fadeUp .5s .15s ease both; }
+        .kpi-card:nth-child(4) { animation: fadeUp .5s .20s ease both; }
+
+        .kpi-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 18px; }
+        .kpi-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 1rem;
+        }
+        .kpi-card.blue   .kpi-icon { background: #eff6ff; color: var(--accent); }
+        .kpi-card.green  .kpi-icon { background: var(--emerald-lt); color: var(--emerald); }
+        .kpi-card.gold   .kpi-icon { background: var(--gold-lt); color: var(--gold); }
+        .kpi-card.violet .kpi-icon { background: var(--violet-lt); color: var(--violet); }
+        .kpi-trend {
+            font-size: .68rem; font-weight: 600; padding: 3px 8px;
+            border-radius: 20px; display: flex; align-items: center; gap: 3px;
+            background: var(--emerald-lt); color: var(--emerald);
+        }
+        .kpi-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.4rem; font-weight: 700; line-height: 1; color: var(--navy); margin-bottom: 5px;
+        }
+        .kpi-label { font-size: .76rem; color: var(--muted); font-weight: 500; }
+
+        .hero-banner {
+            background: var(--navy); border-radius: 16px; padding: 28px 32px;
+            display: flex; align-items: center; justify-content: space-between; gap: 20px;
+            position: relative; overflow: hidden;
+            animation: fadeUp .5s .22s ease both;
+        }
+        .hero-banner::before {
+            content: ''; position: absolute; top: -60px; right: 80px;
+            width: 240px; height: 240px;
+            background: radial-gradient(circle, rgba(79,142,247,.18) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .hero-text { position: relative; z-index: 1; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(79,142,247,.2); border: 1px solid rgba(79,142,247,.3);
+            color: #93c5fd; font-size: .68rem; font-weight: 600; letter-spacing: .06em;
+            text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 12px;
+        }
+        .hero-text h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.35rem; font-weight: 700; color: #fff; margin-bottom: 6px;
+        }
+        .hero-text p { font-size: .82rem; color: rgba(255,255,255,.55); max-width: 380px; }
+        .hero-actions { display: flex; align-items: center; gap: 12px; position: relative; z-index: 1; }
+        .btn-hero {
+            display: inline-flex; align-items: center; gap: 9px;
+            background: var(--accent); color: #fff; text-decoration: none;
+            padding: 12px 26px; border-radius: 11px; font-weight: 600; font-size: .85rem;
+            box-shadow: 0 4px 20px rgba(79,142,247,.45); transition: all .2s;
+        }
+        .btn-hero:hover { background: var(--accent-glow); transform: translateY(-2px); }
+        .btn-hero-ghost {
+            display: inline-flex; align-items: center; gap: 9px;
+            background: rgba(255,255,255,.08); color: rgba(255,255,255,.75); text-decoration: none;
+            padding: 12px 22px; border-radius: 11px; border: 1px solid rgba(255,255,255,.12);
+            font-weight: 500; font-size: .82rem; transition: all .2s;
+        }
+        .btn-hero-ghost:hover { background: rgba(255,255,255,.14); color: #fff; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main { margin-left: 0; }
+            .content { padding: 24px 20px 60px; }
+        }
+        @media (max-width: 560px) {
+            .kpi-grid { grid-template-columns: 1fr; }
+            .hero-banner { flex-direction: column; align-items: flex-start; }
+            .hero-actions { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-logo">
+            <div class="brand-icon"><i class="fas fa-graduation-cap"></i></div>
+            <div>
+                <div class="brand-name">Portail Doctorat</div>
+                <div class="brand-sub">Gestion académique</div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Principal</div>
+        <a href="#" class="nav-item active">
+            <i class="fas fa-chart-pie"></i> Vue d'ensemble
+        </a>
+        <a th:href="@{/encadrant/liste}" href="liste.html" class="nav-item">
+            <i class="fas fa-chalkboard-teacher"></i> Encadrants
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="user-row">
+            <div class="user-avatar">AD</div>
+            <div>
+                <div class="user-name">Administrateur</div>
+                <div class="user-role">Accès complet</div>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<div class="main">
+    <div class="topbar">
+        <div class="breadcrumb">
+            <i class="fas fa-home" style="font-size:.7rem"></i>
+            <span class="breadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+            <span class="current">Tableau de bord</span>
+        </div>
+        <div class="topbar-right">
+            <div class="topbar-date">
+                <i class="far fa-calendar-alt" style="margin-right:6px;opacity:.5"></i>
+                <span id="todayDate"></span>
+            </div>
+            <div class="topbar-btn"><i class="fas fa-bell"></i></div>
+            <div class="topbar-btn"><i class="fas fa-cog"></i></div>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <div class="page-head">
+            <h1>Tableau de <em>bord</em></h1>
+            <p>Vue d'ensemble de la gestion des encadrants et des formations doctorales</p>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card blue">
+                <div class="kpi-top">
+                    <div class="kpi-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                    <div class="kpi-trend"><i class="fas fa-arrow-up"></i> actif</div>
+                </div>
+                <div class="kpi-value" th:text="${totalEncadrants}">0</div>
+                <div class="kpi-label">Encadrants au total</div>
+            </div>
+            <div class="kpi-card green">
+                <div class="kpi-top">
+                    <div class="kpi-icon"><i class="fas fa-flask"></i></div>
+                    <div class="kpi-trend"><i class="fas fa-circle" style="font-size:.5rem"></i> actif</div>
+                </div>
+                <div class="kpi-value" th:text="${totalSpecialites}">0</div>
+                <div class="kpi-label">Spécialités distinctes</div>
+            </div>
+            <div class="kpi-card gold">
+                <div class="kpi-top">
+                    <div class="kpi-icon"><i class="fas fa-medal"></i></div>
+                    <div class="kpi-trend"><i class="fas fa-circle" style="font-size:.5rem"></i> actif</div>
+                </div>
+                <div class="kpi-value" th:text="${totalGrades}">0</div>
+                <div class="kpi-label">Grades différents</div>
+            </div>
+            <div class="kpi-card violet">
+                <div class="kpi-top">
+                    <div class="kpi-icon"><i class="fas fa-university"></i></div>
+                    <div class="kpi-trend"><i class="fas fa-circle" style="font-size:.5rem"></i> actif</div>
+                </div>
+                <div class="kpi-value" th:text="${totalEtablissements}">0</div>
+                <div class="kpi-label">Établissements</div>
+            </div>
+        </div>
+
+        <div class="hero-banner">
+            <div class="hero-text">
+                <div class="hero-badge"><i class="fas fa-users-cog"></i> Gestion des encadrants</div>
+                <h2>Gérez vos encadrants en toute simplicité</h2>
+                <p>Consultez, ajoutez, modifiez ou supprimez des encadrants depuis la liste complète.</p>
+            </div>
+            <div class="hero-actions">
+                <a th:href="@{/encadrant/liste}" href="liste.html" class="btn-hero">
+                    <i class="fas fa-arrow-right"></i> Accéder à la liste
+                </a>
+                <a th:href="@{/encadrant/liste}" href="liste.html" class="btn-hero-ghost">
+                    <i class="fas fa-plus"></i> Nouvel encadrant
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const d = new Date();
+    const opts = { weekday:'long', day:'numeric', month:'long', year:'numeric' };
+    document.getElementById('todayDate').textContent = d.toLocaleDateString('fr-FR', opts);
+</script>
+
+</body>
+</html>

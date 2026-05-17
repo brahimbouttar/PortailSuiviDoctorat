@@ -69,4 +69,9 @@ public class EncadrantController {
     public List<Encadrant> findAllEncadrants() {
         return encadrantService.findAllEncadrants();
     }
+    @GetMapping("/dashboard")
+    public String dashboard(Model model) {
+        List<Encadrant> tous = encadrantService.findAllEncadrants();
+        return "encadrant/dashboard";
+    }
 }
