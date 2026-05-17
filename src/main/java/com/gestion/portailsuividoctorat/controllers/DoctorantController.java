@@ -19,6 +19,7 @@ public class DoctorantController {
     @GetMapping
     public String listDoctorants(Model model) {
         model.addAttribute("doctorants", doctorantService.findAllDoctorants());
+        model.addAttribute("newDoctorant", new Doctorant());
         return "Doctorant/Dashboard";
     }
 
@@ -30,6 +31,13 @@ public class DoctorantController {
         model.addAttribute("doctorant", doctorant);
         return "Doctorant/Form";
     }
+    @GetMapping("/liste")
+    public String liste(Model model) {
+        model.addAttribute("doctorants", doctorantService.findAllDoctorants());
+        model.addAttribute("newDoctorant", new Doctorant());
+        return "Doctorant/Liste";
+    }
+
 
     @PostMapping("/save")
     public String saveDoctorant(@ModelAttribute Doctorant doctorant) {
