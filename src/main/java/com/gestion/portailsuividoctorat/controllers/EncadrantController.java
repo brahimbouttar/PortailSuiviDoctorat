@@ -21,16 +21,7 @@ public class EncadrantController {
         model.addAttribute("encadrants", encadrantService.findAllEncadrants());
         return "Encadrant/Dashboard";
     }
-    @PostMapping("/create")
-    public String createEncadrant(@ModelAttribute Encadrant encadrant, RedirectAttributes ra) {
-        try {
-            encadrantService.createEncadrant(encadrant);
-            ra.addFlashAttribute("successMessage", "Encadrant créé avec succès !");
-        } catch (Exception e) {
-            ra.addFlashAttribute("errorMessage", "Erreur lors de la création : " + e.getMessage());
-        }
-        return "redirect:/encadrant/liste";
-    }
+
     @PostMapping("/update/{id}")
     public String updateEncadrant(@PathVariable Long id, @ModelAttribute Encadrant encadrant, RedirectAttributes ra) {
         try {
