@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr"
+      th:replace="~{fragments/admin-layout :: layout('Gestion des demandes', 'Validation administrative des demandes de soutenance', 'demandes', ~{::section})}">
+<body>
+<section>
+  <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+  <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+  <div class="card">
+    <div class="card-body p-3">
+      <div th:if="${#lists.isEmpty(demandes)}" class="text-center py-4">
+        <i class="bi bi-inbox text-muted" style="font-size:2rem;"></i>
+        <p class="text-muted mt-2 mb-0">Aucune demande trouvée.</p>
+      </div>
+
+      <div class="table-responsive" th:unless="${#lists.isEmpty(demandes)}">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+          <tr>
+            <th>Doctorant</th>
+            <th>Date dépôt</th>
+            <th>Articles</th>
+            <th>Conférences</th>
+            <th>Formation</th>
+            <th>Statut</th>
+            <th class="text-center">Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="d : ${demandes}">
+            <td>
+              <span th:if="${d.doctorant != null}"
+                    th:text="${d.doctorant.prenom + ' ' + d.doctorant.nom}">-</span>
+              <span th:unless="${d.doctorant != null}" class="text-muted">-</span>
+            </td>
+            <td th:text="${d.dateDepot != null ? #temporals.format(d.dateDepot,'dd/MM/yyyy') : '-'}">-</td>
+            <td th:text="${d.nbrArticlesQ1Q2 != null ? d.nbrArticlesQ1Q2 : '-'}">-</td>
+            <td th:text="${d.nbrConferences != null ? d.nbrConferences : '-'}">-</td>
+            <td th:text="${d.heuresFormation != null ? d.heuresFormation + ' h' : '-'}">-</td>
+            <td><span class="badge bg-info" th:text="${d.statut}">-</span></td>
+            <td class="text-center">
+              <div class="d-flex justify-content-center gap-1">
+                <form th:action="@{/admin/demandes/{id}/autoriser(id=${d.id})}" method="post">
+                  <button type="submit" class="btn btn-sm btn-outline-success" title="Autoriser">
+                    <i class="bi bi-check-lg"></i>
+                  </button>
+                </form>
+                <form th:action="@{/admin/demandes/{id}/refuser(id=${d.id})}" method="post">
+                  <button type="submit" class="btn btn-sm btn-outline-danger" title="Refuser">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+</body>
+</html>

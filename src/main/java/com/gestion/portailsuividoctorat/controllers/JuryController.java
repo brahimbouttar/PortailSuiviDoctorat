@@ -16,7 +16,7 @@ public class JuryController {
     @GetMapping("/liste")
     public String showList(Model model) {
         model.addAttribute("jurys", juryService.findAllJuries());
-        return "jury/liste";
+        return "Jury/Liste";
     }
     @PostMapping("/create")
     public String createJury(@ModelAttribute Jury jury, RedirectAttributes ra) {
