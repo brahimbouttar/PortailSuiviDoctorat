@@ -53,11 +53,12 @@
         <small class="text-muted" th:text="${pageSubtitle}">Gestion du portail doctoral</small>
       </div>
 
-      <!-- Pulls <section th:fragment="content"> from the calling page -->
-      <th:block th:replace="~{::section}"></th:block>
-    </main>
-  </div>
-</div>
+<main class="main">
+  <div class="page-title" th:text="${pageTitle}">Administration</div>
+  <div class="page-sub"   th:text="${pageSubtitle}">Gestion du portail doctoral</div>
+
+  <th:block th:replace="~{::section}"></th:block>
+</main>
 
 </body>
 </html>
