@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Doctorants — Liste</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <style>
+        body { background: #f5f6fa; font-family: 'Segoe UI', sans-serif; }
+        .card { border-radius: 10px; }
+        .table th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
+        .stat-card { border-radius: 12px; border: none; cursor: pointer; transition: transform .15s; user-select: none; }
+        .stat-card:hover { transform: translateY(-2px); }
+        .stat-card.active { border: 2px solid #0d6efd44; }
+        .stat-card .stat-num { font-size: 1.75rem; font-weight: 700; line-height: 1; }
+        .stat-card .stat-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: .08em; opacity: .7; }
+        .empty-state { padding: 64px 0; color: #adb5bd; }
+        .empty-state i { font-size: 3rem; display: block; margin-bottom: 14px; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: none; }
+        }
+        #tableBody tr { animation: fadeUp .22s ease both; }
+        #tableBody tr:hover td { background: #f0f4ff; }
+        .total-card { background: #0d6efd; color: #fff; border-radius: 12px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="#"><i class="fas fa-graduation-cap me-2"></i>Liste des Doctorants</a>
+    </div>
+</nav>
+
+<div class="container mt-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <p class="text-muted mb-0" style="font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;">Laboratoire de Recherche</p>
+            <h4 class="mb-0 fw-bold">Doctorants Inscrits</h4>
+        </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-6 col-sm-4 col-md-2">
+            <div class="stat-card card p-3 active">
+                <div class="stat-num text-primary" th:text="${doctorants.size()}">0</div>
+                <div class="stat-label text-muted">Tous</div>
+            </div>
+        </div>
+
+        <div class="col-6 col-sm-4 col-md-2">
+            <div class="stat-card card p-3">
+                <div class="stat-num text-success" th:text="${nbActif}">0</div>
+                <div class="stat-label text-muted">Actif</div>
+            </div>
+        </div>
+
+        <div class="col-6 col-sm-4 col-md-2">
+            <div class="stat-card card p-3">
+                <div class="stat-num text-warning" th:text="${nbSuspendu}">0</div>
+                <div class="stat-label text-muted">Suspendu</div>
+            </div>
+        </div>
+
+        <div class="col-6 col-sm-4 col-md-2">
+            <div class="stat-card card p-3">
+                <div class="stat-num text-primary" th:text="${nbDiplome}">0</div>
+                <div class="stat-label text-muted">Diplômé</div>
+            </div>
+        </div>
+
+        <div class="col-6 col-sm-4 col-md-2">
+            <div class="stat-card card p-3">
+                <div class="stat-num text-danger" th:text="${nbAbandon}">0</div>
+                <div class="stat-label text-muted">Abandonné</div>
+            </div>
+        </div>
+
+        <div class="col-6 col-sm-4 col-md-2">
+            <div class="total-card card p-3 text-center">
+                <div class="stat-num" th:text="${doctorants.size()}">0</div>
+                <div class="stat-label" style="opacity:.8;">Total inscrits</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Table -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>Email</th>
+                    <th>Téléphone</th>
+                    <th>Adresse</th>
+                    <th>Sujet de Thèse</th>
+                    <th>Inscrit le</th>
+                </tr>
+                </thead>
+                <tbody id="tableBody">
+
+                <tr th:each="d, stat : ${doctorants}"
+                    th:style="'animation-delay:' + ${stat.index * 30} + 'ms'">
+                    <td class="text-muted small" th:text="${d.email != null ? d.email : '—'}">—</td>
+                    <td class="text-muted small" th:text="${d.telephone != null ? d.telephone : '—'}">—</td>
+                    <td class="text-muted small" th:text="${d.adresse != null ? d.adresse : '—'}">—</td>
+                    <td class="text-muted small" th:text="${d.sujetThese != null ? d.sujetThese : '—'}">—</td>
+                    <td class="text-muted small">—</td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(doctorants)}">
+                    <td colspan="5">
+                        <div class="empty-state text-center">
+                            <i class="fas fa-user-graduate text-muted"></i>
+                            <div>Aucun doctorant inscrit.</div>
+                        </div>
+                    </td>
+                </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

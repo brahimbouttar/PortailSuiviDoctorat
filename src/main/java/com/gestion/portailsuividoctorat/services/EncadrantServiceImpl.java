@@ -9,54 +9,53 @@ import java.util.List;
 
 @Service
 public class EncadrantServiceImpl implements EncadrantService {
+
     @Autowired
-    EncadrantRepo EncadrantRepo;
+    EncadrantRepo encadrantRepo;
 
     @Override
     public Encadrant createEncadrant(Encadrant u) {
-        return EncadrantRepo.save(u);
+        u.setRole("ENCADRANT");
+        return encadrantRepo.save(u);
     }
 
     @Override
     public Encadrant updateEncadrant(Encadrant u, Long id) {
-        Encadrant existing = EncadrantRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Encadrant not found"));
-        if (u.getNom() != null) {
-            existing.setNom(u.getNom());
+        Encadrant existing = encadrantRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Encadrant introuvable"));
+
+        existing.setNom(u.getNom());
+        existing.setPrenom(u.getPrenom());
+        existing.setEmail(u.getEmail());
+        existing.setTelephone(u.getTelephone());
+        existing.setAdresse(u.getAdresse());
+        existing.setSpecialite(u.getSpecialite());
+        existing.setGrade(u.getGrade());
+        existing.setEtablissement(u.getEtablissement());
+
+        // Only update password if a new one was actually submitted
+        if (u.getPassword() != null && !u.getPassword().isBlank()) {
+            existing.setPassword(u.getPassword());
         }
-        if (u.getPrenom() != null) {
-            existing.setPrenom(u.getPrenom());
-        }
-        if (u.getEmail() != null) {
-            existing.setEmail(u.getEmail());
-        }
-        if (u.getSpecialite() != null) {
-            existing.setSpecialite(u.getSpecialite());
-        }
-        if (u.getGrade() != null) {
-            existing.setGrade(u.getGrade());
-        }
-        if (u.getEtablissement() != null) {
-            existing.setEtablissement(u.getEtablissement());
-        }
-        return EncadrantRepo.save(existing);
+
+        return encadrantRepo.save(existing);
     }
 
     @Override
     public Encadrant findEncadrant(Long id) {
-        return EncadrantRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Encadrant not found"));
+        return encadrantRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Encadrant introuvable"));
     }
 
     @Override
     public List<Encadrant> findAllEncadrants() {
-        return EncadrantRepo.findAll();
+        return encadrantRepo.findAll();
     }
 
     @Override
     public void DeleteEncadrant(Long id) {
-        Encadrant user = EncadrantRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Encadrant not found"));
-        EncadrantRepo.delete(user);
+        encadrantRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Encadrant introuvable"));
+        encadrantRepo.deleteById(id);
     }
 }

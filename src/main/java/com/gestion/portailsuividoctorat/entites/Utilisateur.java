@@ -1,5 +1,5 @@
 package com.gestion.portailsuividoctorat.entites;
-
+import jakarta.persistence.*;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,10 +10,13 @@ import lombok.Setter;
 
 @Getter @Setter @NoArgsConstructor //Lombook
 @Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorValue("UTILISATEUR")
 public class Utilisateur {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     private String nom;
     private String prenom;
     private String email;

@@ -4,289 +4,480 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion des Encadrants</title>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet"/>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Segoe UI", sans-serif;
+        :root {
+            --primary:    #1a56db;
+            --primary-lt: #e8f0fe;
+            --primary-md: #3b82f6;
+            --accent:     #1e40af;
+            --bg:         #f0f4ff;
+            --surface:    #ffffff;
+            --surface2:   #f5f8ff;
+            --border:     #dce7ff;
+            --text:       #1e2d4d;
+            --muted:      #6b7fa3;
+            --danger:     #dc2626;
+            --danger-lt:  #fef2f2;
+            --success:    #16a34a;
+            --success-lt: #f0fdf4;
         }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background: #eef2fb;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Nunito', sans-serif;
+            font-weight: 400;
+            min-height: 100vh;
         }
 
-        .header {
-            background: linear-gradient(135deg, #0d6efd, #1a7fff);
-            color: white;
-            text-align: center;
-            padding: 25px;
-            border-radius: 0 0 25px 25px;
-            box-shadow: 0 4px 20px rgba(13,110,253,0.25);
+        .page {
+            max-width: 1280px; margin: 0 auto;
+            padding: 40px 28px 80px;
         }
 
-        .header h2 { font-size: 22px; font-weight: 700; }
-        .header p  { font-size: 13px; opacity: 0.85; margin-top: 4px; }
-
-        .container {
-            max-width: 1100px;
-            margin: 30px auto;
-            padding: 0 15px;
+        .page-title {
+            font-size: 1.6rem; font-weight: 700;
+            color: var(--text); margin-bottom: 28px;
+            animation: fadeUp 0.45s ease both;
         }
 
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border-left: 4px solid #28a745;
+        .alert {
+            display: flex; align-items: center; gap: 10px;
+            padding: 13px 16px; border-radius: 10px;
+            font-size: 0.875rem; margin-bottom: 22px;
+            animation: fadeUp 0.4s ease both;
+        }
+        .alert-success { background: var(--success-lt); border: 1px solid #bbf7d0; color: var(--success); }
+        .alert-danger  { background: var(--danger-lt);  border: 1px solid #fecaca; color: var(--danger); }
+
+        .stats-bar { display: flex; gap: 12px; margin-bottom: 18px; animation: fadeUp 0.45s 0.08s ease both; }
+        .stat-pill {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 8px; padding: 9px 16px;
+            font-size: 0.8rem; color: var(--muted);
+            display: flex; align-items: center; gap: 7px;
+            box-shadow: 0 1px 4px rgba(26,86,219,0.06);
+        }
+        .stat-pill strong { color: var(--text); font-size: 1rem; font-weight: 700; }
+        .stat-pill i { color: var(--primary); }
+
+        .toolbar { display: flex; gap: 12px; margin-bottom: 18px; animation: fadeUp 0.45s 0.12s ease both; }
+        .search-wrap { flex: 1; position: relative; }
+        .search-wrap i {
+            position: absolute; left: 13px; top: 50%;
+            transform: translateY(-50%); color: var(--muted);
+            font-size: 0.8rem; pointer-events: none;
+        }
+        .search-wrap input {
+            width: 100%; background: var(--surface); border: 1px solid var(--border);
+            color: var(--text); padding: 10px 13px 10px 36px;
+            border-radius: 9px; font-family: 'Nunito', sans-serif;
+            font-size: 0.875rem; outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 1px 4px rgba(26,86,219,0.05);
+        }
+        .search-wrap input:focus { border-color: var(--primary-md); box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+        .search-wrap input::placeholder { color: var(--muted); }
+
+        .btn-add {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--primary); color: #fff; border: none;
+            padding: 10px 20px; border-radius: 9px;
+            font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 0.875rem;
+            cursor: pointer; white-space: nowrap;
+            transition: background 0.2s, transform 0.15s;
+            box-shadow: 0 2px 8px rgba(26,86,219,0.25);
+        }
+        .btn-add:hover { background: var(--accent); transform: translateY(-1px); }
+
+        .table-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 14px; overflow: hidden;
+            box-shadow: 0 2px 16px rgba(26,86,219,0.07);
+            animation: fadeUp 0.45s 0.18s ease both;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        thead tr { background: var(--surface2); border-bottom: 1px solid var(--border); }
+        thead th {
+            padding: 13px 16px; font-size: 0.68rem; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+        }
+        thead th:last-child { text-align: center; }
+        tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: var(--primary-lt); }
+        tbody td { padding: 13px 16px; font-size: 0.875rem; color: var(--text); vertical-align: middle; }
+        tbody td:last-child { text-align: center; }
+
+        .index-cell { color: var(--muted); font-size: 0.78rem; font-weight: 600; }
+        .name-cell  { font-weight: 700; }
+        .email-cell { color: var(--muted); font-size: 0.82rem; }
+
+        .grade-badge {
+            display: inline-block; padding: 3px 11px; border-radius: 20px;
+            font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;
+            background: var(--primary-lt); border: 1px solid #c7d7fb; color: var(--primary);
         }
 
-        .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border-left: 4px solid #dc3545;
+        .empty-row td { text-align: center; padding: 56px 20px; color: var(--muted); font-size: 0.9rem; }
+        .empty-row td i { display: block; font-size: 2rem; margin-bottom: 12px; opacity: 0.3; color: var(--primary); }
+
+        .action-btn {
+            border: none; cursor: pointer; width: 32px; height: 32px; border-radius: 8px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 0.78rem; transition: opacity 0.15s, transform 0.15s; margin: 0 2px;
+        }
+        .action-btn:hover { opacity: 0.8; transform: scale(1.08); }
+        .btn-edit { background: var(--primary-lt); color: var(--primary); border: 1px solid #c7d7fb; }
+        .btn-del  { background: var(--danger-lt);  color: var(--danger);  border: 1px solid #fecaca; }
+
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(30,45,77,0.4); backdrop-filter: blur(5px);
+            z-index: 500; align-items: center; justify-content: center;
+        }
+        .modal-overlay.open { display: flex; }
+
+        .modal-box {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; width: 580px; max-width: 95vw;
+            max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 24px 60px rgba(26,86,219,0.18);
+            animation: popIn 0.25s cubic-bezier(0.175,0.885,0.32,1.275) both;
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.93) translateY(14px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
         }
 
-        .card {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 4px 24px rgba(13,110,253,0.09);
+        .modal-header {
+            padding: 20px 24px 16px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--surface2); position: sticky; top: 0; z-index: 1;
+        }
+        .modal-header-left { display: flex; align-items: center; gap: 12px; }
+        .modal-icon {
+            width: 36px; height: 36px; background: var(--primary);
+            border-radius: 9px; display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 0.88rem;
+        }
+        .modal-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+        .modal-close {
+            width: 30px; height: 30px; background: var(--border); border: none;
+            border-radius: 7px; color: var(--muted); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; transition: background 0.15s, color 0.15s;
+        }
+        .modal-close:hover { background: #dce7ff; color: var(--text); }
+
+        .modal-body { padding: 22px 24px; }
+
+        .form-section-title {
+            font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em;
+            text-transform: uppercase; color: var(--primary);
+            padding-bottom: 6px; border-bottom: 1px solid var(--border);
+            margin-bottom: 14px; margin-top: 4px;
         }
 
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+        .form-group:last-child { margin-bottom: 0; }
+        .form-label {
+            font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+            text-transform: uppercase; color: var(--muted);
         }
-
-        .add-btn {
-            background: #0d6efd;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
+        .form-control {
+            background: var(--surface2); border: 1px solid var(--border);
+            color: var(--text); padding: 10px 13px; border-radius: 9px;
+            font-family: 'Nunito', sans-serif; font-size: 0.875rem;
+            outline: none; transition: border-color 0.2s, box-shadow 0.2s; width: 100%;
         }
+        .form-control:focus { border-color: var(--primary-md); box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+        .form-control[readonly] { opacity: 0.6; cursor: not-allowed; }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .modal-footer {
+            padding: 14px 24px; border-top: 1px solid var(--border);
+            display: flex; justify-content: flex-end; gap: 10px;
+            background: var(--surface2); position: sticky; bottom: 0;
         }
-
-        thead {
-            background: #0d6efd;
-            color: white;
+        .btn-cancel {
+            padding: 9px 18px; border-radius: 9px;
+            border: 1px solid var(--border); background: transparent;
+            color: var(--muted); font-family: 'Nunito', sans-serif;
+            font-size: 0.875rem; cursor: pointer; transition: color 0.15s, border-color 0.15s;
         }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
+        .btn-cancel:hover { color: var(--text); border-color: #b0c4f8; }
+        .btn-save {
+            padding: 9px 22px; border-radius: 9px; border: none;
+            background: var(--primary); color: #fff;
+            font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.875rem;
+            cursor: pointer; display: flex; align-items: center; gap: 7px;
+            transition: background 0.2s; box-shadow: 0 2px 8px rgba(26,86,219,0.2);
         }
+        .btn-save:hover { background: var(--accent); }
 
-        tbody tr:hover {
-            background: #f0f5ff;
-        }
-
-        .edit {
-            background: #1e90ff;
-            color: white;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .delete {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.4);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 20px;
-            width: 450px;
-            border-radius: 12px;
-        }
-
-        .modal-content input {
-            width: 100%;
-            margin: 8px 0;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            box-sizing: border-box;
-        }
-
-        .modal-content input:focus {
-            outline: none;
-            border-color: #0d6efd;
-        }
-
-        .modal-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .save {
-            background: #0d6efd;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .cancel {
-            background: #ccc;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
-
 <body>
 
-<div class="header">
-    <h2>Gestion des Encadrants</h2>
-    <p>Lister toutes les encadrants enregistrés</p>
-</div>
+<nav class="navbar navbar-dark bg-primary">
+    <div class="container-fluid">
+        <span class="navbar-brand">
+            <i class="fas fa-graduation-cap me-2"></i>Portail Doctorat
+        </span>
+    </div>
+</nav>
 
-<div class="container">
-    <div th:if="${successMessage}" class="alert-success" th:text="${successMessage}"></div>
-    <div th:if="${errorMessage}" class="alert-error" th:text="${errorMessage}"></div>
+<div class="page">
 
-    <div class="top-bar">
-        <h3>Liste des Encadrants</h3>
-        <button class="add-btn" onclick="openAdd()">+ Ajouter</button>
+    <div th:if="${successMessage}" class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${errorMessage}"></span>
     </div>
 
-    <div class="card">
+    <h1 class="page-title">Encadrants</h1>
+
+    <div class="stats-bar">
+        <div class="stat-pill">
+            <i class="fas fa-chalkboard-teacher"></i>
+            <strong th:text="${#lists.size(encadrants)}">0</strong> encadrants enregistrés
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <div class="search-wrap">
+            <i class="fas fa-search"></i>
+            <input id="searchInput" oninput="filterTable()"/>
+        </div>
+        <button class="btn-add" onclick="openAdd()">
+            <i class="fas fa-plus"></i> Ajouter un encadrant
+        </button>
+    </div>
+
+    <div class="table-card">
         <table>
             <thead>
             <tr>
-                <th>ID</th>
+                <th>#</th>
                 <th>Nom</th>
                 <th>Prénom</th>
                 <th>Email</th>
+                <th>Téléphone</th>
                 <th>Spécialité</th>
                 <th>Grade</th>
                 <th>Établissement</th>
                 <th>Actions</th>
             </tr>
             </thead>
-            <tbody>
-            <tr th:each="encadrant : ${encadrants}">
-                <td th:text="${encadrant.id}">...</td>
-                <td th:text="${encadrant.nom}">...</td>
-                <td th:text="${encadrant.prenom}">...</td>
-                <td th:text="${encadrant.email}">...</td>
-                <td th:text="${encadrant.specialite}">...</td>
-                <td th:text="${encadrant.grade}">...</td>
-                <td th:text="${encadrant.etablissement}">...</td>
+            <tbody id="tableBody">
+
+            <tr th:each="encadrant, encadrantStat : ${encadrants}">
+                <td class="index-cell" th:text="${encadrantStat.count}"></td>
+                <td class="name-cell"  th:text="${encadrant.nom}"></td>
+                <td                    th:text="${encadrant.prenom}"></td>
+                <td class="email-cell" th:text="${encadrant.email       != null ? encadrant.email       : '—'}"></td>
+                <td                    th:text="${encadrant.telephone   != null ? encadrant.telephone   : '—'}"></td>
+                <td                    th:text="${encadrant.specialite  != null ? encadrant.specialite  : '—'}"></td>
                 <td>
-                    <button class="edit" th:onclick="'openEdit(' + ${encadrant.id} + ', \'' + ${encadrant.nom} + '\', \'' + ${encadrant.prenom} + '\', \'' + ${encadrant.email} + '\', \'' + ${encadrant.specialite} + '\', \'' + ${encadrant.grade} + '\', \'' + ${encadrant.etablissement} + '\')'">
-                        Modifier
+                    <span class="grade-badge"
+                          th:text="${encadrant.grade != null ? encadrant.grade : '—'}"></span>
+                </td>
+                <td th:text="${encadrant.etablissement != null ? encadrant.etablissement : '—'}"></td>
+                <td>
+                    <button class="action-btn btn-edit"
+                            th:data-id="${encadrant.id}"
+                            th:data-nom="${encadrant.nom}"
+                            th:data-prenom="${encadrant.prenom}"
+                            th:data-email="${encadrant.email}"
+                            th:data-adresse="${encadrant.adresse}"
+                            th:data-telephone="${encadrant.telephone}"
+                            th:data-specialite="${encadrant.specialite}"
+                            th:data-grade="${encadrant.grade}"
+                            th:data-etablissement="${encadrant.etablissement}"
+                            th:data-url="@{/encadrant/update/{id}(id=${encadrant.id})}"
+                            onclick="openEdit(this)"
+                            title="Modifier">
+                        <i class="fas fa-pen"></i>
                     </button>
-                    <a th:href="@{/encadrant/delete/{id}(id=${encadrant.id})}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet encadrant ?')">
-                        <button class="delete" type="button">Supprimer</button>
-                    </a>
+
+                    <form th:action="@{/encadrant/delete/{id}(id=${encadrant.id})}"
+                          method="post" style="display:inline"
+                          onsubmit="return confirm('Supprimer cet encadrant ?')">
+                        <button class="action-btn btn-del" type="submit" title="Supprimer">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
                 </td>
             </tr>
+
+            <tr class="empty-row" th:if="${#lists.isEmpty(encadrants)}">
+                <td colspan="9">
+                    <i class="fas fa-folder-open"></i>
+                    Aucun encadrant enregistré pour le moment.
+                </td>
+            </tr>
+
             </tbody>
         </table>
     </div>
 </div>
 
-<!-- MODAL -->
-<div class="modal" id="modal">
-    <div class="modal-content">
-        <h3 id="title">Ajouter Encadrant</h3>
-        <form id="form" method="post" accept-charset="UTF-8">
-            <input type="hidden" id="id" name="id">
-            <input type="text" id="nom" name="nom" placeholder="Nom" required>
-            <input type="text" id="prenom" name="prenom" placeholder="Prénom" required>
-            <input type="email" id="email" name="email" placeholder="Email" required>
-            <input type="text" id="specialite" name="specialite" placeholder="Spécialité" required>
-            <input type="text" id="grade" name="grade" placeholder="Grade" required>
-            <input type="text" id="etablissement" name="etablissement" placeholder="Établissement" required>
-            <div class="modal-actions">
-                <button type="button" class="cancel" onclick="closeModal()">Annuler</button>
-                <button type="submit" class="save">Enregistrer</button>
+<span id="createUrl" th:data-url="@{/encadrant/create}" style="display:none;"></span>
+
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+
+        <div class="modal-header">
+            <div class="modal-header-left">
+                <div class="modal-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                <span class="modal-title" id="modalTitle">Ajouter un Encadrant</span>
+            </div>
+            <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+        </div>
+
+        <form id="encadrantForm" method="post" th:action="@{/encadrant/create}">
+            <div class="modal-body">
+
+                <input type="hidden" id="encId" name="id"/>
+
+                <div class="form-section-title">Identité</div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="encNom">Nom *</label>
+                        <input type="text" class="form-control" id="encNom" name="nom" required/>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="encPrenom">Prénom *</label>
+                        <input type="text" class="form-control" id="encPrenom" name="prenom" required/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="encEmail">Email *</label>
+                    <input type="email" class="form-control" id="encEmail" name="email" required/>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="encTel">Téléphone</label>
+                        <input type="text" class="form-control" id="encTel" name="telephone"/>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="encAdresse">Adresse</label>
+                        <input type="text" class="form-control" id="encAdresse" name="adresse"/>
+                    </div>
+                </div>
+
+                <div class="form-section-title" style="margin-top:10px;">Profil académique</div>
+
+                <div class="form-group">
+                    <label class="form-label" for="encSpec">Spécialité *</label>
+                    <input type="text" class="form-control" id="encSpec" name="specialite" required/>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="encGrade">Grade *</label>
+                        <input type="text" class="form-control" id="encGrade" name="grade" required/>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="encEtab">Établissement *</label>
+                        <input type="text" class="form-control" id="encEtab" name="etablissement" required/>
+                    </div>
+                </div>
+
+                <div class="form-section-title" style="margin-top:10px;">Compte</div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="encPassword">Mot de passe</label>
+                        <input type="password" class="form-control" id="encPassword" name="password"/>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="encRole">Rôle</label>
+                        <input type="text" class="form-control" id="encRole" name="role"
+                               value="ENCADRANT" readonly/>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeModal()">Annuler</button>
+                <button type="submit" class="btn-save">
+                    <i class="fas fa-check"></i> Enregistrer
+                </button>
             </div>
         </form>
+
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
-    const BASE_URL = 'http://localhost:8081';
+    const createUrl = document.getElementById('createUrl').dataset.url;
+
+    function filterTable() {
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll('#tableBody tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+    }
 
     function openAdd() {
-        document.getElementById("form").action = BASE_URL + "/encadrant/create";
-        document.getElementById("form").method = "post";
-        document.getElementById("title").innerText = "Ajouter Encadrant";
-
-        document.getElementById("id").value = "";
-        document.getElementById("nom").value = "";
-        document.getElementById("prenom").value = "";
-        document.getElementById("email").value = "";
-        document.getElementById("specialite").value = "";
-        document.getElementById("grade").value = "";
-        document.getElementById("etablissement").value = "";
-
-        document.getElementById("modal").style.display = "flex";
+        document.getElementById('modalTitle').textContent = 'Ajouter un Encadrant';
+        document.getElementById('encadrantForm').action = createUrl;
+        ['encId', 'encNom', 'encPrenom', 'encEmail',
+            'encTel', 'encAdresse', 'encSpec', 'encGrade',
+            'encEtab', 'encPassword'].forEach(id => {
+            document.getElementById(id).value = '';
+        });
+        document.getElementById('encRole').value = 'ENCADRANT';
+        document.getElementById('modalOverlay').classList.add('open');
     }
 
-    function openEdit(id, nom, prenom, email, specialite, grade, etablissement) {
-        document.getElementById("form").action = BASE_URL + "/encadrant/update/" + id;
-        document.getElementById("form").method = "post";
-        document.getElementById("title").innerText = "Modifier Encadrant";
-
-        document.getElementById("id").value = id;
-        document.getElementById("nom").value = nom;
-        document.getElementById("prenom").value = prenom;
-        document.getElementById("email").value = email;
-        document.getElementById("specialite").value = specialite;
-        document.getElementById("grade").value = grade;
-        document.getElementById("etablissement").value = etablissement;
-
-        document.getElementById("modal").style.display = "flex";
+    function openEdit(btn) {
+        document.getElementById('modalTitle').textContent = "Modifier l'Encadrant";
+        document.getElementById('encadrantForm').action   = btn.dataset.url;
+        document.getElementById('encId').value            = btn.dataset.id          || '';
+        document.getElementById('encNom').value           = btn.dataset.nom         || '';
+        document.getElementById('encPrenom').value        = btn.dataset.prenom      || '';
+        document.getElementById('encEmail').value         = btn.dataset.email       || '';
+        document.getElementById('encTel').value           = btn.dataset.telephone   || '';
+        document.getElementById('encAdresse').value       = btn.dataset.adresse     || '';
+        document.getElementById('encRole').value          = 'ENCADRANT';
+        document.getElementById('encPassword').value      = '';
+        document.getElementById('encSpec').value          = btn.dataset.specialite    || '';
+        document.getElementById('encGrade').value         = btn.dataset.grade         || '';
+        document.getElementById('encEtab').value          = btn.dataset.etablissement || '';
+        document.getElementById('modalOverlay').classList.add('open');
     }
+
     function closeModal() {
-        document.getElementById("modal").style.display = "none";
+        document.getElementById('modalOverlay').classList.remove('open');
     }
-    window.onclick = function(event) {
-        var modal = document.getElementById("modal");
-        if (event.target == modal) {
-            closeModal();
-        }
-    }
+
+    document.getElementById('modalOverlay').addEventListener('click', function (e) {
+        if (e.target === this) closeModal();
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeModal();
+    });
 </script>
 
 </body>

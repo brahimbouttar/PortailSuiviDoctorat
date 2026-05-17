@@ -1,5 +1,6 @@
 package com.gestion.portailsuividoctorat.controllers;
 
+import com.gestion.portailsuividoctorat.entites.Doctorant;
 import com.gestion.portailsuividoctorat.entites.Encadrant;
 import com.gestion.portailsuividoctorat.services.EncadrantServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,16 @@ public class EncadrantController {
     public String dashboard(Model model) {
         List<Encadrant> tous = encadrantService.findAllEncadrants();
         return "Encadrant/Dashboard";
+    }
+    @GetMapping("/listes")
+    public String listes(Model model) {
+        List<Encadrant> encadrants = encadrantService.findAllEncadrants();
+        model.addAttribute("doctorants", encadrants);
+        model.addAttribute("nbActif",    0);
+        model.addAttribute("nbSuspendu", 0);
+        model.addAttribute("nbDiplome",  0);
+        model.addAttribute("nbAbandon",  0);
+        return "Encadrant/Listes";
     }
     @GetMapping("/delete/{id}")
     public String deleteEncadrant(@PathVariable Long id, RedirectAttributes ra) {
