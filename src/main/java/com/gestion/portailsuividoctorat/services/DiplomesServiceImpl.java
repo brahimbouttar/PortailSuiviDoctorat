@@ -12,16 +12,16 @@ public class DiplomesServiceImpl implements DiplomesService {
     @Autowired
     DiplomeRepo DiplomeRepo;
     @Override
-    public Diplomes createDiplome(Diplomes u) {
-        return DiplomeRepo.save(u);
+    public Diplomes createDiplome(Diplomes d) {
+        return DiplomeRepo.save(d);
     }
 
     @Override
-    public Diplomes updateDiplome(Diplomes u, Long id) {
+    public Diplomes updateDiplome(Diplomes d, Long id) {
         Diplomes existing = DiplomeRepo.findById(id).orElseThrow(() -> new RuntimeException("Diplome not found"));
-        if (u.getBac() != null) {existing.setBac(u.getBac());}
-        if (u.getLicence() != null) {existing.setLicence(u.getLicence());}
-        if (u.getMaster() != null) {existing.setMaster(u.getMaster());}
+        if (d.getBac() != null) {existing.setBac(d.getBac());}
+        if (d.getLicence() != null) {existing.setLicence(d.getLicence());}
+        if (d.getMaster() != null) {existing.setMaster(d.getMaster());}
         return DiplomeRepo.save(existing);
     }
 
