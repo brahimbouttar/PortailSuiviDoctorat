@@ -1,9 +1,11 @@
 package com.gestion.portailsuividoctorat.services;
 
+import com.gestion.portailsuividoctorat.entites.Doctorant;
 import com.gestion.portailsuividoctorat.entites.Encadrant;
 import com.gestion.portailsuividoctorat.entites.Utilisateur;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface EncadrantService {
     //creation
@@ -14,6 +16,10 @@ public interface EncadrantService {
     Encadrant findEncadrant(Long id);
     //list all
     List<Encadrant> findAllEncadrants();
-    //Suppression
+
+    Encadrant findByEmail(String email);
+
+
+
     void DeleteEncadrant(Long id);
 }

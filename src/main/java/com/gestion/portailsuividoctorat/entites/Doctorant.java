@@ -14,6 +14,7 @@ public class Doctorant extends Utilisateur{
     private String sujetThese;
     private String CV;
     private String LettreMotivation;
+    private String statut;
     public Doctorant(String role, String password, String telephone, String adresse, String prenom, String email, String nom,
                      String SujetThese, String CV, String LettreMotivation) {
         super(nom, prenom, email, telephone, password, role, adresse);
@@ -23,4 +24,5 @@ public class Doctorant extends Utilisateur{
     }
     @ManyToOne
     private Utilisateur encadrant;
+
 }

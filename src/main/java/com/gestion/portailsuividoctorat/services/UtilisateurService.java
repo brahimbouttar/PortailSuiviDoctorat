@@ -16,6 +16,7 @@ public interface UtilisateurService {
     Utilisateur findUtilisateur(Long id);
     //list all
     List<Utilisateur> findAllUtilisateurs();
+    Utilisateur save(Utilisateur u);
     //Suppression
     void DeleteUtilisateur(Long id);
     Optional<Utilisateur> findByEmail(String email);

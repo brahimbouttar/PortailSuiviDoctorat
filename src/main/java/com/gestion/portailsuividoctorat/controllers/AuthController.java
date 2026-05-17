@@ -3,6 +3,7 @@ package com.gestion.portailsuividoctorat.controllers;
 import com.gestion.portailsuividoctorat.services.UtilisateurService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -13,6 +14,11 @@ public class AuthController {
 
     public AuthController(UtilisateurService utilisateurService) {
         this.utilisateurService = utilisateurService;
+    }
+
+    @GetMapping("/login")
+    public String loginPage(Model model) {
+        return "auth/login";
     }
 
     @PostMapping("/login")
@@ -26,9 +32,10 @@ public class AuthController {
                     session.setAttribute("user", u);
                     session.setAttribute("role", u.getRole());
                     return switch (u.getRole()) {
-                        case "ADMIN"     -> "redirect:/admin/dashboard";
-
-                        default          -> "redirect:/admin/dashboard";
+                        case "ADMIN"     -> "redirect:/admin";
+                        case "DOCTORANT" -> "redirect:/doctorant";
+                        case "ENCADRANT" -> "redirect:/encadrant";
+                        default          -> "redirect:/login";
                     };
                 })
                 .orElseGet(() -> {

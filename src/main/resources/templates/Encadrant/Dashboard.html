@@ -1,182 +1,16 @@
 <!DOCTYPE html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Encadrants — Portail Doctorat</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-    <style>
-        :root {
-            --navy:    #1a2340;
-            --accent:  #0d9488;
-            --success: #16a34a;
-            --warning: #d97706;
-            --blue:    #3b6ef4;
-            --amber:   #d97706;
-            --bg:      #f4f6fb;
-            --surface: #ffffff;
-            --border:  #e5e9f2;
-            --text:    #1a2340;
-            --muted:   #6b7280;
-            --sw:      240px;
-        }
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; font-size: 14px; }
-
-
-        .sidebar {
-            width: var(--sw); background: var(--navy); min-height: 100vh;
-            position: fixed; top: 0; left: 0; bottom: 0;
-            display: flex; flex-direction: column; z-index: 100;
-        }
-        .sb-brand {
-            padding: 22px 18px 18px; border-bottom: 1px solid rgba(255,255,255,.07);
-            display: flex; align-items: center; gap: 11px;
-        }
-        .sb-icon {
-            width: 34px; height: 34px; border-radius: 8px;
-            background: var(--accent); display: flex; align-items: center; justify-content: center;
-            color: #fff; font-size: .82rem; flex-shrink: 0;
-        }
-        .sb-title { font-size: .85rem; font-weight: 600; color: #fff; }
-        .sb-sub   { font-size: .63rem; color: rgba(255,255,255,.32); margin-top: 1px; }
-        .sb-role  {
-            margin: 10px 18px 0;
-            display: inline-flex; align-items: center; gap: 5px;
-            background: rgba(13,148,136,.18); border: 1px solid rgba(13,148,136,.28);
-            color: #5eead4; font-size: .61rem; font-weight: 600; letter-spacing: .07em;
-            text-transform: uppercase; padding: 3px 8px; border-radius: 20px;
-        }
-
-        .sb-nav { flex: 1; padding: 14px 8px; overflow-y: auto; }
-        .sb-section {
-            font-size: .57rem; font-weight: 700; letter-spacing: .12em;
-            color: rgba(255,255,255,.2); text-transform: uppercase; padding: 12px 10px 4px;
-        }
-        .sb-link {
-            display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 6px;
-            color: rgba(255,255,255,.45); text-decoration: none;
-            font-size: .79rem; font-weight: 500; transition: all .13s;
-        }
-        .sb-link i { width: 14px; text-align: center; font-size: .76rem; flex-shrink: 0; }
-        .sb-link:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.82); }
-        .sb-link.active {
-            background: rgba(13,148,136,.13); color: #fff;
-            border-left: 2px solid var(--accent); padding-left: 8px;
-        }
-        .sb-link.active i { color: var(--accent); }
-
-        .sb-footer {
-            padding: 12px 16px; border-top: 1px solid rgba(255,255,255,.07);
-            display: flex; align-items: center; gap: 9px;
-        }
-        .sb-avatar {
-            width: 28px; height: 28px; border-radius: 6px;
-            background: rgba(255,255,255,.1); display: flex; align-items: center; justify-content: center;
-            color: rgba(255,255,255,.65); font-size: .65rem; font-weight: 700; flex-shrink: 0;
-        }
-        .sb-uname { font-size: .75rem; color: rgba(255,255,255,.78); font-weight: 600; }
-        .sb-urole { font-size: .61rem; color: rgba(255,255,255,.3); }
-        .sb-logout {
-            margin-left: auto; background: transparent; border: none;
-            color: rgba(255,255,255,.25); cursor: pointer; font-size: .72rem; padding: 4px; transition: color .13s;
-        }
-        .sb-logout:hover { color: #f87171; }
-
-
-        .main { margin-left: var(--sw); flex: 1; padding: 30px 32px; min-width: 0; }
-
-        .page-title { font-size: 1.2rem; font-weight: 700; color: var(--text); margin-bottom: 3px; }
-        .page-sub   { font-size: .76rem; color: var(--muted); margin-bottom: 24px; }
-
-        .kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 22px; }
-        .kpi {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 9px;
-            padding: 16px 14px; display: flex; align-items: center; gap: 12px;
-        }
-        .kpi-icon {
-            width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0;
-            display: flex; align-items: center; justify-content: center; font-size: .9rem;
-        }
-        .kpi-icon.teal  { background: #f0fdfa; color: var(--accent); }
-        .kpi-icon.blue  { background: #eff6ff; color: var(--blue); }
-        .kpi-icon.amber { background: #fffbeb; color: var(--amber); }
-        .kpi-icon.green { background: #f0fdf4; color: var(--success); }
-        .kpi-val { font-size: 1.55rem; font-weight: 700; color: var(--text); line-height: 1; }
-        .kpi-lbl { font-size: .7rem; color: var(--muted); margin-top: 2px; }
-
-
-        .banner {
-            background: var(--navy); border-radius: 9px; padding: 24px 28px;
-            display: flex; align-items: center; justify-content: space-between; gap: 20px;
-        }
-        .banner-tag {
-            display: inline-flex; align-items: center; gap: 5px;
-            background: rgba(13,148,136,.18); border: 1px solid rgba(13,148,136,.25);
-            color: #5eead4; font-size: .62rem; font-weight: 600; letter-spacing: .07em;
-            text-transform: uppercase; padding: 3px 9px; border-radius: 20px; margin-bottom: 10px;
-        }
-        .banner h2 { font-size: 1rem; font-weight: 600; color: #fff; margin-bottom: 5px; }
-        .banner p  { font-size: .77rem; color: rgba(255,255,255,.45); max-width: 360px; line-height: 1.5; }
-        .banner-btns { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-        .btn-primary {
-            display: inline-flex; align-items: center; gap: 7px;
-            background: var(--accent); color: #fff; text-decoration: none;
-            padding: 9px 20px; border-radius: 7px; font-weight: 600; font-size: .8rem;
-            transition: all .13s; white-space: nowrap;
-        }
-        .btn-primary:hover { background: #0f766e; }
-        .btn-ghost {
-            display: inline-flex; align-items: center; gap: 7px;
-            background: rgba(255,255,255,.08); color: rgba(255,255,255,.65); text-decoration: none;
-            padding: 9px 18px; border-radius: 7px; border: 1px solid rgba(255,255,255,.1);
-            font-weight: 500; font-size: .79rem; transition: all .13s; white-space: nowrap;
-        }
-        .btn-ghost:hover { background: rgba(255,255,255,.13); color: #fff; }
-
-        @media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(2,1fr); } }
-        @media (max-width: 768px)  { .sidebar { display:none; } .main { margin-left:0; padding:20px; } .banner { flex-direction: column; align-items: flex-start; } }
-        @media (max-width: 560px)  { .kpi-grid { grid-template-columns:1fr; } .banner-btns { flex-direction: column; align-items: flex-start; } }
-    </style>
-</head>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr"
+      th:replace="~{layouts/encadrant-layout :: layout(
+          'Tableau de bord',
+          'Vue d\'ensemble de la gestion des encadrants et des formations doctorales',
+          'dashboard'
+      )}">
+<head><title>Tableau de bord Encadrant</title></head>
 <body>
 
-<aside class="sidebar">
-    <div class="sb-brand">
-        <div class="sb-icon"><i class="fas fa-graduation-cap"></i></div>
-        <div>
-            <div class="sb-title">Portail Doctorat</div>
-            <div class="sb-sub">Gestion académique</div>
-        </div>
-    </div>
-    <div class="sb-role"><i class="fas fa-chalkboard-teacher"></i> Encadrant</div>
+<section th:fragment="content">
 
-    <nav class="sb-nav">
-        <div class="sb-section">Principal</div>
-        <a href="#" class="sb-link active"><i class="fas fa-house"></i> Vue d'ensemble</a>
-
-        <div class="sb-section">Gestion</div>
-        <a th:href="@{/encadrant/listes}" class="sb-link">
-            <i class="fas fa-user-graduate"></i> Mes doctorants</a>
-
-        <div class="sb-section">Système</div>
-        <a href="#" class="sb-link"><i class="fas fa-gear"></i> Paramètres</a>
-    </nav>
-
-    <div class="sb-footer">
-        <div class="sb-avatar">AD</div>
-        <div>
-            <div class="sb-uname">Administrateur</div>
-            <div class="sb-urole">Accès complet</div>
-        </div>
-        <button class="sb-logout" title="Déconnexion"><i class="fas fa-right-from-bracket"></i></button>
-    </div>
-</aside>
-
-<main class="main">
-    <div class="page-title">Tableau de bord</div>
-    <div class="page-sub">Vue d'ensemble de la gestion des encadrants et des formations doctorales</div>
-
+    <!-- KPI CARDS -->
     <div class="kpi-grid">
         <div class="kpi">
             <div class="kpi-icon teal"><i class="fas fa-chalkboard-teacher"></i></div>
@@ -208,6 +42,7 @@
         </div>
     </div>
 
+    <!-- BANNER -->
     <div class="banner">
         <div>
             <div class="banner-tag"><i class="fas fa-users-cog"></i> Gestion des encadrants</div>
@@ -215,15 +50,15 @@
             <p>Consultez, ajoutez, modifiez ou supprimez des encadrants depuis la liste complète.</p>
         </div>
         <div class="banner-btns">
-            <a th:href="@{/encadrant/liste}" href="#" class="btn-primary">
+            <a th:href="@{/encadrant/liste}" class="btn-primary">
                 <i class="fas fa-arrow-right"></i> Accéder à la liste
             </a>
-            <a th:href="@{/encadrant/nouveau}" href="#" class="btn-ghost">
+            <a th:href="@{/encadrant/nouveau}" class="btn-ghost-dark">
                 <i class="fas fa-plus"></i> Nouvel encadrant
             </a>
         </div>
     </div>
-</main>
 
+</section>
 </body>
 </html>

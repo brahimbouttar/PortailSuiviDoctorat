@@ -62,5 +62,16 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         }
         return doctorantRepo.save(doctorant);
     }
-
+    @Override
+    public Utilisateur save(Utilisateur u) {
+        // update: keep old password if none submitted
+        if (u.getId() != null && u.getId() != 0) {
+            utilisateurRepo.findById(u.getId()).ifPresent(existing -> {
+                if (u.getPassword() == null || u.getPassword().isBlank()) {
+                    u.setPassword(existing.getPassword());
+                }
+            });
+        }
+        return utilisateurRepo.save(u);
+    }
 }

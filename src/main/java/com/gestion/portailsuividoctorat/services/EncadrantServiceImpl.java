@@ -40,7 +40,10 @@ public class EncadrantServiceImpl implements EncadrantService {
 
         return encadrantRepo.save(existing);
     }
-
+    @Override
+    public Encadrant findByEmail(String email) {
+        return encadrantRepo.findByEmail(email);
+    }
     @Override
     public Encadrant findEncadrant(Long id) {
         return encadrantRepo.findById(id)
