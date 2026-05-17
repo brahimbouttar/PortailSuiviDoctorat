@@ -11,6 +11,7 @@ import com.gestion.portailsuividoctorat.services.AdminService;
 import com.gestion.portailsuividoctorat.services.DemandeService;
 import com.gestion.portailsuividoctorat.services.EncadrantService;
 import com.gestion.portailsuividoctorat.services.EncadrantServiceImpl;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -64,7 +65,7 @@ public class AdminController {
         } catch (Exception e) {
             ra.addFlashAttribute("errorMessage", "Erreur lors de la création : " + e.getMessage());
         }
-        return "redirect:/Admin/encadrants";
+        return "redirect:/admin/encadrants";
     }
     @GetMapping("/demandes")
     public String demandes(Model model) {
@@ -149,5 +150,10 @@ public class AdminController {
             ra.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/admin/doctorants";
+    }
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/login";
     }
 }

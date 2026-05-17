@@ -192,7 +192,7 @@
 
   <nav class="sb-nav">
     <div class="sb-section">Principal</div>
-    <a th:href="@{/admin/dashboard}"
+    <a th:href="@{/admin}"
        th:class="${activePage == 'dashboard'} ? 'sb-link active' : 'sb-link'">
       <i class="fas fa-house"></i> Tableau de bord
     </a>
@@ -209,19 +209,13 @@
        th:class="${activePage == 'doctorants'} ? 'sb-link active' : 'sb-link'">
       <i class="fas fa-user-graduate"></i> Doctorants
     </a>
-    <a th:href="@{/encadrant/liste}"
+    <a th:href="@{/admin/encadrants}"
        th:class="${activePage == 'encadrants'} ? 'sb-link active' : 'sb-link'">
       <i class="fas fa-chalkboard-teacher"></i> Encadrants
     </a>
     <a th:href="@{/admin/users}"
        th:class="${activePage == 'users'} ? 'sb-link active' : 'sb-link'">
       <i class="fas fa-users"></i> Utilisateurs
-    </a>
-
-    <div class="sb-section">Système</div>
-    <a th:href="@{/admin/parametres}"
-       th:class="${activePage == 'parametres'} ? 'sb-link active' : 'sb-link'">
-      <i class="fas fa-gear"></i> Paramètres
     </a>
   </nav>
 
@@ -231,7 +225,7 @@
       <div class="sb-uname">Administrateur</div>
       <div class="sb-urole">Accès complet</div>
     </div>
-    <form th:action="@{/logout}" method="post" style="display:inline">
+    <form th:action="@{logout}" method="post" style="display:inline">
       <button type="submit" class="sb-logout" title="Déconnexion">
         <i class="fas fa-right-from-bracket"></i>
       </button>
