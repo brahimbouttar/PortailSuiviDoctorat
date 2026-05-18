@@ -17,18 +17,18 @@ public class AuthController {
 
     @PostMapping("/login")
     public String login(@RequestParam String email,
-                        @RequestParam String password,
-                        HttpSession session,
-                        RedirectAttributes ra) {
+            @RequestParam String password,
+            HttpSession session,
+            RedirectAttributes ra) {
         return utilisateurService.findByEmail(email)
                 .filter(u -> u.getPassword().equals(password))
                 .map(u -> {
                     session.setAttribute("user", u);
                     session.setAttribute("role", u.getRole());
                     return switch (u.getRole()) {
-                        case "ADMIN"     -> "redirect:/admin/dashboard";
+                        case "ADMIN" -> "redirect:/admin/dashboard";
 
-                        default          -> "redirect:/admin/dashboard";
+                        default -> "redirect:/admin/dashboard";
                     };
                 })
                 .orElseGet(() -> {

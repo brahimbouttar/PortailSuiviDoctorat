@@ -7,7 +7,7 @@
          style="width:230px; background:#1a1f2e;">
 
         <!-- Brand -->
-        <a th:href="@{/dashboard}"
+        <a th:href="@{/doctorants}"
            class="d-flex align-items-center gap-2 px-3 py-3 text-white text-decoration-none border-bottom border-secondary">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#818cf8" viewBox="0 0 16 16">
                 <path d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0L14 7.14V13a1 1 0 0 0 2 0V6a.5.5 0 0 0-.309-.462l-7.5-3.5z"/>
@@ -23,7 +23,7 @@
         </div>
         <ul class="nav nav-pills flex-column px-2 gap-1">
             <li class="nav-item">
-                <a th:href="@{/dashboard}"
+                <a th:href="@{/doctorants}"
                    class="nav-link d-flex align-items-center gap-2 text-white py-2"
                    th:classappend="${currentPage == 'dashboard'} ? ' active' : ' opacity-50'">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -33,7 +33,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a th:href="@{/dossiers}"
+                <a th:href="@{/Diplomes}"
                    class="nav-link d-flex align-items-center gap-2 text-white py-2"
                    th:classappend="${currentPage == 'dossiers'} ? ' active' : ' opacity-50'">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">

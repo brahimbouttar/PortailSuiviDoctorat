@@ -2,7 +2,6 @@ package com.gestion.portailsuividoctorat.services;
 import com.gestion.portailsuividoctorat.entites.Demande;
 import com.gestion.portailsuividoctorat.repositories.DemandeRepo;
 import org.springframework.stereotype.Service;
-import com.gestion.portailsuividoctorat.kafka.DemandeEvent;
 
 
 import java.util.List;
@@ -23,13 +22,6 @@ public class DemandeServiceImpl implements DemandeService {
     public Demande createDemande(Demande demande) {
         validerPrerequisSoutenance(demande);
         Demande saved = repository.save(demande);
-
-        DemandeEvent event = new DemandeEvent();
-        event.setDemandeId(saved.getId());
-        event.setStatut(saved.getStatut());
-        event.setDoctorantId(saved.getDoctorant().getId());
-        event.setNomDoctorant(saved.getDoctorant().getNom());
-        event.setEmailDoctorant(saved.getDoctorant().getEmail());
 
 
         return saved;
@@ -54,12 +46,7 @@ public class DemandeServiceImpl implements DemandeService {
 
         Demande updated = repository.save(existing);
 
-        DemandeEvent event = new DemandeEvent();
-        event.setDemandeId(updated.getId());
-        event.setStatut(updated.getStatut());
-        event.setDoctorantId(updated.getDoctorant().getId());
-        event.setNomDoctorant(updated.getDoctorant().getNom());
-        event.setEmailDoctorant(updated.getDoctorant().getEmail());
+
 
 
         return updated;

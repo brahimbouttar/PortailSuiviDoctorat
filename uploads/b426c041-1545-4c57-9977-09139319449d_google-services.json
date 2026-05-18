@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "593098078190",
+    "project_id": "ai-interview-eaf59",
+    "storage_bucket": "ai-interview-eaf59.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:593098078190:android:3a4c0784e04685893640ff",
+        "android_client_info": {
+          "package_name": "com.aiinterview.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCX7R03jScwrvmoo2DY_kCVcEsjAFNYsls"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

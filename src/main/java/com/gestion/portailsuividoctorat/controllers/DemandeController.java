@@ -48,8 +48,8 @@ public class DemandeController {
 
     @PostMapping("/statut")
     public String changerStatut(@RequestParam Long id,
-                                @RequestParam Demande.StatutDemande statut,
-                                RedirectAttributes ra) {
+            @RequestParam Demande.StatutDemande statut,
+            RedirectAttributes ra) {
         try {
             Demande d = service.getDemandeById(id);
             d.setStatut(statut);

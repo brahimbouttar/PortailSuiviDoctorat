@@ -22,6 +22,7 @@ public class DoctorantController {
         return "Doctorant/Dashboard";
     }
 
+
     @GetMapping("/form")
     public String showForm(@RequestParam(required = false) Long id, Model model) {
         Doctorant doctorant = (id != null)

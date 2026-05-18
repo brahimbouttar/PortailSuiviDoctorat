@@ -9,33 +9,53 @@ import java.util.List;
 
 @Service
 public class DiplomesServiceImpl implements DiplomesService {
+
     @Autowired
-    DiplomeRepo DiplomeRepo;
+    private DiplomeRepo diplomeRepo;
+
     @Override
     public Diplomes createDiplome(Diplomes d) {
-        return DiplomeRepo.save(d);
+        return diplomeRepo.save(d);
     }
 
     @Override
     public Diplomes updateDiplome(Diplomes d, Long id) {
-        Diplomes existing = DiplomeRepo.findById(id).orElseThrow(() -> new RuntimeException("Diplome not found"));
-        if (d.getBac() != null) {existing.setBac(d.getBac());}
-        if (d.getLicence() != null) {existing.setLicence(d.getLicence());}
-        if (d.getMaster() != null) {existing.setMaster(d.getMaster());}
-        return DiplomeRepo.save(existing);
+
+        Diplomes existing = diplomeRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Diplome not found"));
+
+        existing.setBac(d.getBac());
+        existing.setLicence(d.getLicence());
+        existing.setMaster(d.getMaster());
+
+        if (d.getBacFile() != null) {
+            existing.setBacFile(d.getBacFile());
+        }
+
+        if (d.getLicenceFile() != null) {
+            existing.setLicenceFile(d.getLicenceFile());
+        }
+
+        if (d.getMasterFile() != null) {
+            existing.setMasterFile(d.getMasterFile());
+        }
+
+        return diplomeRepo.save(existing);
     }
 
     @Override
     public Diplomes findDiplome(Long id) {
-        return DiplomeRepo.findById(id).orElseThrow(() -> new RuntimeException("Diplome not found"));
+        return diplomeRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Diplome not found"));
     }
+
     @Override
     public List<Diplomes> findAllDiplomes() {
-        return DiplomeRepo.findAll();
+        return diplomeRepo.findAll();
     }
+
     @Override
-    public void DeleteDiplome(Long id) {
-        Diplomes user = DiplomeRepo.findById(id).orElseThrow(() -> new RuntimeException("Diplome not found"));
-        DiplomeRepo.delete(user);
+    public void deleteDiplome(Long id) {
+        diplomeRepo.deleteById(id);
     }
 }
