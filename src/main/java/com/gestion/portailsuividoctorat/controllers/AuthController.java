@@ -33,7 +33,7 @@ public class AuthController {
                     session.setAttribute("role", u.getRole());
                     return switch (u.getRole()) {
                         case "ADMIN"     -> "redirect:/admin";
-                        case "DOCTORANT" -> "redirect:/doctorant";
+                        case "DOCTORANT" -> "redirect:/doctorants";
                         case "ENCADRANT" -> "redirect:/encadrant";
                         default          -> "redirect:/login";
                     };

@@ -1,11 +1,14 @@
 package com.gestion.portailsuividoctorat.controllers;
 
+import com.gestion.portailsuividoctorat.entites.Demande;
 import com.gestion.portailsuividoctorat.entites.Doctorant;
+import com.gestion.portailsuividoctorat.services.DemandeService;
 import com.gestion.portailsuividoctorat.services.DoctorantServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -13,9 +16,13 @@ import java.util.List;
 @RequestMapping("/doctorants")
 public class DoctorantController {
 
-    @Autowired
     private DoctorantServiceImpl doctorantService;
+    private DemandeService service;
+    public DoctorantController(DemandeService service, DoctorantServiceImpl doctorantService) {
+        this.service = service;
+        this.doctorantService = doctorantService;
 
+    }
     @GetMapping
     public String listDoctorants(Model model) {
         model.addAttribute("doctorants", doctorantService.findAllDoctorants());
@@ -31,14 +38,23 @@ public class DoctorantController {
         model.addAttribute("doctorant", doctorant);
         return "Doctorant/Form";
     }
-    @GetMapping("/liste")
+    @GetMapping("/demandes")
     public String liste(Model model) {
         model.addAttribute("doctorants", doctorantService.findAllDoctorants());
         model.addAttribute("newDoctorant", new Doctorant());
-        return "Doctorant/Liste";
+        return "Doctorant/MesDemandes";
     }
 
-
+    @PostMapping("demande/create")
+    public String save(@ModelAttribute Demande demande, RedirectAttributes ra) {
+        try {
+            service.createDemande(demande);
+            ra.addFlashAttribute("successMessage", "Demande soumise avec succès !");
+        } catch (RuntimeException e) {
+            ra.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:demandes";
+    }
     @PostMapping("/save")
     public String saveDoctorant(@ModelAttribute Doctorant doctorant) {
         if (doctorant.getId() != 0) {

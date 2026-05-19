@@ -7,6 +7,7 @@ import com.gestion.portailsuividoctorat.repositories.DoctorantRepo;
 import com.gestion.portailsuividoctorat.services.EncadrantServiceImpl;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -21,16 +22,21 @@ public class EncadrantController {
     @Autowired EncadrantServiceImpl encadrantService;
     @Autowired DoctorantRepo doctorantRepo;
 
-    private Encadrant getEncadrantFromSession(HttpSession session) {
-        Utilisateur user = (Utilisateur) session.getAttribute("user");
-        if (user == null) throw new RuntimeException("Session expirée, veuillez vous reconnecter.");
-        return encadrantService.findByEmail(user.getEmail());
+//    private Encadrant getEncadrantFromSession(HttpSession session) {
+//        Utilisateur user = (Utilisateur) session.getAttribute("user");
+//        if (user == null) throw new RuntimeException("Session expirée, veuillez vous reconnecter.");
+//        return encadrantService.findByEmail(user.getEmail());
+//    }
+    private Encadrant getEncadrantFromSession(Authentication authentication) {
+        String email = authentication.getName();
+        return encadrantService.findByEmail(email);
     }
 
 
     @GetMapping
-    public String dashboard(Model model, HttpSession session) {
-        Encadrant encadrant = getEncadrantFromSession(session);
+    public String dashboard(Model model, Authentication authentication) {
+//        Encadrant encadrant = getEncadrantFromSession(session);
+        Encadrant encadrant = getEncadrantFromSession(authentication);
         List<Doctorant> doctorants = doctorantRepo.findByEncadrantId(encadrant.getId());
 
         model.addAttribute("totalDoctorants", doctorants.size());
@@ -43,8 +49,10 @@ public class EncadrantController {
     }
 
     @GetMapping("/doctorants")
-    public String mesDoctorants(Model model, HttpSession session) {
-        Encadrant encadrant = getEncadrantFromSession(session);
+    public String mesDoctorants(Model model, Authentication authentication) {
+//        Encadrant encadrant = getEncadrantFromSession(session);
+        Encadrant encadrant = getEncadrantFromSession(authentication);
+
         List<Doctorant> doctorants = doctorantRepo.findByEncadrantId(encadrant.getId());
 
         model.addAttribute("doctorants", doctorants);

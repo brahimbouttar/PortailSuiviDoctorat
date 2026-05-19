@@ -16,4 +16,5 @@ public interface DoctorantService {
     List<Doctorant> findAllDoctorants();
     //Suppression
     void DeleteDoctorant(Long id);
+
 }

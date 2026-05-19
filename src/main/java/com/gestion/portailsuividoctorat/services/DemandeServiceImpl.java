@@ -1,33 +1,51 @@
 package com.gestion.portailsuividoctorat.services;
 import com.gestion.portailsuividoctorat.entites.Demande;
+import com.gestion.portailsuividoctorat.entites.Doctorant;
 import com.gestion.portailsuividoctorat.repositories.DemandeRepo;
+import com.gestion.portailsuividoctorat.repositories.DoctorantRepo;
 import org.springframework.stereotype.Service;
 
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
 public class DemandeServiceImpl implements DemandeService {
 
 
-    private final DemandeRepo repository;
+    private final DemandeRepo demandeRepository;
+    private final DoctorantRepo doctorantRepository;
 
-    public DemandeServiceImpl(DemandeRepo repository) {
-        this.repository = repository;
+    public DemandeServiceImpl(DemandeRepo demandeRepository,
+                              DoctorantRepo doctorantRepository) {
+        this.demandeRepository = demandeRepository;
+        this.doctorantRepository = doctorantRepository;
     }
 //     injection constructeur
 
     @Override
-    public Demande createDemande(Demande demande) {
-        validerPrerequisSoutenance(demande);
-        Demande saved = repository.save(demande);
-
-        return saved;
+    public Demande createDemande(Demande demande, Long doctorantId) {
+        Doctorant doctorant = doctorantRepository.findById(doctorantId)
+                .orElseThrow(() -> new RuntimeException("Doctorant introuvable"));
+        demande.setDoctorant(doctorant);
+        demande.setDateDepot(LocalDate.now());
+        demande.setStatut(Demande.StatutDemande.EN_ATTENTE);
+        return demandeRepository.save(demande);
     }
+    @Override
+    public List<Demande> getDemandesByDoctorant(Long doctorantId) {
+        return demandeRepository.findByDoctorantId(doctorantId);
+    }
+
+    @Override
+    public Demande createDemande(Demande demande) {
+        return null;
+    }
+
     @Override
     public Demande updateDemande(Long id, Demande demande) {
 
-        Demande existing = repository.findById(id)
+        Demande existing = demandeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Demande introuvable : " + id));
 
         validerPrerequisSoutenance(demande);
@@ -42,7 +60,7 @@ public class DemandeServiceImpl implements DemandeService {
         existing.setAttestations(demande.getAttestations());
         existing.setStatut(demande.getStatut());
 
-        Demande updated = repository.save(existing);
+        Demande updated = demandeRepository.save(existing);
 
 
         return updated;
@@ -50,18 +68,18 @@ public class DemandeServiceImpl implements DemandeService {
 
     @Override
     public void deleteDemande(Long id) {
-        repository.deleteById(id);
+        demandeRepository.deleteById(id);
     }
 
     @Override
     public Demande getDemandeById(Long id) {
-        return repository.findById(id)
+        return demandeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Demande introuvable : " + id));
     }
 
     @Override
     public List<Demande> getAllDemandes() {
-        return repository.findAll();
+        return demandeRepository.findAll();
     }
 
     private void validerPrerequisSoutenance(Demande demande) {
