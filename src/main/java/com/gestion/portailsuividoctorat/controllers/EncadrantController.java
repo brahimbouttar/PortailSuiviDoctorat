@@ -1,8 +1,13 @@
 package com.gestion.portailsuividoctorat.controllers;
 
+import com.gestion.portailsuividoctorat.entites.Doctorant;
 import com.gestion.portailsuividoctorat.entites.Encadrant;
+import com.gestion.portailsuividoctorat.entites.Utilisateur;
+import com.gestion.portailsuividoctorat.repositories.DoctorantRepo;
 import com.gestion.portailsuividoctorat.services.EncadrantServiceImpl;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -14,47 +19,90 @@ import java.util.List;
 @RequestMapping("/encadrant")
 public class EncadrantController {
 
-    @Autowired
-    EncadrantServiceImpl encadrantService;
+    @Autowired EncadrantServiceImpl encadrantService;
+    @Autowired DoctorantRepo doctorantRepo;
+
+//    private Encadrant getEncadrantFromSession(HttpSession session) {
+//        Utilisateur user = (Utilisateur) session.getAttribute("user");
+//        if (user == null) throw new RuntimeException("Session expirée, veuillez vous reconnecter.");
+//        return encadrantService.findByEmail(user.getEmail());
+//    }
+    private Encadrant getEncadrantFromSession(Authentication authentication) {
+        String email = authentication.getName();
+        return encadrantService.findByEmail(email);
+    }
+
+
     @GetMapping
-    public String showList(Model model) {
-        model.addAttribute("encadrants", encadrantService.findAllEncadrants());
+    public String dashboard(Model model, Authentication authentication) {
+//        Encadrant encadrant = getEncadrantFromSession(session);
+        Encadrant encadrant = getEncadrantFromSession(authentication);
+        List<Doctorant> doctorants = doctorantRepo.findByEncadrantId(encadrant.getId());
+
+        model.addAttribute("totalDoctorants", doctorants.size());
+        model.addAttribute("nbActif",    countByStatut(doctorants, "ACTIF"));
+        model.addAttribute("nbSuspendu", countByStatut(doctorants, "SUSPENDU"));
+        model.addAttribute("nbDiplome",  countByStatut(doctorants, "DIPLOME"));
+        model.addAttribute("nbAbandon",  countByStatut(doctorants, "ABANDONNE"));
+
         return "Encadrant/Dashboard";
     }
 
+    @GetMapping("/doctorants")
+    public String mesDoctorants(Model model, Authentication authentication) {
+//        Encadrant encadrant = getEncadrantFromSession(session);
+        Encadrant encadrant = getEncadrantFromSession(authentication);
+
+        List<Doctorant> doctorants = doctorantRepo.findByEncadrantId(encadrant.getId());
+
+        model.addAttribute("doctorants", doctorants);
+        model.addAttribute("nbActif",    countByStatut(doctorants, "ACTIF"));
+        model.addAttribute("nbSuspendu", countByStatut(doctorants, "SUSPENDU"));
+        model.addAttribute("nbDiplome",  countByStatut(doctorants, "DIPLOME"));
+        model.addAttribute("nbAbandon",  countByStatut(doctorants, "ABANDONNE"));
+
+        return "Encadrant/Listes";
+    }
+
     @PostMapping("/update/{id}")
-    public String updateEncadrant(@PathVariable Long id, @ModelAttribute Encadrant encadrant, RedirectAttributes ra) {
+    public String updateEncadrant(@PathVariable Long id,
+                                  @ModelAttribute Encadrant encadrant,
+                                  RedirectAttributes ra) {
         try {
             encadrantService.updateEncadrant(encadrant, id);
             ra.addFlashAttribute("successMessage", "Encadrant modifié avec succès !");
         } catch (Exception e) {
-            ra.addFlashAttribute("errorMessage", "Erreur lors de la modification : " + e.getMessage());
+            ra.addFlashAttribute("errorMessage", "Erreur : " + e.getMessage());
         }
-        return "redirect:/encadrant/liste";
+        return "redirect:/encadrant/dashboard";
     }
-    @GetMapping("/dashboard")
-    public String dashboard(Model model) {
-        List<Encadrant> tous = encadrantService.findAllEncadrants();
-        return "Encadrant/Dashboard";
-    }
+
     @GetMapping("/delete/{id}")
     public String deleteEncadrant(@PathVariable Long id, RedirectAttributes ra) {
         try {
             encadrantService.DeleteEncadrant(id);
             ra.addFlashAttribute("successMessage", "Encadrant supprimé avec succès !");
         } catch (Exception e) {
-            ra.addFlashAttribute("errorMessage", "Erreur lors de la suppression : " + e.getMessage());
+            ra.addFlashAttribute("errorMessage", "Erreur : " + e.getMessage());
         }
-        return "redirect:/encadrant/liste";
+        return "redirect:/encadrant/dashboard";
     }
+
     @GetMapping("/details/{id}")
     @ResponseBody
     public Encadrant trouverEncadrant(@PathVariable Long id) {
         return encadrantService.findEncadrant(id);
     }
+
     @GetMapping("/all")
     @ResponseBody
-    public java.util.List<Encadrant> findAllEncadrants() {
+    public List<Encadrant> findAllEncadrants() {
         return encadrantService.findAllEncadrants();
+    }
+
+    private long countByStatut(List<Doctorant> list, String statut) {
+        return list.stream()
+                .filter(d -> statut.equalsIgnoreCase(d.getStatut()))
+                .count();
     }
 }

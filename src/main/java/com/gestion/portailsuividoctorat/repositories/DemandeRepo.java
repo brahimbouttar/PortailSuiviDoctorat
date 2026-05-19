@@ -9,4 +9,6 @@ public interface DemandeRepo extends JpaRepository<Demande, Long> {
     long countByStatut(Demande.StatutDemande statut);
 
     List<Demande> findTop5ByStatutOrderByDateDepotDescIdDesc(Demande.StatutDemande statut);
+
+    List<Demande> findByDoctorantId(Long doctorantId);
 }

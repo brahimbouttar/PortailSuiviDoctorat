@@ -8,24 +8,21 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
-@NoArgsConstructor
+@Getter @Setter @NoArgsConstructor
 @Entity
-public class Doctorant extends Utilisateur {
-    private String SujetThese;
+public class Doctorant extends Utilisateur{
+    private String sujetThese;
     private String CV;
     private String LettreMotivation;
-
-    public Doctorant(String role, String password, String telephone, String adresse, String prenom, String email,
-            String nom,
-            String SujetThese, String CV, String LettreMotivation) {
+    private String statut;
+    public Doctorant(String role, String password, String telephone, String adresse, String prenom, String email, String nom,
+                     String SujetThese, String CV, String LettreMotivation) {
         super(nom, prenom, email, telephone, password, role, adresse);
-        this.SujetThese = SujetThese;
+        this.sujetThese = SujetThese;
         this.CV = CV;
         this.LettreMotivation = LettreMotivation;
     }
-
     @ManyToOne
     private Utilisateur encadrant;
+
 }

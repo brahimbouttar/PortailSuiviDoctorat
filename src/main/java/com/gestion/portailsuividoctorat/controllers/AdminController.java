@@ -7,10 +7,7 @@ import com.gestion.portailsuividoctorat.repositories.DemandeRepo;
 import com.gestion.portailsuividoctorat.repositories.DoctorantRepo;
 import com.gestion.portailsuividoctorat.repositories.EncadrantRepo;
 import com.gestion.portailsuividoctorat.repositories.UtilisateurRepo;
-import com.gestion.portailsuividoctorat.services.AdminService;
-import com.gestion.portailsuividoctorat.services.DemandeService;
-import com.gestion.portailsuividoctorat.services.EncadrantService;
-import com.gestion.portailsuividoctorat.services.EncadrantServiceImpl;
+import com.gestion.portailsuividoctorat.services.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,6 +21,8 @@ public class AdminController {
     private final AdminService adminService;
     private final EncadrantService encadrantService;
     private final DemandeService demandeService;
+    private final JuryService juryService;
+    private final SoutenanceService Soutservice;
     private final UtilisateurRepo utilisateurRepo;
     private final DoctorantRepo doctorantRepo;
     private final DemandeRepo demandeRepo;
@@ -33,13 +32,16 @@ public class AdminController {
                            UtilisateurRepo utilisateurRepo,
                            DoctorantRepo doctorantRepo,
                            DemandeRepo demandeRepo,
-                           EncadrantRepo encadrantRepo) {
+                           JuryService juryService,
+                           SoutenanceService Soutservice) {
         this.adminService = adminService;
         this.encadrantService = encadrantService;
         this.demandeService = demandeService;
         this.utilisateurRepo = utilisateurRepo;
         this.doctorantRepo = doctorantRepo;
         this.demandeRepo = demandeRepo;
+        this.juryService = juryService;
+        this.Soutservice = Soutservice;
     }
 
     @GetMapping
@@ -151,9 +153,19 @@ public class AdminController {
         }
         return "redirect:/admin/doctorants";
     }
+    @GetMapping("soutenances")
+    public String list(Model model) {
+        model.addAttribute("soutenances", Soutservice.getAllSoutenance());
+        return "Admin/soutenances";
+    }
+    @GetMapping("/jury")
+    public String showList(Model model) {
+        model.addAttribute("jurys", juryService.findAllJuries());
+        return "Admin/jury";
+    }
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/login";
+        return "auth/login";
     }
 }

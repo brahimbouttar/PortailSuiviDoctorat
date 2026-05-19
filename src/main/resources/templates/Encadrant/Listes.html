@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr"
+      th:replace="~{layouts/encadrant-layout :: layout(
+          'Mes doctorants',
+          'Laboratoire de Recherche — Doctorants inscrits',
+          'doctorants'
+      )}">
+<head><title>Mes doctorants</title></head>
+<body>
+
+<section th:fragment="content">
+    <style>
+        /* ── STAT MINI-CARDS ─────────────────────────────────────── */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 9px; padding: 14px 12px;
+            cursor: pointer; transition: transform .15s, border-color .15s;
+            user-select: none;
+        }
+        .stat-card:hover { transform: translateY(-2px); }
+        .stat-card.active { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(13,148,136,.1); }
+        .stat-card.featured {
+            background: var(--navy); border-color: var(--navy); text-align: center;
+        }
+        .stat-num {
+            font-size: 1.6rem; font-weight: 700; line-height: 1; margin-bottom: 3px;
+        }
+        .stat-num.teal   { color: var(--accent); }
+        .stat-num.green  { color: var(--success); }
+        .stat-num.amber  { color: var(--warning); }
+        .stat-num.blue   { color: var(--info); }
+        .stat-num.red    { color: var(--danger); }
+        .stat-num.white  { color: #fff; }
+        .stat-lbl {
+            font-size: .65rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: .08em; color: var(--muted);
+        }
+        .stat-lbl.white { color: rgba(255,255,255,.6); }
+
+        /* ── FADE-IN ROWS ────────────────────────────────────────── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(5px); }
+            to   { opacity: 1; transform: none; }
+        }
+        tbody tr { animation: fadeUp .2s ease both; }
+
+        @media (max-width: 1024px) { .stat-grid { grid-template-columns: repeat(3,1fr); } }
+        @media (max-width: 560px)  { .stat-grid { grid-template-columns: repeat(2,1fr); } }
+    </style>
+
+    <!-- STAT MINI-CARDS -->
+    <div class="stat-grid">
+        <div class="stat-card active">
+            <div class="stat-num teal" th:text="${doctorants.size()}">0</div>
+            <div class="stat-lbl">Tous</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num green" th:text="${nbActif}">0</div>
+            <div class="stat-lbl">Actif</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num amber" th:text="${nbSuspendu}">0</div>
+            <div class="stat-lbl">Suspendu</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num blue" th:text="${nbDiplome}">0</div>
+            <div class="stat-lbl">Diplômé</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num red" th:text="${nbAbandon}">0</div>
+            <div class="stat-lbl">Abandonné</div>
+        </div>
+        <div class="stat-card featured">
+            <div class="stat-num white" th:text="${doctorants.size()}">0</div>
+            <div class="stat-lbl white">Total inscrits</div>
+        </div>
+    </div>
+
+    <!-- TABLE CARD -->
+    <div class="card">
+        <div class="card-head">
+            <h6><i class="fas fa-user-graduate"></i> Liste des doctorants</h6>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Email</th>
+                <th>Téléphone</th>
+                <th>Adresse</th>
+                <th>Sujet de thèse</th>
+                <th>Inscrit le</th>
+            </tr>
+            </thead>
+            <tbody id="tableBody">
+
+            <tr th:if="${#lists.isEmpty(doctorants)}">
+                <td colspan="5" style="text-align:center;padding:56px 20px;color:var(--muted);font-size:.8rem">
+                    <i class="fas fa-user-graduate" style="font-size:2.2rem;color:#d1d5db;display:block;margin-bottom:12px"></i>
+                    Aucun doctorant inscrit.
+                </td>
+            </tr>
+
+            <tr th:unless="${#lists.isEmpty(doctorants)}"
+                th:each="d, stat : ${doctorants}"
+                th:style="'animation-delay:' + ${stat.index * 30} + 'ms'">
+                <td th:text="${d.email     != null ? d.email     : '—'}" style="color:var(--muted)"></td>
+                <td th:text="${d.telephone != null ? d.telephone : '—'}" style="color:var(--muted)"></td>
+                <td th:text="${d.adresse   != null ? d.adresse   : '—'}" style="color:var(--muted)"></td>
+                <td th:text="${d.sujetThese != null ? d.sujetThese : '—'}"></td>
+                <td style="color:var(--muted)">—</td>
+            </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+</section>
+</body>
+</html>
