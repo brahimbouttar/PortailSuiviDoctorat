@@ -30,7 +30,7 @@ public class UtilisateurController {
 
     @PostMapping("/save")
     public String save(@ModelAttribute Utilisateur utilisateur) {
-        if (utilisateur.getId() != 0) {
+        if (utilisateur.getId() != null) {
             utilisateurService.updateUtilisateur(utilisateur, utilisateur.getId());
         } else {
             utilisateurService.createUtilisateur(utilisateur);

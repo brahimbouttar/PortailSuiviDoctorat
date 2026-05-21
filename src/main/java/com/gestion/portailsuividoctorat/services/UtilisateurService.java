@@ -2,8 +2,6 @@ package com.gestion.portailsuividoctorat.services;
 
 import com.gestion.portailsuividoctorat.entites.Doctorant;
 import com.gestion.portailsuividoctorat.entites.Utilisateur;
-import com.gestion.portailsuividoctorat.repositories.UtilisateurRepo;
-import org.hibernate.sql.model.internal.OptionalTableUpdate;
 
 import java.util.List;
 import java.util.Optional;

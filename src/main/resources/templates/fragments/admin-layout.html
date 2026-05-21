@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="fr"
-      th:fragment="layout(pageTitle, pageSubtitle, activePage)">
+      th:fragment="layout(pageTitle, pageSubtitle, activePage, content)">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -53,8 +53,7 @@
         <small class="text-muted" th:text="${pageSubtitle}">Gestion du portail doctoral</small>
       </div>
 
-      <!-- Pulls <section th:fragment="content"> from the calling page -->
-      <th:block th:replace="~{::section}"></th:block>
+      <th:block th:replace="${content}"></th:block>
     </main>
   </div>
 </div>

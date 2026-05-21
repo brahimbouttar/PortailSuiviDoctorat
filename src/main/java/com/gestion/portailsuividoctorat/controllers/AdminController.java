@@ -3,6 +3,7 @@ package com.gestion.portailsuividoctorat.controllers;
 import com.gestion.portailsuividoctorat.entites.Demande;
 import com.gestion.portailsuividoctorat.repositories.DemandeRepo;
 import com.gestion.portailsuividoctorat.repositories.DoctorantRepo;
+import com.gestion.portailsuividoctorat.repositories.EncadrantRepo;
 import com.gestion.portailsuividoctorat.repositories.UtilisateurRepo;
 import com.gestion.portailsuividoctorat.services.AdminService;
 import com.gestion.portailsuividoctorat.services.DemandeService;
@@ -19,21 +20,24 @@ public class AdminController {
     private final DemandeService demandeService;
     private final UtilisateurRepo utilisateurRepo;
     private final DoctorantRepo doctorantRepo;
+    private final EncadrantRepo encadrantRepo;
     private final DemandeRepo demandeRepo;
 
     public AdminController(AdminService adminService,
                            DemandeService demandeService,
                            UtilisateurRepo utilisateurRepo,
                            DoctorantRepo doctorantRepo,
+                           EncadrantRepo encadrantRepo,
                            DemandeRepo demandeRepo) {
         this.adminService = adminService;
         this.demandeService = demandeService;
         this.utilisateurRepo = utilisateurRepo;
         this.doctorantRepo = doctorantRepo;
+        this.encadrantRepo = encadrantRepo;
         this.demandeRepo = demandeRepo;
     }
 
-    @GetMapping
+    @GetMapping({"", "/dashboard"})
     public String dashboard(Model model) {
         model.addAttribute("totalUsers", utilisateurRepo.count());
         model.addAttribute("totalDoctorants", doctorantRepo.count());
@@ -66,9 +70,7 @@ public class AdminController {
                                         String message,
                                         RedirectAttributes ra) {
         try {
-            Demande demande = demandeService.getDemandeById(id);
-            demande.setStatut(statut);
-            demandeRepo.save(demande);
+            demandeService.changerStatut(id, statut);
             ra.addFlashAttribute("successMessage", message);
         } catch (RuntimeException e) {
             ra.addFlashAttribute("errorMessage", e.getMessage());
@@ -98,6 +100,7 @@ public class AdminController {
     @GetMapping("/doctorants")
     public String doctorants(Model model) {
         model.addAttribute("doctorants", adminService.getAllDoctorants());
+        model.addAttribute("encadrants", encadrantRepo.findAll());
         return "Admin/doctorants";
     }
 

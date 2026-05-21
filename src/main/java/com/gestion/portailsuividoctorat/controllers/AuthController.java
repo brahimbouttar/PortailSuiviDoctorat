@@ -28,14 +28,16 @@ public class AuthController {
                         HttpSession session,
                         RedirectAttributes ra) {
         return utilisateurService.findByEmail(email)
-                .filter(u -> u.getPassword().equals(password))
+                .filter(u -> u.getPassword() != null && u.getPassword().equals(password))
                 .map(u -> {
                     session.setAttribute("user", u);
-                    session.setAttribute("role", u.getRole());
-                    return switch (u.getRole()) {
-                        case "ADMIN"     -> "redirect:/admin/dashboard";
-
-                        default          -> "redirect:/admin/dashboard";
+                    String role = u.getRole() != null ? u.getRole() : "DOCTORANT";
+                    session.setAttribute("role", role);
+                    return switch (role) {
+                        case "ADMIN" -> "redirect:/admin/dashboard";
+                        case "ENCADRANT" -> "redirect:/encadrant/dashboard";
+                        case "DOCTORANT" -> "redirect:/doctorants";
+                        default -> "redirect:/admin/dashboard";
                     };
                 })
                 .orElseGet(() -> {

@@ -39,6 +39,9 @@ public class SoutenanceController {
     public String update(@ModelAttribute SoutenanceDTO dto,
                          RedirectAttributes ra) {
         try {
+            if (dto.getId() == null) {
+                throw new RuntimeException("Identifiant de soutenance obligatoire");
+            }
             service.updateSoutenance(dto.getId(), dto);
             ra.addFlashAttribute("successMessage", "Soutenance modifiée avec succès !");
         } catch (Exception e) {

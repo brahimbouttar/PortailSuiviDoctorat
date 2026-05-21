@@ -18,13 +18,35 @@ public class PortailSuiviDoctoratApplication implements CommandLineRunner {
     public static void main(String[] args) {
         SpringApplication.run(PortailSuiviDoctoratApplication.class, args);
     }
-    Utilisateur u1 = new Utilisateur("Utilisateur","bouttar","brahimbouttar@gmail.com","casablanca","+212677862028","123456","admin");
-    Doctorant d1 = new Doctorant("brahim","bouttar","brahimbouttar@gmail.com","casablanca","+212677862028","123456","admin","hello","hhhhh","dhhjfk");
 
     @Override
-    public void run(String... args) throws Exception {
-        utilisateurRepo.save(u1);
-        doctorantRepo.save(d1);
+    public void run(String... args) {
+        if (utilisateurRepo.findByEmail("admin@portail.local").isEmpty()) {
+            Utilisateur admin = new Utilisateur();
+            admin.setNom("Admin");
+            admin.setPrenom("Portail");
+            admin.setEmail("admin@portail.local");
+            admin.setAdresse("Administration");
+            admin.setTelephone("+212600000000");
+            admin.setPassword("admin123");
+            admin.setRole("ADMIN");
+            utilisateurRepo.save(admin);
+        }
+
+        if (utilisateurRepo.findByEmail("doctorant@portail.local").isEmpty()) {
+            Doctorant doctorant = new Doctorant();
+            doctorant.setNom("Doctorant");
+            doctorant.setPrenom("Demo");
+            doctorant.setEmail("doctorant@portail.local");
+            doctorant.setAdresse("Faculte des sciences");
+            doctorant.setTelephone("+212611111111");
+            doctorant.setPassword("doctorant123");
+            doctorant.setRole("DOCTORANT");
+            doctorant.setSujetThese("Portail de suivi doctoral");
+            doctorant.setCV("CV demo");
+            doctorant.setLettreMotivation("Lettre demo");
+            doctorantRepo.save(doctorant);
+        }
     }
 
 }

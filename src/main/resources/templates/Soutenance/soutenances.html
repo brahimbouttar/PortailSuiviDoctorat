@@ -269,11 +269,12 @@
       document.getElementById('modalTitleText').textContent = 'Modifier la soutenance';
       document.getElementById('submitLabel').textContent    = 'Enregistrer';
       form.action = '/soutenances/update';
-      updatePreview(row.dataset.note);
+      if (typeof updatePreview === 'function') updatePreview(row.dataset.note);
     } else {
       ['formId','formDate','formLieu','formNote','formPub']
               .forEach(i => document.getElementById(i).value = '');
-      document.getElementById('notePreview').innerHTML = '';
+      const notePreview = document.getElementById('notePreview');
+      if (notePreview) notePreview.innerHTML = '';
       document.getElementById('modalTitleText').textContent = 'Nouvelle soutenance';
       document.getElementById('submitLabel').textContent    = 'Créer';
       form.action = '/soutenances/save';

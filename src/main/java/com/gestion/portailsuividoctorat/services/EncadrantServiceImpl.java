@@ -37,7 +37,6 @@ public class EncadrantServiceImpl implements EncadrantService {
         if (u.getPassword() != null && !u.getPassword().isBlank()) {
             existing.setPassword(u.getPassword());
         }
-
         return encadrantRepo.save(existing);
     }
 

@@ -9,4 +9,5 @@ public interface DemandeService {
     void deleteDemande(Long id);
     Demande getDemandeById(Long id);
     List<Demande> getAllDemandes();
+    Demande changerStatut(Long id, Demande.StatutDemande statut);
 }

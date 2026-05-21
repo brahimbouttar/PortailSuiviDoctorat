@@ -34,6 +34,19 @@
               <span th:unless="${d.encadrant != null}" class="text-muted">Non assigné</span>
             </td>
             <td class="text-center">
+              <form th:action="@{/admin/doctorants/{id}/encadrant(id=${d.id})}" method="post"
+                    class="d-inline-flex gap-2 align-items-center me-2">
+                <select name="encadrantId" class="form-select form-select-sm" style="max-width:180px;" required>
+                  <option value="">Encadrant</option>
+                  <option th:each="e : ${encadrants}"
+                          th:value="${e.id}"
+                          th:selected="${d.encadrant != null and d.encadrant.id == e.id}"
+                          th:text="${e.prenom + ' ' + e.nom}">Encadrant</option>
+                </select>
+                <button type="submit" class="btn btn-sm btn-outline-primary" title="Assigner">
+                  <i class="bi bi-person-check"></i>
+                </button>
+              </form>
               <form th:action="@{/admin/doctorants/{id}/delete(id=${d.id})}" method="post" class="d-inline">
                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
                   <i class="bi bi-trash"></i>

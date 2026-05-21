@@ -21,6 +21,8 @@ public class JuryServiceImpl
     public Jury updateJury(Jury u, Long id) {
         Jury existing = JuryRepo.findById(id).orElseThrow(() -> new RuntimeException("Jury not found"));
         if (u.getNom() != null) {existing.setNom(u.getNom());}
+        if (u.getPrenom() != null) {existing.setPrenom(u.getPrenom());}
+        if (u.getEmail() != null) {existing.setEmail(u.getEmail());}
         if (u.getType()!= null) {existing.setType(u.getType());}
         return JuryRepo.save(existing);
     }

@@ -4,6 +4,7 @@ import com.gestion.portailsuividoctorat.repositories.DemandeRepo;
 import org.springframework.stereotype.Service;
 
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -19,10 +20,14 @@ public class DemandeServiceImpl implements DemandeService {
 
     @Override
     public Demande createDemande(Demande demande) {
+        if (demande.getDateDepot() == null) {
+            demande.setDateDepot(LocalDate.now());
+        }
+        if (demande.getStatut() == null) {
+            demande.setStatut(Demande.StatutDemande.EN_ATTENTE);
+        }
         validerPrerequisSoutenance(demande);
-        Demande saved = repository.save(demande);
-
-        return saved;
+        return repository.save(demande);
     }
     @Override
     public Demande updateDemande(Long id, Demande demande) {
@@ -40,16 +45,24 @@ public class DemandeServiceImpl implements DemandeService {
         existing.setRapportAntiPlagiat(demande.getRapportAntiPlagiat());
         existing.setRapportPublications(demande.getRapportPublications());
         existing.setAttestations(demande.getAttestations());
-        existing.setStatut(demande.getStatut());
+        if (demande.getStatut() != null) {
+            existing.setStatut(demande.getStatut());
+        }
+        if (demande.getObservations() != null) {
+            existing.setObservations(demande.getObservations());
+        }
+        if (demande.getDoctorant() != null) {
+            existing.setDoctorant(demande.getDoctorant());
+        }
 
-        Demande updated = repository.save(existing);
-
-
-        return updated;
+        return repository.save(existing);
     }
 
     @Override
     public void deleteDemande(Long id) {
+        if (!repository.existsById(id)) {
+            throw new RuntimeException("Demande introuvable : " + id);
+        }
         repository.deleteById(id);
     }
 
@@ -62,6 +75,13 @@ public class DemandeServiceImpl implements DemandeService {
     @Override
     public List<Demande> getAllDemandes() {
         return repository.findAll();
+    }
+
+    @Override
+    public Demande changerStatut(Long id, Demande.StatutDemande statut) {
+        Demande demande = getDemandeById(id);
+        demande.setStatut(statut);
+        return repository.save(demande);
     }
 
     private void validerPrerequisSoutenance(Demande demande) {
