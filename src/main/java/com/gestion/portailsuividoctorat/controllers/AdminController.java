@@ -7,6 +7,8 @@ import com.gestion.portailsuividoctorat.repositories.EncadrantRepo;
 import com.gestion.portailsuividoctorat.repositories.UtilisateurRepo;
 import com.gestion.portailsuividoctorat.services.AdminService;
 import com.gestion.portailsuividoctorat.services.DemandeService;
+import com.gestion.portailsuividoctorat.services.JuryService;
+import com.gestion.portailsuividoctorat.services.SoutenanceService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +20,8 @@ public class AdminController {
 
     private final AdminService adminService;
     private final DemandeService demandeService;
+    private final SoutenanceService soutenanceService;
+    private final JuryService juryService;
     private final UtilisateurRepo utilisateurRepo;
     private final DoctorantRepo doctorantRepo;
     private final EncadrantRepo encadrantRepo;
@@ -25,23 +29,31 @@ public class AdminController {
 
     public AdminController(AdminService adminService,
                            DemandeService demandeService,
+                           SoutenanceService soutenanceService,
+                           JuryService juryService,
                            UtilisateurRepo utilisateurRepo,
                            DoctorantRepo doctorantRepo,
                            EncadrantRepo encadrantRepo,
                            DemandeRepo demandeRepo) {
         this.adminService = adminService;
         this.demandeService = demandeService;
+        this.soutenanceService = soutenanceService;
+        this.juryService = juryService;
         this.utilisateurRepo = utilisateurRepo;
         this.doctorantRepo = doctorantRepo;
         this.encadrantRepo = encadrantRepo;
         this.demandeRepo = demandeRepo;
     }
 
+    @ModelAttribute
+    public void addCommonAttributes(Model model) {
+        model.addAttribute("demandesEnAttente", demandeRepo.countByStatut(Demande.StatutDemande.EN_ATTENTE));
+    }
+
     @GetMapping({"", "/dashboard"})
     public String dashboard(Model model) {
         model.addAttribute("totalUsers", utilisateurRepo.count());
         model.addAttribute("totalDoctorants", doctorantRepo.count());
-        model.addAttribute("demandesEnAttente", demandeRepo.countByStatut(Demande.StatutDemande.EN_ATTENTE));
         model.addAttribute("demandesAutorisees", demandeRepo.countByStatut(Demande.StatutDemande.AUTORISEE));
         model.addAttribute("derniersDemandes",
                 demandeRepo.findTop5ByStatutOrderByDateDepotDescIdDesc(Demande.StatutDemande.EN_ATTENTE));
@@ -81,7 +93,7 @@ public class AdminController {
     @GetMapping("/users")
     public String users(Model model) {
         model.addAttribute("users", adminService.getAllUsers());
-        return "Admin/users";
+        return "Admin/utilisateurs";
     }
 
     @PostMapping("/users/{id}/role")
@@ -127,5 +139,28 @@ public class AdminController {
             ra.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/admin/doctorants";
+    }
+
+    @GetMapping("/encadrants")
+    public String encadrants(Model model) {
+        model.addAttribute("encadrants", encadrantRepo.findAll());
+        return "Admin/encadrants";
+    }
+
+    @GetMapping("/soutenances")
+    public String soutenances(Model model) {
+        model.addAttribute("soutenances", soutenanceService.getAllSoutenance());
+        return "Admin/soutenances";
+    }
+
+    @GetMapping("/jury")
+    public String jury(Model model) {
+        model.addAttribute("jurys", juryService.findAllJuries());
+        return "Admin/jury";
+    }
+
+    @GetMapping("/parametres")
+    public String parametres() {
+        return "Admin/parametres";
     }
 }

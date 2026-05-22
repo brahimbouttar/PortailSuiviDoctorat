@@ -31,7 +31,11 @@ public class DemandeController {
 
     @GetMapping
     public String list(Model model, HttpSession session) {
-        model.addAttribute("demandes", getDemandesVisibles(session));
+        Object role = session.getAttribute("role");
+        if ("DOCTORANT".equals(role)) {
+            return "redirect:/doctorants/demandes";
+        }
+        model.addAttribute("demandes", service.getAllDemandes());
         model.addAttribute("statuts", Demande.StatutDemande.values());
         return "Demande/demandes";
     }

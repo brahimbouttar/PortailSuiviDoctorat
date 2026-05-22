@@ -4,15 +4,22 @@ import com.gestion.portailsuividoctorat.entites.Doctorant;
 import com.gestion.portailsuividoctorat.entites.Demande;
 import com.gestion.portailsuividoctorat.entites.Utilisateur;
 import com.gestion.portailsuividoctorat.repositories.DemandeRepo;
+import com.gestion.portailsuividoctorat.services.DemandeService;
 import com.gestion.portailsuividoctorat.services.DoctorantServiceImpl;
+import com.gestion.portailsuividoctorat.services.SoutenanceService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/doctorants")
@@ -23,6 +30,12 @@ public class DoctorantController {
 
     @Autowired
     private DemandeRepo demandeRepo;
+
+    @Autowired
+    private DemandeService demandeService;
+
+    @Autowired
+    private SoutenanceService soutenanceService;
 
     @GetMapping
     public String dashboard(Model model, HttpSession session) {
@@ -87,9 +100,19 @@ public class DoctorantController {
     }
 
     @PostMapping("/save")
-    public String saveDoctorant(@ModelAttribute Doctorant doctorant) {
+    public String saveDoctorant(@ModelAttribute Doctorant doctorant,
+                                @RequestParam(required = false) MultipartFile cvFile,
+                                @RequestParam(required = false) MultipartFile lettreFile,
+                                HttpSession session) throws IOException {
+        if (cvFile != null && !cvFile.isEmpty()) {
+            doctorant.setCV(saveFile(cvFile));
+        }
+        if (lettreFile != null && !lettreFile.isEmpty()) {
+            doctorant.setLettreMotivation(saveFile(lettreFile));
+        }
         if (doctorant.getId() != null) {
             doctorantService.updateDoctorant(doctorant, doctorant.getId());
+            session.setAttribute("user", doctorantService.findDoctorant(doctorant.getId()));
         } else {
             doctorantService.createDoctorant(doctorant);
         }
@@ -112,6 +135,71 @@ public class DoctorantController {
     @ResponseBody
     public void deleteDoctorantAjax(@PathVariable Long id) {
         doctorantService.DeleteDoctorant(id);
+    }
+
+    @GetMapping("/demandes")
+    public String mesDemandes(Model model, HttpSession session) {
+        List<Doctorant> doctorants = doctorantService.findAllDoctorants();
+        getDoctorantConnecte(session, doctorants).ifPresent(d -> {
+            model.addAttribute("demandes", demandeRepo.findByDoctorantIdOrderByDateDepotDescIdDesc(d.getId()));
+            model.addAttribute("doctorantId", d.getId());
+        });
+        return "Doctorant/MesDemandes";
+    }
+
+    @PostMapping("/demande/create")
+    public String createDemande(@ModelAttribute Demande demande, HttpSession session, RedirectAttributes ra) {
+        try {
+            List<Doctorant> doctorants = doctorantService.findAllDoctorants();
+            getDoctorantConnecte(session, doctorants).ifPresent(demande::setDoctorant);
+            demandeService.createDemande(demande);
+            ra.addFlashAttribute("successMessage", "Demande soumise avec succès !");
+        } catch (RuntimeException e) {
+            ra.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/doctorants/demandes";
+    }
+
+    @PostMapping("/demande/update")
+    public String updateDemande(@ModelAttribute Demande demande, HttpSession session, RedirectAttributes ra) {
+        try {
+            demandeService.updateDemande(demande.getId(), demande);
+            ra.addFlashAttribute("successMessage", "Demande modifiée avec succès !");
+        } catch (RuntimeException e) {
+            ra.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/doctorants/demandes";
+    }
+
+    @GetMapping("/soutenance")
+    public String maSoutenance(Model model, HttpSession session) {
+        List<Doctorant> doctorants = doctorantService.findAllDoctorants();
+        getDoctorantConnecte(session, doctorants).ifPresent(d -> {
+            model.addAttribute("doctorantId", d.getId());
+        });
+        model.addAttribute("soutenances", soutenanceService.getAllSoutenance());
+        return "Doctorant/Soutenance";
+    }
+
+    @PostMapping("/demande/delete")
+    public String deleteDemande(@RequestParam Long id, RedirectAttributes ra) {
+        try {
+            demandeService.deleteDemande(id);
+            ra.addFlashAttribute("successMessage", "Demande supprimée.");
+        } catch (RuntimeException e) {
+            ra.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/doctorants/demandes";
+    }
+
+    private String saveFile(MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) return null;
+        String uploadPath = System.getProperty("user.dir") + File.separator + "uploads";
+        File directory = new File(uploadPath);
+        if (!directory.exists()) directory.mkdirs();
+        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        file.transferTo(new File(directory, fileName));
+        return fileName;
     }
 
     private Optional<Doctorant> getDoctorantConnecte(HttpSession session, List<Doctorant> doctorants) {

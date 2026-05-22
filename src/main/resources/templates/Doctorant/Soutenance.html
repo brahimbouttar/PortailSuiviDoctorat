@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr"
+      th:replace="~{layouts/doctorant-layout :: layout(
+          'Ma soutenance',
+          'Calendrier et suivi de votre soutenance',
+          'soutenance'
+      )}">
+<head><title>Ma soutenance</title></head>
+<body>
+
+<section th:fragment="section">
+  <style>
+    .alert {
+      padding: 10px 14px; border-radius: 7px; font-size: .8rem;
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 16px; border: 1px solid transparent;
+    }
+    .alert-info { background: #eff6ff; border-color: #c7d9fd; color: var(--blue); }
+
+    .date-badge {
+      display: inline-block; background: #f5f3ff; color: var(--accent);
+      border: 1px solid #ddd6fe; font-size: .75rem; font-weight: 600;
+      padding: 4px 12px; border-radius: 20px;
+    }
+
+    .empty-state {
+      text-align: center; padding: 56px 20px; color: var(--muted);
+    }
+    .empty-state i { font-size: 2.5rem; color: #d1d5db; display: block; margin-bottom: 12px; }
+    .empty-state p { font-size: .9rem; margin-bottom: 4px; }
+    .empty-state small { font-size: .75rem; }
+
+    .soutenance-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 9px;
+      padding: 24px 28px; max-width: 520px;
+    }
+    .soutenance-card .row {
+      display: flex; align-items: center; padding: 10px 0;
+    }
+    .soutenance-card .row + .row { border-top: 1px solid var(--border); }
+    .soutenance-card .row label {
+      font-size: .7rem; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .06em; min-width: 120px; flex-shrink: 0;
+    }
+    .soutenance-card .row span {
+      font-size: .88rem; color: var(--text); font-weight: 600;
+    }
+    .note-val {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 50%;
+      font-weight: 700; font-size: .85rem;
+    }
+    .note-val.high { background: #d1fae5; color: #065f46; }
+    .note-val.mid  { background: #fef9c3; color: #713f12; }
+    .note-val.low  { background: #fef2f2; color: #991b1b; }
+  </style>
+
+  <div th:if="${#lists.isEmpty(soutenances)}" class="empty-state">
+    <i class="fas fa-calendar-circle-exclamation"></i>
+    <p>Aucune soutenance programmée</p>
+    <small>Votre soutenance vous sera communiquée dès qu'elle sera planifiée.</small>
+  </div>
+
+  <div th:unless="${#lists.isEmpty(soutenances)}">
+    <div class="alert alert-info">
+      <i class="fas fa-circle-info"></i>
+      <span>Les informations ci-dessous concernent les soutenances enregistrées dans le système.</span>
+    </div>
+
+    <div th:each="s : ${soutenances}" class="soutenance-card" style="margin-bottom:16px">
+      <div style="margin-bottom:14px">
+        <span class="date-badge">
+          <i class="fas fa-calendar"></i>
+          <span th:text="${s.date != null ? #temporals.format(s.date, 'dd MMMM yyyy') : 'Date non fixée'}">Date</span>
+        </span>
+      </div>
+      <div class="row">
+        <label>Lieu</label>
+        <span th:text="${s.lieu != null ? s.lieu : '—'}">—</span>
+      </div>
+      <div class="row">
+        <label>Note</label>
+        <span th:if="${s.note != null}">
+          <span class="note-val"
+                th:class="${s.note >= 16} ? 'note-val high' : (${s.note >= 12} ? 'note-val mid' : 'note-val low')"
+                th:text="${s.note}"></span>
+          <small style="margin-left:6px;color:var(--muted);font-size:.75rem"
+                 th:text="${s.note >= 16} ? 'Très bien' : (${s.note >= 12} ? 'Bien' : 'Passable')"></small>
+        </span>
+        <span th:unless="${s.note != null}" style="color:var(--muted)">—</span>
+      </div>
+      <div class="row">
+        <label>Publications</label>
+        <span th:text="${s.nbrPublication != null ? s.nbrPublication : '—'}">—</span>
+      </div>
+    </div>
+  </div>
+
+</section>
+</body>
+</html>

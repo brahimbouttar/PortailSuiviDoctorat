@@ -1,174 +1,181 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Gestion Diplômes</title>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr"
+      th:replace="~{layouts/doctorant-layout :: layout(
+          'Mes dossiers',
+          'Gestion des diplômes et documents',
+          'dossiers'
+      )}">
+<head><title>Mes dossiers</title></head>
+<body>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-          rel="stylesheet">
+<section th:fragment="section">
+  <style>
+    .alert {
+      padding: 10px 14px; border-radius: 7px; font-size: .8rem;
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 16px; border: 1px solid transparent;
+    }
+    .alert-success { background: #f0fdf4; border-color: #bbf7d0; color: #15803d; }
+    .alert-danger  { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-          rel="stylesheet">
+    .btn-primary {
+      background: var(--accent); color: #fff; border: none;
+      padding: 7px 14px; border-radius: 6px; font-size: .78rem; font-weight: 600;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: opacity .13s;
+    }
+    .btn-primary:hover { opacity: .88; }
+    .btn-ghost {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      padding: 5px 11px; border-radius: 6px; font-size: .75rem; font-weight: 500;
+      cursor: pointer; transition: all .13s;
+    }
+    .btn-ghost:hover { border-color: #ddd6fe; color: var(--accent); background: #f5f3ff; }
 
-    <style>
-        body{
-            overflow-x: hidden;
-        }
+    .file-link {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: .75rem; color: var(--accent); text-decoration: none;
+      padding: 2px 7px; border: 1px solid #ddd6fe; border-radius: 4px;
+      background: #f5f3ff; transition: all .12s;
+    }
+    .file-link:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-        /* Sidebar */
-        .sidebar-container{
-            width: 250px;
-            min-height: 100vh;
-            background: #212529;
-        }
+    .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(15,20,35,.45); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+    .modal-backdrop.open { display: flex; }
+    .modal-box { background: var(--surface); border-radius: 10px; width: 100%; max-width: 520px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,.18); animation: modalIn .18s ease; }
+    @keyframes modalIn { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+    .modal-head { padding: 15px 20px; background: var(--navy); border-radius: 10px 10px 0 0; display: flex; align-items: center; gap: 9px; color: #fff; flex-shrink: 0; }
+    .modal-head h5 { font-size: .88rem; font-weight: 600; margin: 0; flex: 1; }
+    .modal-head .close-btn { background: none; border: none; color: rgba(255,255,255,.45); font-size: .85rem; cursor: pointer; padding: 2px 5px; transition: color .12s; }
+    .modal-head .close-btn:hover { color: #fff; }
+    .modal-body { padding: 22px 24px; overflow-y: auto; flex: 1; }
+    .modal-foot { padding: 13px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; background: var(--bg); border-radius: 0 0 10px 10px; flex-shrink: 0; }
 
-        /* Content */
-        .content-container{
-            flex: 1;
-            padding: 20px;
-        }
-    </style>
-</head>
+    .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+    .form-group label { font-size: .71rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+    .form-group input {
+      border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px;
+      font-size: .81rem; color: var(--text); background: var(--surface);
+      font-family: inherit; transition: border-color .12s;
+    }
+    .form-group input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,58,237,.1); }
+    .form-group input[type="file"] { padding: 5px; font-size: .78rem; }
+  </style>
 
-<body class="bg-light">
+  <div class="alert alert-success" th:if="${successMessage}">
+    <i class="fas fa-check-circle"></i><span th:text="${successMessage}"></span>
+  </div>
+  <div class="alert alert-danger" th:if="${errorMessage}">
+    <i class="fas fa-exclamation-circle"></i><span th:text="${errorMessage}"></span>
+  </div>
 
-<div class="d-flex">
-
-    <!-- ===== SIDEBAR ===== -->
-    <div class="sidebar-container">
-        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+  <div class="card">
+    <div class="card-head">
+      <h6><i class="fas fa-folder-open"></i> Liste des diplômes</h6>
+      <button class="btn-primary" onclick="openAddModal()">
+        <i class="fas fa-plus"></i> Ajouter
+      </button>
     </div>
 
-    <!-- ===== CONTENT ===== -->
-    <div class="content-container">
-
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2>Gestion des Diplômes</h2>
-
-            <button class="btn btn-primary"
-                    data-bs-toggle="modal"
-                    data-bs-target="#addModal">
-                Ajouter
-            </button>
-        </div>
-
-        <table class="table table-bordered table-striped bg-white shadow-sm">
-            <thead class="table-dark">
-            <tr>
-                <th>ID</th>
-                <th>Bac</th>
-                <th>Licence</th>
-                <th>Master</th>
-                <th>Fichiers</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-
-            <tbody>
-            <tr th:each="d : ${diplomes}">
-                <td th:text="${d.id}"></td>
-                <td th:text="${d.bac}"></td>
-                <td th:text="${d.licence}"></td>
-                <td th:text="${d.master}"></td>
-
-                <td>
-                    <a th:if="${d.bacFile != null}"
-                       th:href="@{'/uploads/' + ${d.bacFile}}"
-                       target="_blank">
-                        Bac
-                    </a>
-
-                    |
-
-                    <a th:if="${d.licenceFile != null}"
-                       th:href="@{'/uploads/' + ${d.licenceFile}}"
-                       target="_blank">
-                        Licence
-                    </a>
-
-                    |
-
-                    <a th:if="${d.masterFile != null}"
-                       th:href="@{'/uploads/' + ${d.masterFile}}"
-                       target="_blank">
-                        Master
-                    </a>
-                </td>
-
-                <td>
-                    <a th:href="@{/Diplome/delete/{id}(id=${d.id})}"
-                       class="btn btn-danger btn-sm">
-                        <i class="bi bi-trash"></i>
-                    </a>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-
+    <div th:if="${#lists.isEmpty(diplomes)}" style="text-align:center;padding:48px 20px;color:var(--muted);font-size:.8rem">
+      <i class="fas fa-inbox" style="font-size:2rem;color:#d1d5db;display:block;margin-bottom:10px"></i>
+      Aucun diplôme enregistré.
     </div>
-</div>
 
-<!-- ===== ADD MODAL ===== -->
-<div class="modal fade" id="addModal">
-    <div class="modal-dialog">
-        <div class="modal-content">
+    <table th:unless="${#lists.isEmpty(diplomes)}">
+      <thead>
+        <tr>
+          <th>Bac</th><th>Licence</th><th>Master</th><th>Fichiers</th><th style="text-align:center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="d : ${diplomes}">
+          <td style="font-weight:600" th:text="${d.bac}">-</td>
+          <td th:text="${d.licence}">-</td>
+          <td th:text="${d.master}">-</td>
+          <td>
+            <div style="display:flex;gap:5px;flex-wrap:wrap">
+              <a th:if="${d.bacFile != null}" class="file-link"
+                 th:href="@{'/uploads/' + ${d.bacFile}}" target="_blank">
+                <i class="fas fa-file-pdf"></i> Bac
+              </a>
+              <a th:if="${d.licenceFile != null}" class="file-link"
+                 th:href="@{'/uploads/' + ${d.licenceFile}}" target="_blank">
+                <i class="fas fa-file-pdf"></i> Licence
+              </a>
+              <a th:if="${d.masterFile != null}" class="file-link"
+                 th:href="@{'/uploads/' + ${d.masterFile}}" target="_blank">
+                <i class="fas fa-file-pdf"></i> Master
+              </a>
+              <span th:if="${d.bacFile == null and d.licenceFile == null and d.masterFile == null}"
+                    style="color:var(--muted);font-size:.75rem">—</span>
+            </div>
+          </td>
+          <td>
+            <div class="act">
+              <a th:href="@{/Diplome/delete/{id}(id=${d.id})}"
+                 onclick="return confirm('Supprimer ce diplôme ?')"
+                 style="display:inline-flex">
+                <button type="button" class="act-btn no" title="Supprimer">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </a>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-            <form th:action="@{/Diplome/create}"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <div class="modal-header">
-                    <h5 class="modal-title">Ajouter Diplôme</h5>
-
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal">
-                    </button>
-                </div>
-
-                <div class="modal-body">
-
-                    <input type="text"
-                           name="bac"
-                           class="form-control mb-2"
-                           placeholder="Bac">
-
-                    <input type="file"
-                           name="bacFile"
-                           class="form-control mb-2">
-
-                    <input type="text"
-                           name="licence"
-                           class="form-control mb-2"
-                           placeholder="Licence">
-
-                    <input type="file"
-                           name="licenceFile"
-                           class="form-control mb-2">
-
-                    <input type="text"
-                           name="master"
-                           class="form-control mb-2"
-                           placeholder="Master">
-
-                    <input type="file"
-                           name="masterFile"
-                           class="form-control mb-2">
-
-                </div>
-
-                <div class="modal-footer">
-                    <button class="btn btn-success">
-                        Save
-                    </button>
-                </div>
-
-            </form>
-
-        </div>
+  <!-- ADD MODAL -->
+  <div class="modal-backdrop" id="addModal" onclick="closeOnBackdrop(event,'addModal')">
+    <div class="modal-box">
+      <div class="modal-head">
+        <i class="fas fa-folder-open" style="font-size:.82rem"></i>
+        <h5>Ajouter un diplôme</h5>
+        <button class="close-btn" onclick="closeModal('addModal')"><i class="fas fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form th:action="@{/Diplome/create}" method="post" enctype="multipart/form-data" id="diplomeForm">
+          <div class="form-group">
+            <label>Bac</label>
+            <input type="text" name="bac" placeholder="Série / Mention"/>
+          </div>
+          <div class="form-group">
+            <label>Fichier Bac</label>
+            <input type="file" name="bacFile"/>
+          </div>
+          <div class="form-group">
+            <label>Licence</label>
+            <input type="text" name="licence" placeholder="Parcours / Mention"/>
+          </div>
+          <div class="form-group">
+            <label>Fichier Licence</label>
+            <input type="file" name="licenceFile"/>
+          </div>
+          <div class="form-group">
+            <label>Master</label>
+            <input type="text" name="master" placeholder="Parcours / Mention"/>
+          </div>
+          <div class="form-group">
+            <label>Fichier Master</label>
+            <input type="file" name="masterFile"/>
+          </div>
+        </form>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-ghost" onclick="closeModal('addModal')">Annuler</button>
+        <button class="btn-primary" onclick="document.getElementById('diplomeForm').submit()">
+          <i class="fas fa-check"></i> Enregistrer
+        </button>
+      </div>
     </div>
-</div>
+  </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+  <script>
+    function openAddModal() { document.getElementById('addModal').classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    function closeOnBackdrop(e, id) { if (e.target === e.currentTarget) closeModal(id); }
+  </script>
+</section>
 </body>
 </html>

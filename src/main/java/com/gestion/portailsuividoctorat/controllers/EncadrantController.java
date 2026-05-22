@@ -22,9 +22,8 @@ public class EncadrantController {
     @Autowired
     DoctorantRepo doctorantRepo;
     @GetMapping
-    public String showList(Model model) {
-        model.addAttribute("encadrants", encadrantService.findAllEncadrants());
-        return "Encadrant/Liste";
+    public String showList() {
+        return "redirect:/encadrant/dashboard";
     }
 
     @GetMapping("/liste")
@@ -88,10 +87,7 @@ public class EncadrantController {
         if (encadrantId == null) {
             return doctorantRepo.findAll();
         }
-        Long finalEncadrantId = encadrantId;
-        return doctorantRepo.findAll().stream()
-                .filter(d -> d.getEncadrant() != null && finalEncadrantId.equals(d.getEncadrant().getId()))
-                .toList();
+        return doctorantRepo.findByEncadrantId(encadrantId);
     }
 
     @RequestMapping(value = "/delete/{id}", method = {RequestMethod.GET, RequestMethod.POST})

@@ -1,273 +1,196 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="fr">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Espace doctorant - Portail Doctorat</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
-  <style>
-    :root {
-      --ink: #172033;
-      --muted: #6b7280;
-      --line: #e5e7eb;
-      --soft: #f5f7fb;
-      --blue: #2563eb;
-      --teal: #0f766e;
-      --amber: #b45309;
-      --green: #15803d;
-    }
-    body { background: var(--soft); color: var(--ink); }
-    .shell { min-height: 100vh; }
-    .sidebar {
-      width: 248px;
-      background: #111827;
-      color: #fff;
-      position: sticky;
-      top: 0;
-      height: 100vh;
-    }
-    .sidebar a { color: rgba(255,255,255,.72); text-decoration: none; }
-    .sidebar a:hover, .sidebar a.active { color: #fff; background: rgba(255,255,255,.08); }
-    .brand-mark { width: 38px; height: 38px; border-radius: 8px; background: var(--blue); }
-    .main { min-width: 0; }
-    .topbar { border-bottom: 1px solid var(--line); background: #fff; }
-    .stat-card, .panel {
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, .05);
-    }
-    .icon-box {
-      width: 42px;
-      height: 42px;
-      border-radius: 8px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      flex: 0 0 auto;
-    }
-    .icon-blue { background: #eff6ff; color: var(--blue); }
-    .icon-teal { background: #f0fdfa; color: var(--teal); }
-    .icon-amber { background: #fffbeb; color: var(--amber); }
-    .icon-green { background: #f0fdf4; color: var(--green); }
-    .label { color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; }
-    .value { font-size: 1.45rem; font-weight: 700; line-height: 1; }
-    .progress { height: 8px; background: #eef2f7; }
-    .timeline-dot { width: 10px; height: 10px; border-radius: 999px; background: var(--blue); margin-top: .45rem; }
-    .truncate-2 {
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    @media (max-width: 991px) {
-      .sidebar { display: none; }
-    }
-  </style>
-</head>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr"
+      th:replace="~{layouts/doctorant-layout :: layout(
+          'Tableau de bord',
+          'Suivi de votre parcours doctoral',
+          'dashboard'
+      )}">
+<head><title>Tableau de bord</title></head>
 <body>
-<div class="d-flex shell">
-  <aside class="sidebar p-3">
-    <div class="d-flex align-items-center gap-2 pb-3 mb-3 border-bottom border-secondary">
-      <div class="brand-mark d-flex align-items-center justify-content-center">
-        <i class="bi bi-mortarboard-fill"></i>
+
+<section th:fragment="section">
+  <style>
+    .alert-info {
+      padding: 10px 14px; border-radius: 7px; font-size: .8rem;
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 16px; background: #eff6ff; border: 1px solid #c7d9fd; color: var(--blue);
+    }
+    .profile-header {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 9px;
+      padding: 20px 22px; margin-bottom: 20px;
+    }
+    .profile-name { font-size: 1.2rem; font-weight: 700; color: var(--text); }
+    .profile-sujet { font-size: .82rem; color: var(--muted); margin-top: 2px; }
+    .pbar-wrap { display: flex; align-items: center; gap: 14px; }
+    .pbar-wrap .pbar { flex: 1; height: 6px; }
+    .pct { font-size: .85rem; font-weight: 700; color: var(--accent); white-space: nowrap; }
+    .coord-grid { display: grid; gap: 12px; }
+    .coord-item label { font-size: .68rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; display: block; margin-bottom: 2px; }
+    .coord-item span  { font-size: .82rem; color: var(--text); }
+    .doc-item { display: flex; gap: 10px; padding: 8px 0; }
+    .doc-item:not(:last-child) { border-bottom: 1px solid var(--border); }
+    .doc-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 5px; }
+    .doc-item p { font-size: .81rem; font-weight: 600; }
+    .doc-item small { font-size: .7rem; color: var(--muted); }
+    .bottom { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+    .link-to {
+      font-size: .71rem; color: var(--muted); text-decoration: none;
+      padding: 4px 10px; border: 1px solid var(--border); border-radius: 5px;
+      background: var(--bg); transition: all .13s;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .link-to:hover { color: var(--accent); border-color: #ddd6fe; background: #f5f3ff; }
+    @media (max-width: 1024px) { .bottom { grid-template-columns: 1fr; } }
+  </style>
+
+  <div th:if="${messageInfo}" class="alert-info">
+    <i class="fas fa-circle-info"></i><span th:text="${messageInfo}"></span>
+  </div>
+
+  <div th:if="${doctorant != null}">
+
+    <div class="profile-header">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+        <div>
+          <div class="profile-name" th:text="${doctorant.prenom + ' ' + doctorant.nom}">Doctorant</div>
+          <div class="profile-sujet" th:text="${doctorant.sujetThese != null && !doctorant.sujetThese.isBlank() ? doctorant.sujetThese : 'Sujet de thèse non renseigné'}">Sujet</div>
+        </div>
+        <div class="pbar-wrap" style="min-width:220px">
+          <div class="pbar"><div class="pbar-fill" th:style="'width:' + ${profilCompletion} + '%'"></div></div>
+          <span class="pct" th:text="${profilCompletion} + '%'">0%</span>
+        </div>
       </div>
-      <div>
-        <div class="fw-semibold">Portail Doctorat</div>
-        <small class="text-white-50">Espace doctorant</small>
+      <div style="margin-top:10px">
+        <a th:href="@{/doctorants/form(id=${doctorant.id})}" class="link-to">
+          <i class="fas fa-pencil"></i> Modifier mon profil
+        </a>
       </div>
     </div>
 
-    <nav class="d-flex flex-column gap-1">
-      <a th:href="@{/doctorants}" class="rounded px-3 py-2 active">
-        <i class="bi bi-speedometer2 me-2"></i>Tableau de bord
-      </a>
-      <a th:href="@{/demandes}" class="rounded px-3 py-2">
-        <i class="bi bi-file-earmark-check me-2"></i>Demandes
-      </a>
-      <a th:href="@{/soutenances}" class="rounded px-3 py-2">
-        <i class="bi bi-calendar2-check me-2"></i>Soutenances
-      </a>
-      <a th:if="${doctorant != null}" th:href="@{/doctorants/detail(id=${doctorant.id})}" class="rounded px-3 py-2">
-        <i class="bi bi-person-lines-fill me-2"></i>Profil
-      </a>
-      <a th:href="@{/logout}" class="rounded px-3 py-2 text-danger mt-2">
-        <i class="bi bi-box-arrow-right me-2"></i>Deconnexion
-      </a>
-    </nav>
-  </aside>
-
-  <div class="main flex-grow-1 d-flex flex-column">
-    <header class="topbar px-4 py-3 d-flex justify-content-between align-items-center">
-      <div>
-        <h1 class="h4 fw-bold mb-0">Tableau de bord</h1>
-        <small class="text-muted">Suivi de votre parcours doctoral</small>
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-icon violet"><i class="fas fa-file-lines"></i></div>
+        <div>
+          <div class="kpi-val" th:text="${demandesTotal}">0</div>
+          <div class="kpi-lbl">Demandes</div>
+        </div>
       </div>
-      <a th:href="@{/doctorants/form(id=${doctorant != null ? doctorant.id : null})}"
-         class="btn btn-outline-primary btn-sm"
-         th:if="${doctorant != null}">
-        <i class="bi bi-pencil-square me-1"></i>Modifier mon profil
-      </a>
-    </header>
+      <div class="kpi">
+        <div class="kpi-icon amber"><i class="fas fa-hourglass-half"></i></div>
+        <div>
+          <div class="kpi-val" th:text="${demandesEnAttente}">0</div>
+          <div class="kpi-lbl">En attente</div>
+        </div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon green"><i class="fas fa-circle-check"></i></div>
+        <div>
+          <div class="kpi-val" th:text="${demandesAutorisees}">0</div>
+          <div class="kpi-lbl">Autorisées</div>
+        </div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon blue"><i class="fas fa-chalkboard-user"></i></div>
+        <div>
+          <div class="kpi-lbl" style="font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Encadrant</div>
+          <div style="font-size:.82rem;font-weight:600;margin-top:1px"
+               th:text="${doctorant.encadrant != null ? doctorant.encadrant.prenom + ' ' + doctorant.encadrant.nom : 'Non assigné'}">
+            Non assigné
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <main class="p-4">
-      <div th:if="${messageInfo}" class="alert alert-info" th:text="${messageInfo}"></div>
+    <div class="bottom">
+      <div class="card">
+        <div class="card-head">
+          <h6><i class="fas fa-table-list"></i> Demandes récentes</h6>
+          <a th:href="@{/doctorants/demandes}" class="link-to"><i class="fas fa-plus"></i> Voir tout</a>
+        </div>
 
-      <section th:if="${doctorant != null}">
-        <div class="panel p-4 mb-4">
-          <div class="row g-3 align-items-center">
-            <div class="col-lg-8">
-              <div class="label mb-2">Profil doctorant</div>
-              <h2 class="h3 fw-bold mb-2" th:text="${doctorant.prenom + ' ' + doctorant.nom}">Doctorant</h2>
-              <p class="text-muted mb-0 truncate-2"
-                 th:text="${doctorant.sujetThese != null && !doctorant.sujetThese.isBlank() ? doctorant.sujetThese : 'Sujet de these non renseigne'}">
-                Sujet de these
-              </p>
+        <div th:if="${#lists.isEmpty(demandes)}" style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.8rem">
+          <i class="fas fa-inbox" style="font-size:2rem;color:#d1d5db;display:block;margin-bottom:10px"></i>
+          Aucune demande enregistrée.
+        </div>
+
+        <table th:unless="${#lists.isEmpty(demandes)}">
+          <thead>
+            <tr>
+              <th>Date</th><th>Articles Q1/Q2</th><th>Conférences</th><th>Formation</th><th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="d : ${demandes}">
+              <td th:text="${d.dateDepot != null ? #temporals.format(d.dateDepot, 'dd/MM/yyyy') : '-'}">-</td>
+              <td th:text="${d.nbrArticlesQ1Q2 != null ? d.nbrArticlesQ1Q2 : 0}">0</td>
+              <td th:text="${d.nbrConferences != null ? d.nbrConferences : 0}">0</td>
+              <td th:text="${d.heuresFormation != null ? d.heuresFormation + ' h' : '0 h'}">0 h</td>
+              <td>
+                <span class="badge"
+                      th:class="${d.statut.name() == 'AUTORISEE'} ? 'badge badge-success' : (${d.statut.name() == 'REFUSEE'} ? 'badge badge-danger' : 'badge badge-warning')"
+                      th:text="${d.statut}">EN_ATTENTE</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-head">
+            <h6><i class="fas fa-address-card"></i> Coordonnées</h6>
+          </div>
+          <div style="padding:14px 18px">
+            <div class="coord-item" style="margin-bottom:10px">
+              <label>Email</label>
+              <span th:text="${doctorant.email != null ? doctorant.email : '-'}">-</span>
             </div>
-            <div class="col-lg-4">
-              <div class="d-flex justify-content-between small mb-1">
-                <span class="text-muted">Profil complete</span>
-                <strong th:text="${profilCompletion + '%'}">0%</strong>
-              </div>
-              <div class="progress">
-                <div class="progress-bar" th:style="'width:' + ${profilCompletion} + '%'"></div>
-              </div>
+            <div class="coord-item" style="margin-bottom:10px">
+              <label>Téléphone</label>
+              <span th:text="${doctorant.telephone != null ? doctorant.telephone : '-'}">-</span>
+            </div>
+            <div class="coord-item">
+              <label>Adresse</label>
+              <span th:text="${doctorant.adresse != null ? doctorant.adresse : '-'}">-</span>
             </div>
           </div>
         </div>
 
-        <div class="row g-3 mb-4">
-          <div class="col-md-6 col-xl-3">
-            <div class="stat-card p-3 h-100 d-flex gap-3 align-items-center">
-              <div class="icon-box icon-blue"><i class="bi bi-file-earmark-text"></i></div>
+        <div class="card">
+          <div class="card-head">
+            <h6><i class="fas fa-folder-open"></i> Documents</h6>
+          </div>
+          <div style="padding:10px 18px">
+            <div class="doc-item">
+              <div class="doc-dot"></div>
               <div>
-                <div class="label">Demandes</div>
-                <div class="value" th:text="${demandesTotal}">0</div>
+                <p>CV</p>
+                <a th:if="${doctorant.CV != null && !doctorant.CV.isBlank()}"
+                   th:href="@{'/uploads/' + ${doctorant.CV}}" target="_blank"
+                   style="font-size:.75rem;color:var(--accent);text-decoration:none">
+                  <i class="fas fa-file-pdf"></i> Télécharger
+                </a>
+                <small th:unless="${doctorant.CV != null && !doctorant.CV.isBlank()}" style="color:var(--muted)">Non renseigné</small>
               </div>
             </div>
-          </div>
-          <div class="col-md-6 col-xl-3">
-            <div class="stat-card p-3 h-100 d-flex gap-3 align-items-center">
-              <div class="icon-box icon-amber"><i class="bi bi-hourglass-split"></i></div>
+            <div class="doc-item">
+              <div class="doc-dot"></div>
               <div>
-                <div class="label">En attente</div>
-                <div class="value" th:text="${demandesEnAttente}">0</div>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6 col-xl-3">
-            <div class="stat-card p-3 h-100 d-flex gap-3 align-items-center">
-              <div class="icon-box icon-green"><i class="bi bi-check2-circle"></i></div>
-              <div>
-                <div class="label">Autorisees</div>
-                <div class="value" th:text="${demandesAutorisees}">0</div>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6 col-xl-3">
-            <div class="stat-card p-3 h-100 d-flex gap-3 align-items-center">
-              <div class="icon-box icon-teal"><i class="bi bi-person-workspace"></i></div>
-              <div>
-                <div class="label">Encadrant</div>
-                <div class="fw-semibold text-truncate" style="max-width:150px;"
-                     th:text="${doctorant.encadrant != null ? doctorant.encadrant.prenom + ' ' + doctorant.encadrant.nom : 'Non assigne'}">
-                  Non assigne
-                </div>
+                <p>Lettre de motivation</p>
+                <a th:if="${doctorant.lettreMotivation != null && !doctorant.lettreMotivation.isBlank()}"
+                   th:href="@{'/uploads/' + ${doctorant.lettreMotivation}}" target="_blank"
+                   style="font-size:.75rem;color:var(--accent);text-decoration:none">
+                  <i class="fas fa-file-pdf"></i> Télécharger
+                </a>
+                <small th:unless="${doctorant.lettreMotivation != null && !doctorant.lettreMotivation.isBlank()}" style="color:var(--muted)">Non renseignée</small>
               </div>
             </div>
           </div>
         </div>
+      </div>
+    </div>
 
-        <div class="row g-4">
-          <div class="col-xl-8">
-            <div class="panel">
-              <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
-                <h3 class="h6 fw-bold mb-0"><i class="bi bi-activity me-2 text-primary"></i>Demandes recentes</h3>
-                <a th:href="@{/demandes}" class="btn btn-sm btn-outline-primary">Nouvelle demande</a>
-              </div>
-
-              <div th:if="${#lists.isEmpty(demandes)}" class="text-center text-muted py-5">
-                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
-                Aucune demande enregistree.
-              </div>
-
-              <div th:unless="${#lists.isEmpty(demandes)}" class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                  <thead class="table-light">
-                  <tr>
-                    <th>Date</th>
-                    <th>Articles Q1/Q2</th>
-                    <th>Conferences</th>
-                    <th>Formation</th>
-                    <th>Statut</th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  <tr th:each="d : ${demandes}">
-                    <td th:text="${d.dateDepot != null ? #temporals.format(d.dateDepot, 'dd/MM/yyyy') : '-'}">-</td>
-                    <td th:text="${d.nbrArticlesQ1Q2 != null ? d.nbrArticlesQ1Q2 : 0}">0</td>
-                    <td th:text="${d.nbrConferences != null ? d.nbrConferences : 0}">0</td>
-                    <td th:text="${d.heuresFormation != null ? d.heuresFormation + ' h' : '0 h'}">0 h</td>
-                    <td>
-                      <span class="badge text-bg-secondary" th:text="${d.statut}">EN_ATTENTE</span>
-                    </td>
-                  </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-xl-4">
-            <div class="panel mb-4">
-              <div class="p-3 border-bottom">
-                <h3 class="h6 fw-bold mb-0"><i class="bi bi-person-badge me-2 text-primary"></i>Coordonnees</h3>
-              </div>
-              <div class="p-3">
-                <div class="mb-3">
-                  <div class="label">Email</div>
-                  <div th:text="${doctorant.email != null ? doctorant.email : '-'}">-</div>
-                </div>
-                <div class="mb-3">
-                  <div class="label">Telephone</div>
-                  <div th:text="${doctorant.telephone != null ? doctorant.telephone : '-'}">-</div>
-                </div>
-                <div>
-                  <div class="label">Adresse</div>
-                  <div th:text="${doctorant.adresse != null ? doctorant.adresse : '-'}">-</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="panel">
-              <div class="p-3 border-bottom">
-                <h3 class="h6 fw-bold mb-0"><i class="bi bi-folder2-open me-2 text-primary"></i>Documents</h3>
-              </div>
-              <div class="p-3">
-                <div class="d-flex gap-2 mb-3">
-                  <div class="timeline-dot"></div>
-                  <div>
-                    <div class="fw-semibold">CV</div>
-                    <small class="text-muted" th:text="${doctorant.CV != null && !doctorant.CV.isBlank() ? doctorant.CV : 'Non renseigne'}">Non renseigne</small>
-                  </div>
-                </div>
-                <div class="d-flex gap-2">
-                  <div class="timeline-dot"></div>
-                  <div>
-                    <div class="fw-semibold">Lettre de motivation</div>
-                    <small class="text-muted" th:text="${doctorant.lettreMotivation != null && !doctorant.lettreMotivation.isBlank() ? doctorant.lettreMotivation : 'Non renseignee'}">Non renseignee</small>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
   </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</section>
 </body>
 </html>

@@ -1,8 +1,10 @@
 package com.gestion.portailsuividoctorat;
 
 import com.gestion.portailsuividoctorat.entites.Doctorant;
+import com.gestion.portailsuividoctorat.entites.Encadrant;
 import com.gestion.portailsuividoctorat.entites.Utilisateur;
 import com.gestion.portailsuividoctorat.repositories.DoctorantRepo;
+import com.gestion.portailsuividoctorat.repositories.EncadrantRepo;
 import com.gestion.portailsuividoctorat.repositories.UtilisateurRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -15,6 +17,8 @@ public class PortailSuiviDoctoratApplication implements CommandLineRunner {
     UtilisateurRepo utilisateurRepo;
     @Autowired
     DoctorantRepo doctorantRepo;
+    @Autowired
+    EncadrantRepo encadrantRepo;
     public static void main(String[] args) {
         SpringApplication.run(PortailSuiviDoctoratApplication.class, args);
     }
@@ -46,6 +50,21 @@ public class PortailSuiviDoctoratApplication implements CommandLineRunner {
             doctorant.setCV("CV demo");
             doctorant.setLettreMotivation("Lettre demo");
             doctorantRepo.save(doctorant);
+        }
+
+        if (encadrantRepo.findByEmail("encadrant@portail.local") == null) {
+            Encadrant encadrant = new Encadrant();
+            encadrant.setNom("Encadrant");
+            encadrant.setPrenom("Demo");
+            encadrant.setEmail("encadrant@portail.local");
+            encadrant.setAdresse("Faculte des sciences");
+            encadrant.setTelephone("+212622222222");
+            encadrant.setPassword("encadrant123");
+            encadrant.setRole("ENCADRANT");
+            encadrant.setSpecialite("Informatique");
+            encadrant.setGrade("Professeur");
+            encadrant.setEtablissement("Faculte des sciences");
+            encadrantRepo.save(encadrant);
         }
     }
 

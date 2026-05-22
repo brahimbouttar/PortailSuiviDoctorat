@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr"
+      th:replace="~{layouts/admin-layout :: layout(
+          'Paramètres',
+          'Configuration de la plateforme',
+          'parametres'
+      )}">
+<head><title>Paramètres</title></head>
+<body>
+
+<section th:fragment="content">
+  <style>
+    .empty-state {
+      text-align: center; padding: 64px 20px; color: var(--muted);
+    }
+    .empty-state i {
+      font-size: 3rem; color: #d1d5db; display: block; margin-bottom: 14px;
+    }
+    .empty-state p { font-size: .9rem; margin-bottom: 4px; }
+    .empty-state small { font-size: .75rem; color: var(--muted); }
+  </style>
+
+  <div class="empty-state">
+    <i class="fas fa-gear"></i>
+    <p>Page des paramètres</p>
+    <small>Fonctionnalité à venir.</small>
+  </div>
+</section>
+</body>
+</html>

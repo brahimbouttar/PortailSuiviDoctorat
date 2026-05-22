@@ -18,4 +18,7 @@ public class Diplomes {
     private String Bac;
     private String Licence;
     private String Master;
+    private String BacFile;
+    private String LicenceFile;
+    private String MasterFile;
 }

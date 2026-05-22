@@ -239,11 +239,9 @@
       <div class="sb-uname">Administrateur</div>
       <div class="sb-urole">Accès complet</div>
     </div>
-    <form th:action="@{/logout}" method="post" style="display:inline">
-      <button type="submit" class="sb-logout" title="Déconnexion">
-        <i class="fas fa-right-from-bracket"></i>
-      </button>
-    </form>
+    <a th:href="@{/logout}" class="sb-logout" title="Déconnexion">
+      <i class="fas fa-right-from-bracket"></i>
+    </a>
   </div>
 </aside>
 
