@@ -1,247 +1,64 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="fr"
-      th:replace="~{layouts/admin-layout :: layout(
-          'Doctorants',
-          'Gestion des doctorants inscrits',
-          'doctorants'
-      )}">
-<head><title>Doctorants</title></head>
+      th:replace="~{fragments/admin-layout :: layout('Gestion des doctorants', 'Suivi des profils doctorants', 'doctorants', ~{::section})}">
 <body>
+<section>
+  <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+  <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
 
-<section th:fragment="content">
-  <style>
-    /* ── SEARCH ──────────────────────────────────────────────── */
-    .search-bar {
-      position: relative; margin-bottom: 16px;
-    }
-    .search-bar i {
-      position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
-      color: var(--muted); font-size: .78rem; pointer-events: none;
-    }
-    .search-bar input {
-      width: 100%; padding: 8px 12px 8px 32px;
-      border: 1px solid var(--border); border-radius: 7px;
-      font-size: .81rem; color: var(--text); background: var(--surface);
-      font-family: inherit; transition: border-color .12s;
-    }
-    .search-bar input:focus {
-      outline: none; border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(59,110,244,.1);
-    }
-
-    /* ── BTN ─────────────────────────────────────────────────── */
-    .btn-primary {
-      background: var(--accent); color: #fff; border: none;
-      padding: 7px 14px; border-radius: 6px; font-size: .78rem; font-weight: 600;
-      cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
-      transition: opacity .13s;
-    }
-    .btn-primary:hover { opacity: .88; }
-    .btn-ghost {
-      background: transparent; border: 1px solid var(--border); color: var(--muted);
-      padding: 5px 11px; border-radius: 6px; font-size: .75rem; font-weight: 500;
-      cursor: pointer; transition: all .13s;
-    }
-    .btn-ghost:hover { border-color: #c7d9fd; color: var(--accent); background: #eff6ff; }
-
-    /* ── CLICKABLE ROW ───────────────────────────────────────── */
-    tbody tr.clickable { cursor: pointer; }
-
-    /* ── MODAL ───────────────────────────────────────────────── */
-    .modal-backdrop {
-      display: none; position: fixed; inset: 0;
-      background: rgba(15,20,35,.45); z-index: 200;
-      align-items: center; justify-content: center; padding: 20px;
-    }
-    .modal-backdrop.open { display: flex; }
-    .modal-box {
-      background: var(--surface); border-radius: 10px;
-      width: 100%; max-width: 500px; max-height: 90vh;
-      display: flex; flex-direction: column;
-      box-shadow: 0 20px 60px rgba(0,0,0,.18);
-      animation: modalIn .18s ease;
-    }
-    @keyframes modalIn { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
-    .modal-head {
-      padding: 15px 20px; background: var(--navy); border-radius: 10px 10px 0 0;
-      display: flex; align-items: center; gap: 9px; color: #fff; flex-shrink: 0;
-    }
-    .modal-head h5 { font-size: .88rem; font-weight: 600; margin: 0; flex: 1; }
-    .modal-head .close-btn {
-      background: none; border: none; color: rgba(255,255,255,.45);
-      font-size: .85rem; cursor: pointer; padding: 2px 5px; transition: color .12s;
-    }
-    .modal-head .close-btn:hover { color: #fff; }
-    .modal-body { padding: 22px 24px; overflow-y: auto; flex: 1; }
-    .modal-foot {
-      padding: 13px 20px; border-top: 1px solid var(--border);
-      display: flex; justify-content: flex-end; gap: 8px;
-      background: var(--bg); border-radius: 0 0 10px 10px; flex-shrink: 0;
-    }
-
-    /* ── FORM ────────────────────────────────────────────────── */
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .form-grid.cols-1 { grid-template-columns: 1fr; }
-    .form-group { display: flex; flex-direction: column; gap: 4px; }
-    .form-group label {
-      font-size: .71rem; font-weight: 600; color: var(--muted);
-      text-transform: uppercase; letter-spacing: .06em;
-    }
-    .form-group input {
-      border: 1px solid var(--border); border-radius: 6px;
-      padding: 7px 10px; font-size: .81rem; color: var(--text);
-      background: var(--surface); transition: border-color .12s; font-family: inherit;
-    }
-    .form-group input:focus {
-      outline: none; border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(59,110,244,.1);
-    }
-  </style>
-
-
-
-  <!-- HEADER ACTIONS -->
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-    <div class="search-bar" style="flex:1;max-width:320px;margin-bottom:0">
-      <i class="fas fa-search"></i>
-      <input id="searchInput" placeholder="Rechercher un doctorant…" oninput="filterTable()"/>
-    </div>
-    <button class="btn-primary" onclick="openModal('add')">
-      <i class="fas fa-plus"></i> Ajouter
-    </button>
-  </div>
-
-  <!-- TABLE CARD -->
   <div class="card">
-    <div class="card-head">
-      <h6><i class="fas fa-user-graduate"></i> Liste des doctorants</h6>
-    </div>
-    <table>
-      <thead>
-      <tr>
-        <th>Nom</th><th>Prénom</th><th>Email</th>
-        <th>Adresse</th><th>Téléphone</th><th>Sujet</th>
-        <th style="text-align:center">Actions</th>
-      </tr>
-      </thead>
-      <tbody id="tableBody">
-
-      <tr th:if="${#lists.isEmpty(doctorants)}">
-        <td colspan="7" style="text-align:center;padding:48px 20px;color:var(--muted);font-size:.8rem">
-          <i class="fas fa-inbox" style="font-size:2rem;color:#d1d5db;display:block;margin-bottom:10px"></i>
-          Aucun doctorant trouvé.
-        </td>
-      </tr>
-
-      <tr th:unless="${#lists.isEmpty(doctorants)}"
-          th:each="d : ${doctorants}"
-          class="clickable"
-          th:onclick="|window.location.href='@{/doctorants/details/{id}(id=${d.id})}'|">
-        <td th:text="${d.nom}"></td>
-        <td th:text="${d.prenom}"></td>
-        <td th:text="${d.email != null ? d.email : '—'}"></td>
-        <td th:text="${d.adresse}"></td>
-        <td th:text="${d.telephone}"></td>
-        <td th:text="${d.sujetThese}"></td>
-        <td>
-          <div class="act">
-            <button class="act-btn ok" title="Modifier" onclick="event.stopPropagation()"
-                    th:attr="onclick='event.stopPropagation();openUpdateModal('+${d.id}+',\''+${d.nom}+'\',\''+${d.prenom}+'\',\''+${d.email}+'\',\''+${d.adresse}+'\',\''+${d.telephone}+'\',\''+${d.sujetThese}+'\')'">
-              <i class="fas fa-pencil"></i>
-            </button>
-            <button class="act-btn no" title="Supprimer"
-                    th:onclick="'deleteDoctorant(event,' + ${d.id} + ')'">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </td>
-      </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- ═══ MODAL AJOUTER ═══════════════════════════════════════ -->
-  <div class="modal-backdrop" id="addModal" onclick="closeOnBackdrop(event,'addModal')">
-    <div class="modal-box">
-      <div class="modal-head">
-        <i class="fas fa-user-plus" style="font-size:.82rem"></i>
-        <h5>Ajouter un doctorant</h5>
-        <button class="close-btn" onclick="closeModal('addModal')"><i class="fas fa-xmark"></i></button>
+    <div class="card-body p-3">
+      <div th:if="${#lists.isEmpty(doctorants)}" class="text-center py-4">
+        <i class="bi bi-mortarboard text-muted" style="font-size:2rem;"></i>
+        <p class="text-muted mt-2 mb-0">Aucun doctorant trouvé.</p>
       </div>
-      <div class="modal-body">
-        <form th:action="@{/doctorants/save}" method="post" th:object="${newDoctorant}">
-          <div class="form-grid">
-            <div class="form-group"><label>Nom</label><input th:field="*{nom}" placeholder="Nom"/></div>
-            <div class="form-group"><label>Prénom</label><input th:field="*{prenom}" placeholder="Prénom"/></div>
-            <div class="form-group"><label>Email</label><input th:field="*{email}" placeholder="Email"/></div>
-            <div class="form-group"><label>Téléphone</label><input th:field="*{telephone}" placeholder="Téléphone"/></div>
-            <div class="form-group cols-1" style="grid-column:1/-1"><label>Adresse</label><input th:field="*{adresse}" placeholder="Adresse"/></div>
-            <div class="form-group" style="grid-column:1/-1"><label>Sujet de thèse</label><input th:field="*{sujetThese}" placeholder="Sujet"/></div>
-            <div class="form-group" style="grid-column:1/-1"><label>Mot de passe</label><input type="password" th:field="*{password}" placeholder="Mot de passe"/></div>
-          </div>
-          <div class="modal-foot" style="padding:16px 0 0;background:transparent;border:none">
-            <button type="button" class="btn-ghost" onclick="closeModal('addModal')">Annuler</button>
-            <button type="submit" class="btn-primary"><i class="fas fa-check"></i> Enregistrer</button>
-          </div>
-        </form>
+
+      <div class="table-responsive" th:unless="${#lists.isEmpty(doctorants)}">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+          <tr>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Sujet de thèse</th>
+            <th>Encadrant</th>
+            <th class="text-center">Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="d : ${doctorants}">
+            <td th:text="${d.prenom + ' ' + d.nom}">-</td>
+            <td th:text="${d.email}">-</td>
+            <td th:text="${d.sujetThese != null ? d.sujetThese : '-'}">-</td>
+            <td>
+              <span th:if="${d.encadrant != null}" th:text="${d.encadrant.prenom + ' ' + d.encadrant.nom}">-</span>
+              <span th:unless="${d.encadrant != null}" class="text-muted">Non assigné</span>
+            </td>
+            <td class="text-center">
+              <form th:action="@{/admin/doctorants/{id}/encadrant(id=${d.id})}" method="post"
+                    class="d-inline-flex gap-2 align-items-center me-2">
+                <select name="encadrantId" class="form-select form-select-sm" style="max-width:180px;" required>
+                  <option value="">Encadrant</option>
+                  <option th:each="e : ${encadrants}"
+                          th:value="${e.id}"
+                          th:selected="${d.encadrant != null and d.encadrant.id == e.id}"
+                          th:text="${e.prenom + ' ' + e.nom}">Encadrant</option>
+                </select>
+                <button type="submit" class="btn btn-sm btn-outline-primary" title="Assigner">
+                  <i class="bi bi-person-check"></i>
+                </button>
+              </form>
+              <form th:action="@{/admin/doctorants/{id}/delete(id=${d.id})}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
-
-  <!-- ═══ MODAL MODIFIER ══════════════════════════════════════ -->
-  <div class="modal-backdrop" id="updateModal" onclick="closeOnBackdrop(event,'updateModal')">
-    <div class="modal-box">
-      <div class="modal-head">
-        <i class="fas fa-user-pen" style="font-size:.82rem"></i>
-        <h5>Modifier le doctorant</h5>
-        <button class="close-btn" onclick="closeModal('updateModal')"><i class="fas fa-xmark"></i></button>
-      </div>
-      <div class="modal-body">
-        <form id="updateForm" method="post">
-          <div class="form-grid">
-            <div class="form-group"><label>Nom</label><input id="updateNom" name="nom"/></div>
-            <div class="form-group"><label>Prénom</label><input id="updatePrenom" name="prenom"/></div>
-            <div class="form-group"><label>Email</label><input id="updateEmail" name="email"/></div>
-            <div class="form-group"><label>Téléphone</label><input id="updateTelephone" name="telephone"/></div>
-            <div class="form-group" style="grid-column:1/-1"><label>Adresse</label><input id="updateAdresse" name="adresse"/></div>
-            <div class="form-group" style="grid-column:1/-1"><label>Sujet de thèse</label><input id="updateSujetThese" name="sujetThese"/></div>
-          </div>
-          <div class="modal-foot" style="padding:16px 0 0;background:transparent;border:none">
-            <button type="button" class="btn-ghost" onclick="closeModal('updateModal')">Annuler</button>
-            <button type="submit" class="btn-primary"><i class="fas fa-check"></i> Mettre à jour</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    function filterTable() {
-      const q = document.getElementById('searchInput').value.toLowerCase();
-      document.querySelectorAll('#tableBody tr').forEach(r => {
-        r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none';
-      });
-    }
-    function deleteDoctorant(event, id) {
-      event.stopPropagation();
-      if (!confirm('Supprimer ce doctorant ?')) return;
-      fetch('/doctorants/delete/' + id, { method: 'DELETE' })
-              .then(r => r.ok ? location.reload() : alert('Erreur suppression'));
-    }
-    function openUpdateModal(id, nom, prenom, email, adresse, telephone, sujetThese) {
-      document.getElementById('updateNom').value        = nom;
-      document.getElementById('updatePrenom').value     = prenom;
-      document.getElementById('updateEmail').value      = email;
-      document.getElementById('updateAdresse').value    = adresse;
-      document.getElementById('updateTelephone').value  = telephone;
-      document.getElementById('updateSujetThese').value = sujetThese;
-      document.getElementById('updateForm').action      = '/doctorants/update/' + id;
-      document.getElementById('updateModal').classList.add('open');
-    }
-    function closeModal(id)               { document.getElementById(id).classList.remove('open'); }
-    function closeOnBackdrop(e, id)       { if (e.target === e.currentTarget) closeModal(id); }
-  </script>
-
 </section>
 </body>
 </html>

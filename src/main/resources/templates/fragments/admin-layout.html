@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr"
+      th:fragment="layout(pageTitle, pageSubtitle, activePage, content)">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title th:text="${pageTitle}">Administration</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+  <style>
+    body { background:#f0f4f8; }
+    .admin-shell { min-height:calc(100vh - 56px); }
+    .admin-sidebar { background:#fff; border-right:1px solid #e5e7eb; }
+    .admin-sidebar .nav-link { color:#495057; border-radius:8px; font-weight:500; }
+    .admin-sidebar .nav-link:hover { background:#eef4ff; color:#0d6efd; }
+    .admin-sidebar .nav-link.active { background:#0d6efd; color:#fff; }
+    .card { border:none; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+    .stat-card { border-radius:12px; padding:1.2rem 1.5rem; display:flex; align-items:center; gap:1rem; background:#fff; }
+    .stat-icon { width:50px; height:50px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; }
+    .stat-value { font-size:1.8rem; font-weight:700; }
+    .stat-label { font-size:.75rem; color:#888; text-transform:uppercase; letter-spacing:.08em; }
+  </style>
+</head>
+<body>
+<th:block th:replace="~{fragments/navbar :: navbar}"></th:block>
+
+<div class="container-fluid admin-shell">
+  <div class="row h-100">
+    <aside class="col-lg-2 admin-sidebar p-3">
+      <nav class="nav flex-column gap-1">
+        <a class="nav-link" th:classappend="${activePage == 'dashboard'} ? ' active' : ''"
+           th:href="@{/admin/dashboard}">
+          <i class="bi bi-speedometer2 me-2"></i>Tableau de bord
+        </a>
+        <a class="nav-link" th:classappend="${activePage == 'demandes'} ? ' active' : ''"
+           th:href="@{/admin/demandes}">
+          <i class="bi bi-bell me-2"></i>Demandes
+        </a>
+        <a class="nav-link" th:classappend="${activePage == 'users'} ? ' active' : ''"
+           th:href="@{/admin/users}">
+          <i class="bi bi-people me-2"></i>Utilisateurs
+        </a>
+        <a class="nav-link" th:classappend="${activePage == 'doctorants'} ? ' active' : ''"
+           th:href="@{/admin/doctorants}">
+          <i class="bi bi-mortarboard me-2"></i>Doctorants
+        </a>
+      </nav>
+    </aside>
+
+    <main class="col-lg-10 p-4">
+      <div class="mb-4">
+        <h4 class="fw-bold mb-0" th:text="${pageTitle}">Administration</h4>
+        <small class="text-muted" th:text="${pageSubtitle}">Gestion du portail doctoral</small>
+      </div>
+
+      <th:block th:replace="${content}"></th:block>
+    </main>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

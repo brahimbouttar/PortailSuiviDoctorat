@@ -12,12 +12,20 @@ public class DoctorantServiceImpl implements DoctorantService {
     DoctorantRepo DoctorantRepo;
     @Override
     public Doctorant createDoctorant(Doctorant d) {
+        d.setRole("DOCTORANT");
         return DoctorantRepo.save(d);
     }
 
     @Override
     public Doctorant updateDoctorant(Doctorant d, Long id) {
         Doctorant existing = DoctorantRepo.findById(id).orElseThrow(() -> new RuntimeException("Doctorant not found"));
+        if (d.getNom() != null) {existing.setNom(d.getNom());}
+        if (d.getPrenom() != null) {existing.setPrenom(d.getPrenom());}
+        if (d.getEmail() != null) {existing.setEmail(d.getEmail());}
+        if (d.getTelephone() != null) {existing.setTelephone(d.getTelephone());}
+        if (d.getAdresse() != null) {existing.setAdresse(d.getAdresse());}
+        if (d.getPassword() != null && !d.getPassword().isBlank()) {existing.setPassword(d.getPassword());}
+        existing.setRole("DOCTORANT");
         if (d.getSujetThese() != null) {existing.setSujetThese(d.getSujetThese());}
         if (d.getCV() != null) {existing.setCV(d.getCV());}
         if (d.getLettreMotivation() != null) {existing.setLettreMotivation(d.getLettreMotivation());}

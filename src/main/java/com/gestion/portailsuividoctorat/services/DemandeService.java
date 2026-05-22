@@ -9,6 +9,5 @@ public interface DemandeService {
     void deleteDemande(Long id);
     Demande getDemandeById(Long id);
     List<Demande> getAllDemandes();
-    Demande createDemande(Demande demande, Long doctorantId);
-    List<Demande> getDemandesByDoctorant(Long doctorantId);
+    Demande changerStatut(Long id, Demande.StatutDemande statut);
 }
