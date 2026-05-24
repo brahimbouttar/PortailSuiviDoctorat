@@ -2,6 +2,7 @@ package com.gestion.portailsuividoctorat.controllers;
 
 import com.gestion.portailsuividoctorat.dto.SoutenanceDTO;
 import com.gestion.portailsuividoctorat.services.SoutenanceService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,11 @@ public class SoutenanceController {
     }
 
     @GetMapping
-    public String list(Model model) {
+    public String list(Model model, HttpSession session) {
+        Object role = session.getAttribute("role");
+        if ("DOCTORANT".equals(role)) {
+            return "redirect:/doctorants/soutenance";
+        }
         model.addAttribute("soutenances", service.getAllSoutenance());
         return "Soutenance/soutenances";
     }
@@ -39,6 +44,9 @@ public class SoutenanceController {
     public String update(@ModelAttribute SoutenanceDTO dto,
                          RedirectAttributes ra) {
         try {
+            if (dto.getId() == null) {
+                throw new RuntimeException("Identifiant de soutenance obligatoire");
+            }
             service.updateSoutenance(dto.getId(), dto);
             ra.addFlashAttribute("successMessage", "Soutenance modifiée avec succès !");
         } catch (Exception e) {

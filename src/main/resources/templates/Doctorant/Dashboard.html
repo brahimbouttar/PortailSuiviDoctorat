@@ -2,137 +2,195 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="fr"
       th:replace="~{layouts/doctorant-layout :: layout(
           'Tableau de bord',
-          'Suivez l\'avancement de votre thèse et vos échéances à venir',
+          'Suivi de votre parcours doctoral',
           'dashboard'
       )}">
 <head><title>Tableau de bord</title></head>
 <body>
 
-<section th:fragment="content">
+<section th:fragment="section">
+  <style>
+    .alert-info {
+      padding: 10px 14px; border-radius: 7px; font-size: .8rem;
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 16px; background: #eff6ff; border: 1px solid #c7d9fd; color: var(--blue);
+    }
+    .profile-header {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 9px;
+      padding: 20px 22px; margin-bottom: 20px;
+    }
+    .profile-name { font-size: 1.2rem; font-weight: 700; color: var(--text); }
+    .profile-sujet { font-size: .82rem; color: var(--muted); margin-top: 2px; }
+    .pbar-wrap { display: flex; align-items: center; gap: 14px; }
+    .pbar-wrap .pbar { flex: 1; height: 6px; }
+    .pct { font-size: .85rem; font-weight: 700; color: var(--accent); white-space: nowrap; }
+    .coord-grid { display: grid; gap: 12px; }
+    .coord-item label { font-size: .68rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; display: block; margin-bottom: 2px; }
+    .coord-item span  { font-size: .82rem; color: var(--text); }
+    .doc-item { display: flex; gap: 10px; padding: 8px 0; }
+    .doc-item:not(:last-child) { border-bottom: 1px solid var(--border); }
+    .doc-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 5px; }
+    .doc-item p { font-size: .81rem; font-weight: 600; }
+    .doc-item small { font-size: .7rem; color: var(--muted); }
+    .bottom { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+    .link-to {
+      font-size: .71rem; color: var(--muted); text-decoration: none;
+      padding: 4px 10px; border: 1px solid var(--border); border-radius: 5px;
+      background: var(--bg); transition: all .13s;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .link-to:hover { color: var(--accent); border-color: #ddd6fe; background: #f5f3ff; }
+    @media (max-width: 1024px) { .bottom { grid-template-columns: 1fr; } }
+  </style>
 
-  <!-- ALERTE URGENTE -->
-  <div class="alert-warn" th:if="${alerteUrgente != null}">
-    <i class="fas fa-triangle-exclamation"></i>
-    <div th:utext="${alerteUrgente}">Alerte urgente.</div>
+  <div th:if="${messageInfo}" class="alert-info">
+    <i class="fas fa-circle-info"></i><span th:text="${messageInfo}"></span>
   </div>
 
-  <!-- KPI -->
-  <div class="kpi-grid">
-    <div class="kpi">
-      <div class="kpi-icon violet"><i class="fas fa-book-open"></i></div>
-      <div>
-        <div class="kpi-val" th:text="${doctorant != null ? doctorant.anneeDoctorat + 'ème' : '—'}">3ème</div>
-        <div class="kpi-lbl">Année de doctorat</div>
-        <div class="kpi-sub m"
-             th:text="${doctorant != null ? 'Depuis ' + #temporals.format(doctorant.dateInscription,'MMM yyyy') : ''}">
-          Depuis oct. 2022</div>
-      </div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-icon green"><i class="fas fa-chart-line"></i></div>
-      <div>
-        <div class="kpi-val" th:text="${doctorant != null ? doctorant.avancement + '%' : '—'}">68%</div>
-        <div class="kpi-lbl">Avancement</div>
-        <div class="pbar">
-          <div class="pbar-fill"
-               th:style="'width:' + (${doctorant != null ? doctorant.avancement : 0}) + '%'"></div>
-        </div>
-      </div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-icon amber"><i class="fas fa-folder"></i></div>
-      <div>
-        <div class="kpi-val" th:text="${stats != null ? stats.dossiersTotal : '—'}">4</div>
-        <div class="kpi-lbl">Dossiers soumis</div>
-        <div class="kpi-sub w"
-             th:text="${stats != null ? stats.dossiersEnAttente + ' en attente' : ''}">1 en attente</div>
-      </div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-icon blue"><i class="fas fa-calendar-star"></i></div>
-      <div>
-        <div class="kpi-val"
-             th:text="${doctorant != null ? #temporals.format(doctorant.dateSoutenance,'MMM yy') : '—'}">Juin 26</div>
-        <div class="kpi-lbl">Soutenance prévue</div>
-        <div class="kpi-sub m"
-             th:text="${stats != null ? '~' + stats.moisRestants + ' mois' : ''}">~8 mois</div>
-      </div>
-    </div>
-  </div>
+  <div th:if="${doctorant != null}">
 
-  <!-- BOTTOM GRID -->
-  <div class="bottom">
-
-    <!-- LEFT : Dossiers + Manuscrit -->
-    <div>
-      <div class="card">
-        <div class="card-head">
-          <h6>Suivi des dossiers</h6>
-          <a th:href="@{/dossiers}" class="link-btn"><i class="fas fa-arrow-right"></i> Voir tout</a>
+    <div class="profile-header">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+        <div>
+          <div class="profile-name" th:text="${doctorant.prenom + ' ' + doctorant.nom}">Doctorant</div>
+          <div class="profile-sujet" th:text="${doctorant.sujetThese != null && !doctorant.sujetThese.isBlank() ? doctorant.sujetThese : 'Sujet de thèse non renseigné'}">Sujet</div>
         </div>
-        <div th:each="dossier, stat : ${dossiers}" class="drow">
-          <div class="step"
-               th:class="${dossier.statut.name() == 'VALIDE'}    ? 'step v' :
-                         (${dossier.statut.name() == 'EN_ATTENTE'} ? 'step a' : 'step d')"
-               th:text="${stat.index + 1}">1</div>
-          <div class="drow-info">
-            <p th:text="${dossier.titre}">Titre</p>
-            <small th:text="${dossier.description}">Description</small>
-          </div>
-          <span class="badge"
-                th:class="${dossier.statut.name() == 'VALIDE'}    ? 'badge badge-success' :
-                          (${dossier.statut.name() == 'EN_ATTENTE'} ? 'badge badge-warning' :
-                          (${dossier.statut.name() == 'REJETE'}     ? 'badge badge-danger'  : 'badge badge-muted'))"
-                th:text="${dossier.statutLibelle}">Validé</span>
+        <div class="pbar-wrap" style="min-width:220px">
+          <div class="pbar"><div class="pbar-fill" th:style="'width:' + ${profilCompletion} + '%'"></div></div>
+          <span class="pct" th:text="${profilCompletion} + '%'">0%</span>
         </div>
-        <div class="drow" style="color:var(--muted);font-size:.78rem;font-style:italic;justify-content:center"
-             th:if="${#lists.isEmpty(dossiers)}">Aucun dossier trouvé.</div>
       </div>
-
-      <div class="card">
-        <div class="card-head">
-          <h6>Manuscrit de thèse</h6>
-          <a th:href="@{/manuscrit/depot}" class="link-btn"><i class="fas fa-upload"></i> Déposer</a>
-        </div>
-        <div th:if="${manuscrit != null}" class="drow">
-          <div style="width:36px;height:36px;border-radius:8px;background:#f5f3ff;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:.85rem;flex-shrink:0">
-            <i class="fas fa-file-pdf"></i>
-          </div>
-          <div class="drow-info">
-            <p th:text="${manuscrit.nomFichier}">These_v3.pdf</p>
-            <small th:text="'Déposé le ' + ${#temporals.format(manuscrit.dateDepot,'dd/MM/yyyy')} + ' · ' + ${manuscrit.tailleFichier}">12/09/2025 · 4,2 Mo</small>
-          </div>
-          <span class="badge"
-                th:class="${manuscrit.statut.name() == 'FINAL'} ? 'badge badge-success' : 'badge badge-warning'"
-                th:text="${manuscrit.statutLibelle}">Brouillon</span>
-        </div>
-        <div class="m-empty" th:if="${manuscrit == null}">Aucun manuscrit déposé.</div>
-        <a th:href="@{/manuscrit/depot}" class="upload-btn">
-          <i class="fas fa-cloud-arrow-up"></i> Déposer la version finale
+      <div style="margin-top:10px">
+        <a th:href="@{/doctorants/form(id=${doctorant.id})}" class="link-to">
+          <i class="fas fa-pencil"></i> Modifier mon profil
         </a>
       </div>
     </div>
 
-    <!-- RIGHT : Échéances -->
-    <div>
-      <div class="card">
-        <div class="card-head"><h6>Échéances à venir</h6></div>
-        <div th:each="e : ${echeances}" class="erow">
-          <div class="edot"
-               th:class="${e.urgente} ? 'edot urg' :
-                         (${e.type.name() == 'SOUTENANCE'} ? 'edot def' :
-                         (${e.type.name() == 'MANUSCRIT'}  ? 'edot doc' : 'edot oth'))"></div>
-          <div>
-            <p th:text="${e.titre}">Réinscription</p>
-            <small th:class="${e.urgente} ? 'urg' : ''"
-                   th:text="${(e.urgente ? '⚠ ' : '')} + ${#temporals.format(e.date,'dd MMMM yyyy')}">15 oct. 2025</small>
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-icon violet"><i class="fas fa-file-lines"></i></div>
+        <div>
+          <div class="kpi-val" th:text="${demandesTotal}">0</div>
+          <div class="kpi-lbl">Demandes</div>
+        </div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon amber"><i class="fas fa-hourglass-half"></i></div>
+        <div>
+          <div class="kpi-val" th:text="${demandesEnAttente}">0</div>
+          <div class="kpi-lbl">En attente</div>
+        </div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon green"><i class="fas fa-circle-check"></i></div>
+        <div>
+          <div class="kpi-val" th:text="${demandesAutorisees}">0</div>
+          <div class="kpi-lbl">Autorisées</div>
+        </div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon blue"><i class="fas fa-chalkboard-user"></i></div>
+        <div>
+          <div class="kpi-lbl" style="font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Encadrant</div>
+          <div style="font-size:.82rem;font-weight:600;margin-top:1px"
+               th:text="${doctorant.encadrant != null ? doctorant.encadrant.prenom + ' ' + doctorant.encadrant.nom : 'Non assigné'}">
+            Non assigné
           </div>
         </div>
-        <div class="e-empty" th:if="${#lists.isEmpty(echeances)}">Aucune échéance programmée.</div>
       </div>
     </div>
-  </div>
 
+    <div class="bottom">
+      <div class="card">
+        <div class="card-head">
+          <h6><i class="fas fa-table-list"></i> Demandes récentes</h6>
+          <a th:href="@{/doctorants/demandes}" class="link-to"><i class="fas fa-plus"></i> Voir tout</a>
+        </div>
+
+        <div th:if="${#lists.isEmpty(demandes)}" style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.8rem">
+          <i class="fas fa-inbox" style="font-size:2rem;color:#d1d5db;display:block;margin-bottom:10px"></i>
+          Aucune demande enregistrée.
+        </div>
+
+        <table th:unless="${#lists.isEmpty(demandes)}">
+          <thead>
+            <tr>
+              <th>Date</th><th>Articles Q1/Q2</th><th>Conférences</th><th>Formation</th><th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="d : ${demandes}">
+              <td th:text="${d.dateDepot != null ? #temporals.format(d.dateDepot, 'dd/MM/yyyy') : '-'}">-</td>
+              <td th:text="${d.nbrArticlesQ1Q2 != null ? d.nbrArticlesQ1Q2 : 0}">0</td>
+              <td th:text="${d.nbrConferences != null ? d.nbrConferences : 0}">0</td>
+              <td th:text="${d.heuresFormation != null ? d.heuresFormation + ' h' : '0 h'}">0 h</td>
+              <td>
+                <span class="badge"
+                      th:class="${d.statut.name() == 'AUTORISEE'} ? 'badge badge-success' : (${d.statut.name() == 'REFUSEE'} ? 'badge badge-danger' : 'badge badge-warning')"
+                      th:text="${d.statut}">EN_ATTENTE</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-head">
+            <h6><i class="fas fa-address-card"></i> Coordonnées</h6>
+          </div>
+          <div style="padding:14px 18px">
+            <div class="coord-item" style="margin-bottom:10px">
+              <label>Email</label>
+              <span th:text="${doctorant.email != null ? doctorant.email : '-'}">-</span>
+            </div>
+            <div class="coord-item" style="margin-bottom:10px">
+              <label>Téléphone</label>
+              <span th:text="${doctorant.telephone != null ? doctorant.telephone : '-'}">-</span>
+            </div>
+            <div class="coord-item">
+              <label>Adresse</label>
+              <span th:text="${doctorant.adresse != null ? doctorant.adresse : '-'}">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h6><i class="fas fa-folder-open"></i> Documents</h6>
+          </div>
+          <div style="padding:10px 18px">
+            <div class="doc-item">
+              <div class="doc-dot"></div>
+              <div>
+                <p>CV</p>
+                <a th:if="${doctorant.CV != null && !doctorant.CV.isBlank()}"
+                   th:href="@{'/uploads/' + ${doctorant.CV}}" target="_blank"
+                   style="font-size:.75rem;color:var(--accent);text-decoration:none">
+                  <i class="fas fa-file-pdf"></i> Télécharger
+                </a>
+                <small th:unless="${doctorant.CV != null && !doctorant.CV.isBlank()}" style="color:var(--muted)">Non renseigné</small>
+              </div>
+            </div>
+            <div class="doc-item">
+              <div class="doc-dot"></div>
+              <div>
+                <p>Lettre de motivation</p>
+                <a th:if="${doctorant.lettreMotivation != null && !doctorant.lettreMotivation.isBlank()}"
+                   th:href="@{'/uploads/' + ${doctorant.lettreMotivation}}" target="_blank"
+                   style="font-size:.75rem;color:var(--accent);text-decoration:none">
+                  <i class="fas fa-file-pdf"></i> Télécharger
+                </a>
+                <small th:unless="${doctorant.lettreMotivation != null && !doctorant.lettreMotivation.isBlank()}" style="color:var(--muted)">Non renseignée</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </section>
 </body>
 </html>

@@ -133,6 +133,16 @@
     </div>
 
     <form th:action="@{/login}" method="post">
+      <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+      <div class="alert alert-danger" th:if="${param.error}">
+        <i class="fas fa-triangle-exclamation"></i>
+        <span>Email ou mot de passe incorrect.</span>
+      </div>
+      <div class="alert alert-success" th:if="${param.logout}">
+        <i class="fas fa-circle-check"></i>
+        <span>Déconnexion réussie.</span>
+      </div>
 
       <div class="field">
         <label>Adresse email</label>
@@ -141,7 +151,6 @@
           <input type="email" name="email" placeholder="exemple@univ.ma" required/>
         </div>
       </div>
-
       <div class="field">
         <label>Mot de passe</label>
         <div class="input-wrap">
@@ -149,11 +158,9 @@
           <input type="password" name="password" placeholder="••••••••" required/>
         </div>
       </div>
-
       <button type="submit" class="btn-submit">
         <i class="fas fa-arrow-right-to-bracket"></i> Se connecter
       </button>
-
     </form>
 
   </div>

@@ -31,7 +31,7 @@ public class SoutenanceServiceImpl implements SoutenanceService {
         Soutenance s = new Soutenance();
         s.setDate(dto.getDate());
         s.setLieu(dto.getLieu());
-        s.setNote(dto.getNote()       != null ? dto.getNote()           : 0.0);
+        s.setNote(dto.getNote() != null ? dto.getNote() : 0.0);
         s.setNbrPublication(dto.getNbrPublication() != null ? dto.getNbrPublication() : 0);
         return s;
     }
@@ -61,26 +61,19 @@ public class SoutenanceServiceImpl implements SoutenanceService {
 
     @Override
     public SoutenanceDTO createSoutenance(SoutenanceDTO dto) {
-        int nbPub = dto.getNbrPublication() != null ? dto.getNbrPublication() : 0;
-        if (nbPub < 2) {
-            throw new RuntimeException("Conditions non respectées : minimum 2 publications requises");
-        }
-        Soutenance s = mapToEntity(dto);
-        return mapToDTO(repository.save(s));
+        validerSoutenance(dto);
+        return mapToDTO(repository.save(mapToEntity(dto)));
     }
 
     @Override
     public SoutenanceDTO updateSoutenance(long id, SoutenanceDTO dto) {
-        int nbPub = dto.getNbrPublication() != null ? dto.getNbrPublication() : 0;
-        if (nbPub < 2) {
-            throw new RuntimeException("Conditions non respectées : minimum 2 publications requises");
-        }
+        validerSoutenance(dto);
         Soutenance existing = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Soutenance introuvable : " + id));
 
         existing.setDate(dto.getDate());
         existing.setLieu(dto.getLieu());
-        existing.setNote(dto.getNote()             != null ? dto.getNote()           : 0.0);
+        existing.setNote(dto.getNote() != null ? dto.getNote() : 0.0);
         existing.setNbrPublication(dto.getNbrPublication() != null ? dto.getNbrPublication() : 0);
 
         return mapToDTO(repository.save(existing));
@@ -88,6 +81,25 @@ public class SoutenanceServiceImpl implements SoutenanceService {
 
     @Override
     public void deleteSoutenance(long id) {
+        if (!repository.existsById(id)) {
+            throw new RuntimeException("Soutenance introuvable : " + id);
+        }
         repository.deleteById(id);
+    }
+
+    private void validerSoutenance(SoutenanceDTO dto) {
+        if (dto.getDate() == null) {
+            throw new RuntimeException("Date de soutenance obligatoire");
+        }
+        if (dto.getLieu() == null || dto.getLieu().isBlank()) {
+            throw new RuntimeException("Lieu de soutenance obligatoire");
+        }
+        int nbPub = dto.getNbrPublication() != null ? dto.getNbrPublication() : 0;
+        if (nbPub < 2) {
+            throw new RuntimeException("Conditions non respectees : minimum 2 publications requises");
+        }
+        if (dto.getNote() != null && (dto.getNote() < 0 || dto.getNote() > 20)) {
+            throw new RuntimeException("La note doit etre comprise entre 0 et 20");
+        }
     }
 }

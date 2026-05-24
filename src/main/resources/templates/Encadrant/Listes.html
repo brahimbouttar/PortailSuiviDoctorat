@@ -8,7 +8,7 @@
 <head><title>Mes doctorants</title></head>
 <body>
 
-<section th:fragment="content">
+<section th:fragment="section">
     <style>
         /* ── STAT MINI-CARDS ─────────────────────────────────────── */
         .stat-grid {
@@ -83,6 +83,10 @@
     </div>
 
     <!-- TABLE CARD -->
+    <div class="alert alert-error" th:if="${errorMessage}">
+        <i class="fas fa-triangle-exclamation"></i><span th:text="${errorMessage}"></span>
+    </div>
+
     <div class="card">
         <div class="card-head">
             <h6><i class="fas fa-user-graduate"></i> Liste des doctorants</h6>
@@ -91,17 +95,19 @@
         <table>
             <thead>
             <tr>
+                <th>Doctorant</th>
                 <th>Email</th>
                 <th>Téléphone</th>
                 <th>Adresse</th>
                 <th>Sujet de thèse</th>
-                <th>Inscrit le</th>
+                <th style="text-align:center">Documents</th>
+                <th style="text-align:center">Dossier</th>
             </tr>
             </thead>
             <tbody id="tableBody">
 
             <tr th:if="${#lists.isEmpty(doctorants)}">
-                <td colspan="5" style="text-align:center;padding:56px 20px;color:var(--muted);font-size:.8rem">
+                <td colspan="7" style="text-align:center;padding:56px 20px;color:var(--muted);font-size:.8rem">
                     <i class="fas fa-user-graduate" style="font-size:2.2rem;color:#d1d5db;display:block;margin-bottom:12px"></i>
                     Aucun doctorant inscrit.
                 </td>
@@ -110,11 +116,42 @@
             <tr th:unless="${#lists.isEmpty(doctorants)}"
                 th:each="d, stat : ${doctorants}"
                 th:style="'animation-delay:' + ${stat.index * 30} + 'ms'">
+                <td style="font-weight:600" th:text="${d.prenom + ' ' + d.nom}">Doctorant</td>
                 <td th:text="${d.email     != null ? d.email     : '—'}" style="color:var(--muted)"></td>
                 <td th:text="${d.telephone != null ? d.telephone : '—'}" style="color:var(--muted)"></td>
                 <td th:text="${d.adresse   != null ? d.adresse   : '—'}" style="color:var(--muted)"></td>
                 <td th:text="${d.sujetThese != null ? d.sujetThese : '—'}"></td>
-                <td style="color:var(--muted)">—</td>
+                <td style="text-align:center">
+                    <div class="act" style="justify-content:center">
+                        <a th:if="${d.CV != null and !d.CV.isBlank()}"
+                           th:href="@{'/uploads/' + ${d.CV}}" target="_blank"
+                           class="act-btn ok" title="Consulter le CV" style="text-decoration:none">
+                            <i class="fas fa-file-lines"></i>
+                        </a>
+                        <button th:unless="${d.CV != null and !d.CV.isBlank()}"
+                                class="act-btn" title="CV non disponible" disabled
+                                style="border-color:#e5e9f2;color:#d1d5db;cursor:not-allowed">
+                            <i class="fas fa-file-lines"></i>
+                        </button>
+                        <a th:if="${d.lettreMotivation != null and !d.lettreMotivation.isBlank()}"
+                           th:href="@{'/uploads/' + ${d.lettreMotivation}}" target="_blank"
+                           class="act-btn ok" title="Consulter la lettre" style="text-decoration:none">
+                            <i class="fas fa-file-signature"></i>
+                        </a>
+                        <button th:unless="${d.lettreMotivation != null and !d.lettreMotivation.isBlank()}"
+                                class="act-btn" title="Lettre non disponible" disabled
+                                style="border-color:#e5e9f2;color:#d1d5db;cursor:not-allowed">
+                            <i class="fas fa-file-signature"></i>
+                        </button>
+                    </div>
+                </td>
+                <td style="text-align:center">
+                    <a th:href="@{/encadrant/doctorants/{id}/dossier(id=${d.id})}"
+                       class="act-btn ok" title="Consulter le dossier"
+                       style="display:inline-flex;text-decoration:none">
+                        <i class="fas fa-folder-open"></i>
+                    </a>
+                </td>
             </tr>
 
             </tbody>

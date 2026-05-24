@@ -11,6 +11,6 @@ public interface AdminService {
     List<Doctorant> getAllDoctorants();
     Doctorant getDoctorant(long id);
     void deleteDoctorant(long id);
-    void assignSupervisor(long doctorantId, long encadrantId);
+    void assignSupervisor(long doctorantId, Long encadrantId);
 
 }

@@ -1,10 +1,168 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr"
+      th:replace="~{layouts/encadrant-layout :: layout(
+          'Dossier doctorant',
+          'Consultation des informations, documents et demandes',
+          'doctorants'
+      )}">
+<head><title>Dossier doctorant</title></head>
 <body>
 
+<section th:fragment="section">
+  <style>
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .detail-item label {
+      font-size: .68rem; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .06em; display: block; margin-bottom: 3px;
+    }
+    .detail-item span { font-size: .88rem; color: var(--text); font-weight: 500; }
+    .detail-item span.missing { color: var(--muted); font-weight: 400; font-style: italic; }
+    .full-width { grid-column: 1 / -1; }
+    .file-link {
+      display: inline-flex; align-items: center; gap: 4px; font-size: .78rem;
+      color: var(--accent); text-decoration: none; padding: 3px 9px;
+      border: 1px solid #99f6e4; border-radius: 5px; background: #f0fdfa;
+    }
+    .file-link:hover { background: #ccfbf1; }
+    .doc-list { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+    .doc-list .missing { color: #d1d5db; font-size: .8rem; }
+    .top-actions { margin-bottom: 16px; display: flex; gap: 8px; }
+  </style>
+
+  <div class="top-actions">
+    <a th:href="@{/encadrant/listes}" class="btn-ghost" style="text-decoration:none">
+      <i class="fas fa-arrow-left"></i> Retour
+    </a>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h6><i class="fas fa-address-card"></i> Informations du doctorant</h6>
+    </div>
+    <div style="padding:18px 20px">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <label>Nom complet</label>
+          <span th:text="${doctorant.prenom + ' ' + doctorant.nom}">Doctorant</span>
+        </div>
+        <div class="detail-item">
+          <label>Email</label>
+          <span th:text="${doctorant.email != null ? doctorant.email : '-'}"
+                th:classappend="${doctorant.email == null} ? 'missing'">-</span>
+        </div>
+        <div class="detail-item">
+          <label>Téléphone</label>
+          <span th:text="${doctorant.telephone != null ? doctorant.telephone : '-'}"
+                th:classappend="${doctorant.telephone == null} ? 'missing'">-</span>
+        </div>
+        <div class="detail-item">
+          <label>Adresse</label>
+          <span th:text="${doctorant.adresse != null ? doctorant.adresse : '-'}"
+                th:classappend="${doctorant.adresse == null} ? 'missing'">-</span>
+        </div>
+        <div class="detail-item full-width">
+          <label>Sujet de thèse</label>
+          <span th:text="${doctorant.sujetThese != null and !doctorant.sujetThese.isBlank() ? doctorant.sujetThese : 'Non renseigné'}"
+                th:classappend="${doctorant.sujetThese == null or doctorant.sujetThese.isBlank()} ? 'missing'">-</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="card-head">
+      <h6><i class="fas fa-folder-open"></i> Documents du profil</h6>
+    </div>
+    <div style="padding:14px 20px">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <label>CV</label>
+          <a th:if="${doctorant.CV != null and !doctorant.CV.isBlank()}"
+             class="file-link" th:href="@{'/uploads/' + ${doctorant.CV}}" target="_blank">
+            <i class="fas fa-file-lines"></i> Consulter
+          </a>
+          <span th:unless="${doctorant.CV != null and !doctorant.CV.isBlank()}" class="missing">Non renseigné</span>
+        </div>
+        <div class="detail-item">
+          <label>Lettre de motivation</label>
+          <a th:if="${doctorant.lettreMotivation != null and !doctorant.lettreMotivation.isBlank()}"
+             class="file-link" th:href="@{'/uploads/' + ${doctorant.lettreMotivation}}" target="_blank">
+            <i class="fas fa-file-signature"></i> Consulter
+          </a>
+          <span th:unless="${doctorant.lettreMotivation != null and !doctorant.lettreMotivation.isBlank()}" class="missing">Non renseignée</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="card-head">
+      <h6><i class="fas fa-table-list"></i> Demandes et documents de soutenance</h6>
+    </div>
+
+    <div th:if="${#lists.isEmpty(demandes)}" style="text-align:center;padding:48px 20px;color:var(--muted);font-size:.8rem">
+      <i class="fas fa-inbox" style="font-size:2rem;color:#d1d5db;display:block;margin-bottom:10px"></i>
+      Aucune demande de soutenance.
+    </div>
+
+    <table th:unless="${#lists.isEmpty(demandes)}">
+      <thead>
+      <tr>
+        <th>Date</th>
+        <th>Articles</th>
+        <th>Conférences</th>
+        <th>Formation</th>
+        <th style="text-align:center">Documents</th>
+        <th>Statut</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="d : ${demandes}">
+        <td th:text="${d.dateDepot != null ? #temporals.format(d.dateDepot, 'dd/MM/yyyy') : '-'}">-</td>
+        <td th:text="${d.nbrArticlesQ1Q2 != null ? d.nbrArticlesQ1Q2 : 0}">0</td>
+        <td th:text="${d.nbrConferences != null ? d.nbrConferences : 0}">0</td>
+        <td th:text="${d.heuresFormation != null ? d.heuresFormation + ' h' : '0 h'}">0 h</td>
+        <td>
+          <div class="doc-list">
+            <a th:if="${d.demandeManus != null and !d.demandeManus.isBlank()}" class="file-link"
+               th:href="@{'/uploads/' + ${d.demandeManus}}" target="_blank" title="Demande manuscrite">
+              <i class="fas fa-file-alt"></i>
+            </a>
+            <a th:if="${d.rapportThese != null and !d.rapportThese.isBlank()}" class="file-link"
+               th:href="@{'/uploads/' + ${d.rapportThese}}" target="_blank" title="Rapport de thèse">
+              <i class="fas fa-book"></i>
+            </a>
+            <a th:if="${d.rapportAntiPlagiat != null and !d.rapportAntiPlagiat.isBlank()}" class="file-link"
+               th:href="@{'/uploads/' + ${d.rapportAntiPlagiat}}" target="_blank" title="Rapport anti-plagiat">
+              <i class="fas fa-shield-alt"></i>
+            </a>
+            <a th:if="${d.rapportPublications != null and !d.rapportPublications.isBlank()}" class="file-link"
+               th:href="@{'/uploads/' + ${d.rapportPublications}}" target="_blank" title="Rapport publications">
+              <i class="fas fa-newspaper"></i>
+            </a>
+            <a th:if="${d.attestations != null and !d.attestations.isBlank()}" class="file-link"
+               th:href="@{'/uploads/' + ${d.attestations}}" target="_blank" title="Attestations">
+              <i class="fas fa-award"></i>
+            </a>
+            <span th:if="${(d.demandeManus == null or d.demandeManus.isBlank())
+                       and (d.rapportThese == null or d.rapportThese.isBlank())
+                       and (d.rapportAntiPlagiat == null or d.rapportAntiPlagiat.isBlank())
+                       and (d.rapportPublications == null or d.rapportPublications.isBlank())
+                       and (d.attestations == null or d.attestations.isBlank())}"
+                  class="missing">Aucun</span>
+          </div>
+        </td>
+        <td>
+          <span class="badge"
+                th:class="${d.statut?.name() == 'AUTORISEE'} ? 'badge badge-success' :
+                          (${d.statut?.name() == 'REFUSEE'} ? 'badge badge-danger' :
+                          (${d.statut?.name() == 'EN_ATTENTE'} ? 'badge badge-warning' : 'badge badge-info'))"
+                th:text="${d.statut != null ? d.statut.name() : 'EN_ATTENTE'}">EN_ATTENTE</span>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
 </body>
 </html>

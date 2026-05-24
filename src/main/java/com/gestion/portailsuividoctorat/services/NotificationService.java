@@ -1,7 +1,6 @@
 package com.gestion.portailsuividoctorat.services;
 
 import com.gestion.portailsuividoctorat.entites.Notification;
-import com.gestion.portailsuividoctorat.entites.Utilisateur;
 
 import java.util.List;
 
@@ -14,6 +13,10 @@ public interface NotificationService {
     Notification findNotification(Long id);
     // liste de tous
     List<Notification> findAllNotifications();
+    List<Notification> findInbox(Long userId);
+    List<Notification> findSent(Long userId);
+    long countUnread(Long userId);
+    Notification markAsRead(Long id, Long userId);
     // suppression
     void deleteNotification(Long id);
 }

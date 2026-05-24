@@ -23,6 +23,33 @@ public class NotificationServiceImpl implements NotificationService {
     public List<Notification> findAllNotifications() {
         return NotificationRepo.findAll();
     }
+
+    @Override
+    public List<Notification> findInbox(Long userId) {
+        return NotificationRepo.findByDestinataireIdOrderByDateDescIdDesc(userId);
+    }
+
+    @Override
+    public List<Notification> findSent(Long userId) {
+        return NotificationRepo.findByExpediteurIdOrderByDateDescIdDesc(userId);
+    }
+
+    @Override
+    public long countUnread(Long userId) {
+        return NotificationRepo.countByDestinataireIdAndLu(userId, "NON");
+    }
+
+    @Override
+    public Notification markAsRead(Long id, Long userId) {
+        Notification notification = NotificationRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Notification  not found"));
+        if (notification.getDestinataire() == null || !userId.equals(notification.getDestinataire().getId())) {
+            throw new RuntimeException("Message inaccessible");
+        }
+        notification.setLu("OUI");
+        return NotificationRepo.save(notification);
+    }
+
     @Override
     public void deleteNotification(Long id) {
         Notification  user = NotificationRepo.findById(id).orElseThrow(() -> new RuntimeException("Notification  not found"));

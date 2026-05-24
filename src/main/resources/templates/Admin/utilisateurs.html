@@ -52,15 +52,15 @@
       </thead>
       <tbody id="tableBody">
 
-      <tr th:if="${#lists.isEmpty(Utilisateur)}">
+      <tr th:if="${#lists.isEmpty(users)}">
         <td colspan="6" style="text-align:center;padding:48px 20px;color:var(--muted);font-size:.8rem">
           <i class="fas fa-inbox" style="font-size:2rem;color:#d1d5db;display:block;margin-bottom:10px"></i>
           Aucun utilisateur trouvé.
         </td>
       </tr>
 
-      <tr th:unless="${#lists.isEmpty(Utilisateur)}"
-          th:each="u : ${Utilisateur}"
+      <tr th:unless="${#lists.isEmpty(users)}"
+          th:each="u : ${users}"
           class="clickable"
           th:onclick="|window.location.href='@{/Utilisateur/Details/{id}(id=${u.id})}'|">
         <td th:text="${u.nom}"></td>

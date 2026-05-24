@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<body>
+<section th:fragment="messagesContent">
+  <style>
+    .alert {
+      padding: 10px 14px; border-radius: 7px; font-size: .8rem;
+      display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+      border: 1px solid transparent;
+    }
+    .alert-success { background: #f0fdf4; border-color: #bbf7d0; color: #15803d; }
+    .alert-error { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+    .comm-grid { display: grid; grid-template-columns: 340px 1fr; gap: 16px; align-items: start; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+    .form-group label {
+      font-size: .71rem; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .06em;
+    }
+    .form-group input, .form-group textarea, .form-group select {
+      border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px;
+      font-size: .81rem; color: var(--text); background: var(--surface);
+      font-family: inherit; transition: border-color .12s;
+    }
+    .form-group textarea { min-height: 120px; resize: vertical; }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(13,148,136,.1);
+    }
+    .tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+    .tab-btn {
+      border: 1px solid var(--border); background: var(--surface); color: var(--muted);
+      border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: .76rem;
+      font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .tab-btn.active { color: var(--accent); border-color: #99f6e4; background: #f0fdfa; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .message-title { font-weight: 700; color: var(--text); }
+    .message-meta { color: var(--muted); font-size: .72rem; margin-top: 2px; }
+    .message-body { color: var(--text); font-size: .8rem; line-height: 1.55; margin-top: 7px; white-space: pre-wrap; }
+    .message-unread { border-left: 3px solid var(--accent); }
+    .message-actions { display: flex; gap: 5px; justify-content: flex-end; }
+    .count-badge {
+      font-size: .68rem; font-weight: 700; background: var(--bg);
+      border: 1px solid var(--border); color: var(--muted);
+      padding: 2px 9px; border-radius: 20px;
+    }
+    @media (max-width: 900px) { .comm-grid { grid-template-columns: 1fr; } }
+  </style>
+
+  <div class="alert alert-success" th:if="${successMessage}">
+    <i class="fas fa-check-circle"></i><span th:text="${successMessage}"></span>
+  </div>
+  <div class="alert alert-error" th:if="${errorMessage}">
+    <i class="fas fa-triangle-exclamation"></i><span th:text="${errorMessage}"></span>
+  </div>
+
+  <div class="comm-grid">
+    <div class="card">
+      <div class="card-head">
+        <h6><i class="fas fa-paper-plane"></i> Nouveau message</h6>
+      </div>
+      <div style="padding:16px 18px">
+        <form th:action="@{/messages/send}" method="post">
+          <div class="form-group">
+            <label>Destinataire</label>
+            <select name="destinataireId" required>
+              <option value="">Choisir un acteur</option>
+              <option th:each="u : ${utilisateurs}"
+                      th:value="${u.id}"
+                      th:text="${u.prenom + ' ' + u.nom + ' - ' + (u.role != null ? u.role : 'UTILISATEUR')}">
+                Utilisateur
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Sujet</label>
+            <input name="sujet" placeholder="Sujet du message"/>
+          </div>
+          <div class="form-group">
+            <label>Message</label>
+            <textarea name="message" placeholder="Écrire votre message..." required></textarea>
+          </div>
+          <button type="submit" class="btn-primary">
+            <i class="fas fa-paper-plane"></i> Envoyer
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h6><i class="fas fa-comments"></i> Communication</h6>
+        <span class="count-badge" th:text="${nonLus} + ' non lu(s)'">0 non lu(s)</span>
+      </div>
+      <div style="padding:16px 18px">
+        <div class="tabs">
+          <button type="button" class="tab-btn active" onclick="showTab('inbox', this)">
+            <i class="fas fa-inbox"></i> Reçus
+          </button>
+          <button type="button" class="tab-btn" onclick="showTab('sent', this)">
+            <i class="fas fa-paper-plane"></i> Envoyés
+          </button>
+        </div>
+
+        <div id="inbox" class="tab-panel active">
+          <table>
+            <thead>
+            <tr>
+              <th>Message</th>
+              <th>Expéditeur</th>
+              <th>Date</th>
+              <th style="text-align:center">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${#lists.isEmpty(messagesRecus)}">
+              <td colspan="4" style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.8rem">
+                <i class="fas fa-inbox" style="font-size:2rem;color:#d1d5db;display:block;margin-bottom:10px"></i>
+                Aucun message reçu.
+              </td>
+            </tr>
+            <tr th:each="m : ${messagesRecus}"
+                th:classappend="${m.lu == null or m.lu == 'NON'} ? 'message-unread'">
+              <td>
+                <div class="message-title" th:text="${m.sujet != null ? m.sujet : 'Message'}">Sujet</div>
+                <div class="message-body" th:text="${m.message}">Message</div>
+              </td>
+              <td>
+                <span th:if="${m.expediteur != null}" th:text="${m.expediteur.prenom + ' ' + m.expediteur.nom}">-</span>
+                <div class="message-meta" th:if="${m.expediteur != null}" th:text="${m.expediteur.role}">ROLE</div>
+              </td>
+              <td>
+                <span th:text="${m.date != null ? #dates.format(m.date, 'dd/MM/yyyy HH:mm') : '-'}">-</span>
+              </td>
+              <td>
+                <div class="message-actions">
+                  <form th:if="${m.lu == null or m.lu == 'NON'}" th:action="@{/messages/{id}/read(id=${m.id})}" method="post">
+                    <button type="submit" class="act-btn ok" title="Marquer comme lu">
+                      <i class="fas fa-check"></i>
+                    </button>
+                  </form>
+                  <form th:action="@{/messages/{id}/delete(id=${m.id})}" method="post"
+                        onsubmit="return confirm('Supprimer ce message ?')">
+                    <button type="submit" class="act-btn no" title="Supprimer">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div id="sent" class="tab-panel">
+          <table>
+            <thead>
+            <tr>
+              <th>Message</th>
+              <th>Destinataire</th>
+              <th>Date</th>
+              <th>Statut</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${#lists.isEmpty(messagesEnvoyes)}">
+              <td colspan="4" style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.8rem">
+                Aucun message envoyé.
+              </td>
+            </tr>
+            <tr th:each="m : ${messagesEnvoyes}">
+              <td>
+                <div class="message-title" th:text="${m.sujet != null ? m.sujet : 'Message'}">Sujet</div>
+                <div class="message-body" th:text="${m.message}">Message</div>
+              </td>
+              <td>
+                <span th:if="${m.destinataire != null}" th:text="${m.destinataire.prenom + ' ' + m.destinataire.nom}">-</span>
+                <div class="message-meta" th:if="${m.destinataire != null}" th:text="${m.destinataire.role}">ROLE</div>
+              </td>
+              <td th:text="${m.date != null ? #dates.format(m.date, 'dd/MM/yyyy HH:mm') : '-'}">-</td>
+              <td>
+                <span class="badge" th:class="${m.lu == 'OUI'} ? 'badge badge-success' : 'badge badge-warning'"
+                      th:text="${m.lu == 'OUI'} ? 'LU' : 'NON LU'">NON LU</span>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showTab(id, btn) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      btn.classList.add('active');
+    }
+  </script>
+</section>
+</body>
+</html>

@@ -8,7 +8,7 @@
 <head><title>Mes demandes</title></head>
 <body>
 
-<section th:fragment="content">
+<section th:fragment="section">
     <style>
         /* ── PREREQ BANNER ───────────────────────────────────────── */
         .prereq-banner {
@@ -365,7 +365,7 @@
             </div>
 
             <div class="modal-body">
-                <form id="demandeForm" method="post" novalidate>
+                <form id="demandeForm" method="post" enctype="multipart/form-data" novalidate>
                     <!-- Champs cachés -->
                     <input type="hidden" id="formId"          name="id"/>
                     <input type="hidden" id="formDoctorantId" name="doctorantId"/>
@@ -413,36 +413,36 @@
                                 <i class="fas fa-file-alt" style="margin-right:4px"></i>
                                 Demande manuscrite
                             </label>
-                            <input type="text" id="formManus"
-                                   name="demandeManus"
-                                   placeholder="Référence du document"/>
+                            <input type="file" id="formManus"
+                                   name="demandeManusFile"
+                                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"/>
                         </div>
                         <div class="form-group">
                             <label>
                                 <i class="fas fa-book" style="margin-right:4px"></i>
                                 Rapport de thèse
                             </label>
-                            <input type="text" id="formRapport"
-                                   name="rapportThese"
-                                   placeholder="Référence du document"/>
+                            <input type="file" id="formRapport"
+                                   name="rapportTheseFile"
+                                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"/>
                         </div>
                         <div class="form-group">
                             <label>
                                 <i class="fas fa-shield-alt" style="margin-right:4px"></i>
                                 Rapport anti-plagiat
                             </label>
-                            <input type="text" id="formPlagiat"
-                                   name="rapportAntiPlagiat"
-                                   placeholder="Référence du document"/>
+                            <input type="file" id="formPlagiat"
+                                   name="rapportAntiPlagiatFile"
+                                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"/>
                         </div>
                         <div class="form-group">
                             <label>
                                 <i class="fas fa-newspaper" style="margin-right:4px"></i>
                                 Rapport publications
                             </label>
-                            <input type="text" id="formPub"
-                                   name="rapportPublications"
-                                   placeholder="Référence du document"/>
+                            <input type="file" id="formPub"
+                                   name="rapportPublicationsFile"
+                                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"/>
                         </div>
                     </div>
 
@@ -452,9 +452,9 @@
                                 <i class="fas fa-award" style="margin-right:4px"></i>
                                 Attestations + autorisation
                             </label>
-                            <input type="text" id="formAttest"
-                                   name="attestations"
-                                   placeholder="Référence du document"/>
+                            <input type="file" id="formAttest"
+                                   name="attestationsFile"
+                                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"/>
                         </div>
                         <div class="form-group">
                             <label>Observations</label>
@@ -499,7 +499,7 @@
                 };
                 Object.entries(vals).forEach(([fieldId, val]) => {
                     const el = document.getElementById(fieldId);
-                    if (el) el.value = val || '';
+                    if (el) el.value = el.type === 'file' ? '' : (val || '');
                 });
                 document.getElementById('modalTitleText').textContent = 'Modifier la demande';
                 document.getElementById('submitLabel').textContent    = 'Enregistrer';

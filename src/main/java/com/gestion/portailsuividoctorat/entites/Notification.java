@@ -1,8 +1,10 @@
 package com.gestion.portailsuividoctorat.entites;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +20,14 @@ public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String sujet;
     private String message;
     private Date date;
     private String lu;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Utilisateur expediteur;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Utilisateur destinataire;
 }

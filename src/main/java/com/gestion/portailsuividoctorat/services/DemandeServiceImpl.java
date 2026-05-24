@@ -1,8 +1,6 @@
 package com.gestion.portailsuividoctorat.services;
 import com.gestion.portailsuividoctorat.entites.Demande;
-import com.gestion.portailsuividoctorat.entites.Doctorant;
 import com.gestion.portailsuividoctorat.repositories.DemandeRepo;
-import com.gestion.portailsuividoctorat.repositories.DoctorantRepo;
 import org.springframework.stereotype.Service;
 
 
@@ -13,39 +11,28 @@ import java.util.List;
 public class DemandeServiceImpl implements DemandeService {
 
 
-    private final DemandeRepo demandeRepository;
-    private final DoctorantRepo doctorantRepository;
+    private final DemandeRepo repository;
 
-    public DemandeServiceImpl(DemandeRepo demandeRepository,
-                              DoctorantRepo doctorantRepository) {
-        this.demandeRepository = demandeRepository;
-        this.doctorantRepository = doctorantRepository;
+    public DemandeServiceImpl(DemandeRepo repository) {
+        this.repository = repository;
     }
 //     injection constructeur
 
     @Override
-    public Demande createDemande(Demande demande, Long doctorantId) {
-        Doctorant doctorant = doctorantRepository.findById(doctorantId)
-                .orElseThrow(() -> new RuntimeException("Doctorant introuvable"));
-        demande.setDoctorant(doctorant);
-        demande.setDateDepot(LocalDate.now());
-        demande.setStatut(Demande.StatutDemande.EN_ATTENTE);
-        return demandeRepository.save(demande);
-    }
-    @Override
-    public List<Demande> getDemandesByDoctorant(Long doctorantId) {
-        return demandeRepository.findByDoctorantId(doctorantId);
-    }
-
-    @Override
     public Demande createDemande(Demande demande) {
-        return null;
+        if (demande.getDateDepot() == null) {
+            demande.setDateDepot(LocalDate.now());
+        }
+        if (demande.getStatut() == null) {
+            demande.setStatut(Demande.StatutDemande.EN_ATTENTE);
+        }
+        validerPrerequisSoutenance(demande);
+        return repository.save(demande);
     }
-
     @Override
     public Demande updateDemande(Long id, Demande demande) {
 
-        Demande existing = demandeRepository.findById(id)
+        Demande existing = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Demande introuvable : " + id));
 
         validerPrerequisSoutenance(demande);
@@ -53,33 +40,58 @@ public class DemandeServiceImpl implements DemandeService {
         existing.setNbrArticlesQ1Q2(demande.getNbrArticlesQ1Q2());
         existing.setNbrConferences(demande.getNbrConferences());
         existing.setHeuresFormation(demande.getHeuresFormation());
-        existing.setDemandeManus(demande.getDemandeManus());
-        existing.setRapportThese(demande.getRapportThese());
-        existing.setRapportAntiPlagiat(demande.getRapportAntiPlagiat());
-        existing.setRapportPublications(demande.getRapportPublications());
-        existing.setAttestations(demande.getAttestations());
-        existing.setStatut(demande.getStatut());
+        if (demande.getDemandeManus() != null) {
+            existing.setDemandeManus(demande.getDemandeManus());
+        }
+        if (demande.getRapportThese() != null) {
+            existing.setRapportThese(demande.getRapportThese());
+        }
+        if (demande.getRapportAntiPlagiat() != null) {
+            existing.setRapportAntiPlagiat(demande.getRapportAntiPlagiat());
+        }
+        if (demande.getRapportPublications() != null) {
+            existing.setRapportPublications(demande.getRapportPublications());
+        }
+        if (demande.getAttestations() != null) {
+            existing.setAttestations(demande.getAttestations());
+        }
+        if (demande.getStatut() != null) {
+            existing.setStatut(demande.getStatut());
+        }
+        if (demande.getObservations() != null) {
+            existing.setObservations(demande.getObservations());
+        }
+        if (demande.getDoctorant() != null) {
+            existing.setDoctorant(demande.getDoctorant());
+        }
 
-        Demande updated = demandeRepository.save(existing);
-
-
-        return updated;
+        return repository.save(existing);
     }
 
     @Override
     public void deleteDemande(Long id) {
-        demandeRepository.deleteById(id);
+        if (!repository.existsById(id)) {
+            throw new RuntimeException("Demande introuvable : " + id);
+        }
+        repository.deleteById(id);
     }
 
     @Override
     public Demande getDemandeById(Long id) {
-        return demandeRepository.findById(id)
+        return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Demande introuvable : " + id));
     }
 
     @Override
     public List<Demande> getAllDemandes() {
-        return demandeRepository.findAll();
+        return repository.findAll();
+    }
+
+    @Override
+    public Demande changerStatut(Long id, Demande.StatutDemande statut) {
+        Demande demande = getDemandeById(id);
+        demande.setStatut(statut);
+        return repository.save(demande);
     }
 
     private void validerPrerequisSoutenance(Demande demande) {

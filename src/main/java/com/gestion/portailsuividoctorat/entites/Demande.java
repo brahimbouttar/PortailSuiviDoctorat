@@ -5,8 +5,10 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Entity
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Demande {
 
     @Id

@@ -1,4 +1,5 @@
 package com.gestion.portailsuividoctorat.entites;
+
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,7 +9,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter @Setter @NoArgsConstructor //Lombook
+@Getter
+@Setter
+@NoArgsConstructor // Lombook
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
@@ -25,7 +28,8 @@ public class Utilisateur {
     private String password;
     private String role;
 
-    public Utilisateur( String role, String password, String telephone, String adresse, String prenom, String email, String nom) {
+    public Utilisateur(String role, String password, String telephone, String adresse, String prenom, String email,
+            String nom) {
         this.role = role;
         this.password = password;
         this.telephone = telephone;

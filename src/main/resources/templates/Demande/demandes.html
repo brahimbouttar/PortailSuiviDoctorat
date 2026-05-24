@@ -1,453 +1,676 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="fr"
-      th:replace="~{layouts/admin-layout :: layout(
+<html xmlns:th="http://www.thymeleaf.org" lang="fr" th:replace="~{layouts/admin-layout :: layout(
           'Demandes de soutenance',
           'Module 3 — Processus de soutenance',
           'demandes'
       )}">
-<head><title>Demandes de soutenance</title></head>
+
+<head>
+  <title>Demandes de soutenance</title>
+</head>
+
 <body>
 
-<section th:fragment="content">
-  <style>
-    /* ── ALERTS ─────────────────────────────────────────────── */
-    .alert {
-      padding: 10px 14px; border-radius: 7px; font-size: .8rem;
-      display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
-      border: 1px solid transparent;
-    }
-    .alert-success { background: #f0fdf4; border-color: #bbf7d0; color: #15803d; }
-    .alert-warning { background: #fffbeb; border-color: #fde68a; color: #b45309; }
-    .alert-close {
-      margin-left: auto; background: none; border: none; cursor: pointer;
-      font-size: .85rem; color: inherit; opacity: .5; padding: 0 2px;
-    }
-    .alert-close:hover { opacity: 1; }
+  <section th:fragment="content">
+    <style>
+      /* ── ALERTS ─────────────────────────────────────────────── */
+      .alert {
+        padding: 10px 14px;
+        border-radius: 7px;
+        font-size: .8rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+        border: 1px solid transparent;
+      }
 
-    /* ── PREREQ BANNER ───────────────────────────────────────── */
-    .prereq-banner {
-      background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;
-      padding: 11px 16px; display: flex; flex-wrap: wrap; gap: 20px;
-      margin-bottom: 18px; font-size: .8rem; color: var(--text);
-    }
-    .prereq-banner strong { color: var(--accent); }
-    .prereq-banner i { color: var(--accent); margin-right: 4px; }
+      .alert-success {
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+        color: #15803d;
+      }
 
-    /* ── PAGE HEADER ─────────────────────────────────────────── */
-    .page-actions {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 18px;
-    }
-    .count-badge {
-      font-size: .68rem; font-weight: 700; background: var(--bg);
-      border: 1px solid var(--border); color: var(--muted);
-      padding: 2px 9px; border-radius: 20px;
-    }
+      .alert-warning {
+        background: #fffbeb;
+        border-color: #fde68a;
+        color: #b45309;
+      }
 
-    /* ── BTN PRIMARY ─────────────────────────────────────────── */
-    .btn-primary {
-      background: var(--accent); color: #fff; border: none;
-      padding: 7px 14px; border-radius: 6px; font-size: .78rem; font-weight: 600;
-      cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
-      transition: opacity .13s;
-    }
-    .btn-primary:hover { opacity: .88; }
-    .btn-ghost {
-      background: transparent; border: 1px solid var(--border); color: var(--muted);
-      padding: 5px 11px; border-radius: 6px; font-size: .75rem; font-weight: 500;
-      cursor: pointer; transition: all .13s;
-    }
-    .btn-ghost:hover { border-color: #c7d9fd; color: var(--accent); background: #eff6ff; }
+      .alert-close {
+        margin-left: auto;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: .85rem;
+        color: inherit;
+        opacity: .5;
+        padding: 0 2px;
+      }
 
-    /* ── TABLE OVERRIDES ─────────────────────────────────────── */
-    .card-head-actions { display: flex; align-items: center; gap: 10px; }
-    tbody td.center { text-align: center; }
-    .doc-icons { display: flex; justify-content: center; gap: 8px; font-size: .85rem; }
-    .doc-icons i.ok  { color: var(--success); }
-    .doc-icons i.off { color: #d1d5db; }
-    .chk { font-size: .82rem; display: inline-flex; align-items: center; gap: 4px; }
-    .chk.ok  { color: var(--success); }
-    .chk.bad { color: var(--danger); }
+      .alert-close:hover {
+        opacity: 1;
+      }
 
-    /* ── MODAL ───────────────────────────────────────────────── */
-    .modal-backdrop {
-      display: none; position: fixed; inset: 0;
-      background: rgba(15,20,35,.45); z-index: 200;
-      align-items: center; justify-content: center;
-      padding: 20px;
-    }
-    .modal-backdrop.open { display: flex; }
-    .modal-box {
-      background: var(--surface); border-radius: 10px;
-      width: 100%; max-width: 680px; max-height: 90vh;
-      display: flex; flex-direction: column;
-      box-shadow: 0 20px 60px rgba(0,0,0,.18);
-      animation: modalIn .18s ease;
-    }
-    .modal-box.sm { max-width: 380px; }
-    @keyframes modalIn { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
-    .modal-head {
-      padding: 15px 20px; background: var(--navy); border-radius: 10px 10px 0 0;
-      display: flex; align-items: center; gap: 9px; color: #fff; flex-shrink: 0;
-    }
-    .modal-head h5 { font-size: .88rem; font-weight: 600; margin: 0; flex: 1; }
-    .modal-head .close-btn {
-      background: none; border: none; color: rgba(255,255,255,.45);
-      font-size: .85rem; cursor: pointer; padding: 2px 5px; transition: color .12s;
-    }
-    .modal-head .close-btn:hover { color: #fff; }
-    .modal-body { padding: 22px 24px; overflow-y: auto; flex: 1; }
-    .modal-foot {
-      padding: 13px 20px; border-top: 1px solid var(--border);
-      display: flex; justify-content: flex-end; gap: 8px;
-      background: var(--bg); border-radius: 0 0 10px 10px; flex-shrink: 0;
-    }
+      /* ── PREREQ BANNER ───────────────────────────────────────── */
+      .prereq-banner {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 8px;
+        padding: 11px 16px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 18px;
+        font-size: .8rem;
+        color: var(--text);
+      }
 
-    /* ── FORM ────────────────────────────────────────────────── */
-    .form-section-title {
-      font-size: .72rem; font-weight: 700; letter-spacing: .08em;
-      text-transform: uppercase; color: var(--accent);
-      margin: 0 0 12px; display: flex; align-items: center; gap: 6px;
-    }
-    .form-section-title i { font-size: .75rem; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-    .form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
-    .form-row.cols-1 { grid-template-columns: 1fr; }
-    .form-group { display: flex; flex-direction: column; gap: 4px; }
-    .form-group label {
-      font-size: .71rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em;
-    }
-    .form-group label .req { color: var(--danger); }
-    .form-group input, .form-group textarea, .form-group select {
-      border: 1px solid var(--border); border-radius: 6px;
-      padding: 7px 10px; font-size: .81rem; color: var(--text);
-      background: var(--surface); transition: border-color .12s;
-      font-family: inherit;
-    }
-    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
-      outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,110,244,.1);
-    }
-    .form-group .input-suffix {
-      display: flex;
-    }
-    .form-group .input-suffix input { border-radius: 6px 0 0 6px; flex: 1; }
-    .form-group .input-suffix span {
-      border: 1px solid var(--border); border-left: none;
-      border-radius: 0 6px 6px 0; padding: 7px 10px;
-      font-size: .78rem; color: var(--muted); background: var(--bg);
-    }
-    .form-hint { font-size: .67rem; color: var(--danger); margin-top: 2px; }
-    .form-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+      .prereq-banner strong {
+        color: var(--accent);
+      }
 
-    /* ── EMPTY STATE ─────────────────────────────────────────── */
-    .empty-row td { padding: 48px 20px !important; }
-    .empty-row i  { font-size: 2.2rem; color: #d1d5db; display: block; margin-bottom: 10px; }
-  </style>
+      .prereq-banner i {
+        color: var(--accent);
+        margin-right: 4px;
+      }
 
-  <!-- ALERTS -->
-  <div class="alert alert-success" th:if="${successMessage}">
-    <i class="fas fa-check-circle"></i>
-    <span th:text="${successMessage}"></span>
-    <button class="alert-close" onclick="this.closest('.alert').remove()">✕</button>
-  </div>
-  <div class="alert alert-warning" th:if="${errorMessage}">
-    <i class="fas fa-triangle-exclamation"></i>
-    <span th:text="${errorMessage}"></span>
-    <button class="alert-close" onclick="this.closest('.alert').remove()">✕</button>
-  </div>
+      /* ── PAGE HEADER ─────────────────────────────────────────── */
+      .page-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+      }
 
-  <!-- PREREQ BANNER -->
-  <div class="prereq-banner">
-    <span><i class="fas fa-newspaper"></i><strong>≥ 2</strong> articles Q1/Q2</span>
-    <span><i class="fas fa-microphone"></i><strong>≥ 2</strong> conférences</span>
-    <span><i class="fas fa-clock"></i><strong>≥ 200h</strong> formation doctorale</span>
-  </div>
+      .count-badge {
+        font-size: .68rem;
+        font-weight: 700;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: var(--muted);
+        padding: 2px 9px;
+        border-radius: 20px;
+      }
 
-  <!-- TABLE CARD -->
-  <div class="card">
-    <div class="card-head">
-      <h6><i class="fas fa-table"></i> Liste des demandes</h6>
-      <div class="card-head-actions">
-        <span class="count-badge"
-              th:text="${#lists.size(demandes)} + ' demande(s)'">0 demande(s)</span>
-        <button class="btn-primary" onclick="openModal(null)">
-          <i class="fas fa-plus"></i> Nouvelle demande
-        </button>
-      </div>
+      /* ── BTN PRIMARY ─────────────────────────────────────────── */
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        padding: 7px 14px;
+        border-radius: 6px;
+        font-size: .78rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: opacity .13s;
+      }
+
+      .btn-primary:hover {
+        opacity: .88;
+      }
+
+      .btn-ghost {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--muted);
+        padding: 5px 11px;
+        border-radius: 6px;
+        font-size: .75rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all .13s;
+      }
+
+      .btn-ghost:hover {
+        border-color: #c7d9fd;
+        color: var(--accent);
+        background: #eff6ff;
+      }
+
+      /* ── TABLE OVERRIDES ─────────────────────────────────────── */
+      .card-head-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      tbody td.center {
+        text-align: center;
+      }
+
+      .doc-icons {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        font-size: .85rem;
+      }
+
+      .doc-icons i.ok {
+        color: var(--success);
+      }
+
+      .doc-icons i.off {
+        color: #d1d5db;
+      }
+
+      .chk {
+        font-size: .82rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .chk.ok {
+        color: var(--success);
+      }
+
+      .chk.bad {
+        color: var(--danger);
+      }
+
+      /* ── MODAL ───────────────────────────────────────────────── */
+      .modal-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 20, 35, .45);
+        z-index: 200;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .modal-backdrop.open {
+        display: flex;
+      }
+
+      .modal-box {
+        background: var(--surface);
+        border-radius: 10px;
+        width: 100%;
+        max-width: 680px;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, .18);
+        animation: modalIn .18s ease;
+      }
+
+      .modal-box.sm {
+        max-width: 380px;
+      }
+
+      @keyframes modalIn {
+        from {
+          transform: translateY(12px);
+          opacity: 0;
+        }
+
+        to {
+          transform: none;
+          opacity: 1;
+        }
+      }
+
+      .modal-head {
+        padding: 15px 20px;
+        background: var(--navy);
+        border-radius: 10px 10px 0 0;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        color: #fff;
+        flex-shrink: 0;
+      }
+
+      .modal-head h5 {
+        font-size: .88rem;
+        font-weight: 600;
+        margin: 0;
+        flex: 1;
+      }
+
+      .modal-head .close-btn {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, .45);
+        font-size: .85rem;
+        cursor: pointer;
+        padding: 2px 5px;
+        transition: color .12s;
+      }
+
+      .modal-head .close-btn:hover {
+        color: #fff;
+      }
+
+      .modal-body {
+        padding: 22px 24px;
+        overflow-y: auto;
+        flex: 1;
+      }
+
+      .modal-foot {
+        padding: 13px 20px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        background: var(--bg);
+        border-radius: 0 0 10px 10px;
+        flex-shrink: 0;
+      }
+
+      /* ── FORM ────────────────────────────────────────────────── */
+      .form-section-title {
+        font-size: .72rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin: 0 0 12px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .form-section-title i {
+        font-size: .75rem;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .form-row.cols-3 {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+
+      .form-row.cols-1 {
+        grid-template-columns: 1fr;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .form-group label {
+        font-size: .71rem;
+        font-weight: 600;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: .06em;
+      }
+
+      .form-group label .req {
+        color: var(--danger);
+      }
+
+      .form-group input,
+      .form-group textarea,
+      .form-group select {
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 7px 10px;
+        font-size: .81rem;
+        color: var(--text);
+        background: var(--surface);
+        transition: border-color .12s;
+        font-family: inherit;
+      }
+
+      .form-group input:focus,
+      .form-group textarea:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(59, 110, 244, .1);
+      }
+
+      .form-group .input-suffix {
+        display: flex;
+      }
+
+      .form-group .input-suffix input {
+        border-radius: 6px 0 0 6px;
+        flex: 1;
+      }
+
+      .form-group .input-suffix span {
+        border: 1px solid var(--border);
+        border-left: none;
+        border-radius: 0 6px 6px 0;
+        padding: 7px 10px;
+        font-size: .78rem;
+        color: var(--muted);
+        background: var(--bg);
+      }
+
+      .form-hint {
+        font-size: .67rem;
+        color: var(--danger);
+        margin-top: 2px;
+      }
+
+      .form-divider {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 16px 0;
+      }
+
+      /* ── EMPTY STATE ─────────────────────────────────────────── */
+      .empty-row td {
+        padding: 48px 20px !important;
+      }
+
+      .empty-row i {
+        font-size: 2.2rem;
+        color: #d1d5db;
+        display: block;
+        margin-bottom: 10px;
+      }
+    </style>
+
+    <!-- ALERTS -->
+    <div class="alert alert-success" th:if="${successMessage}">
+      <i class="fas fa-check-circle"></i>
+      <span th:text="${successMessage}"></span>
+      <button class="alert-close" onclick="this.closest('.alert').remove()">✕</button>
+    </div>
+    <div class="alert alert-warning" th:if="${errorMessage}">
+      <i class="fas fa-triangle-exclamation"></i>
+      <span th:text="${errorMessage}"></span>
+      <button class="alert-close" onclick="this.closest('.alert').remove()">✕</button>
     </div>
 
-    <table>
-      <thead>
-      <tr>
-        <th>#</th>
-        <th>Articles Q1/Q2</th>
-        <th>Conférences</th>
-        <th>Formation</th>
-        <th style="text-align:center">Documents</th>
-        <th>Statut</th>
-        <th style="text-align:center">Actions</th>
-      </tr>
-      </thead>
-      <tbody>
+    <!-- PREREQ BANNER -->
+    <div class="prereq-banner">
+      <span><i class="fas fa-newspaper"></i><strong>≥ 2</strong> articles Q1/Q2</span>
+      <span><i class="fas fa-microphone"></i><strong>≥ 2</strong> conférences</span>
+      <span><i class="fas fa-clock"></i><strong>≥ 200h</strong> formation doctorale</span>
+    </div>
 
-      <!-- EMPTY STATE -->
-      <tr class="empty-row" th:if="${#lists.isEmpty(demandes)}">
-        <td colspan="7" style="text-align:center">
-          <i class="fas fa-inbox"></i>
-          <p style="color:var(--muted);margin-bottom:12px;font-size:.8rem">Aucune demande de soutenance.</p>
+    <!-- TABLE CARD -->
+    <div class="card">
+      <div class="card-head">
+        <h6><i class="fas fa-table"></i> Liste des demandes</h6>
+        <div class="card-head-actions">
+          <span class="count-badge" th:text="${#lists.size(demandes)} + ' demande(s)'">0 demande(s)</span>
           <button class="btn-primary" onclick="openModal(null)">
-            <i class="fas fa-plus"></i> Soumettre la première
+            <i class="fas fa-plus"></i> Nouvelle demande
           </button>
-        </td>
-      </tr>
+        </div>
+      </div>
 
-      <tr th:unless="${#lists.isEmpty(demandes)}"
-          th:each="d, stat : ${demandes}"
-          th:data-id="${d.id}"
-          th:data-articles="${d.nbrArticlesQ1Q2}"
-          th:data-conf="${d.nbrConferences}"
-          th:data-heures="${d.heuresFormation}"
-          th:data-manus="${d.demandeManus}"
-          th:data-rapport="${d.rapportThese}"
-          th:data-plagiat="${d.rapportAntiPlagiat}"
-          th:data-pub="${d.rapportPublications}"
-          th:data-attest="${d.attestations}"
-          th:data-obs="${d.observations}">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Articles Q1/Q2</th>
+            <th>Conférences</th>
+            <th>Formation</th>
+            <th style="text-align:center">Documents</th>
+            <th>Statut</th>
+            <th style="text-align:center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
 
-        <td style="color:var(--muted);font-weight:600" th:text="${stat.count}"></td>
+          <!-- EMPTY STATE -->
+          <tr class="empty-row" th:if="${#lists.isEmpty(demandes)}">
+            <td colspan="7" style="text-align:center">
+              <i class="fas fa-inbox"></i>
+              <p style="color:var(--muted);margin-bottom:12px;font-size:.8rem">Aucune demande de soutenance.</p>
+              <button class="btn-primary" onclick="openModal(null)">
+                <i class="fas fa-plus"></i> Soumettre la première
+              </button>
+            </td>
+          </tr>
 
-        <!-- Articles -->
-        <td class="center">
-            <span th:if="${d.nbrArticlesQ1Q2 != null}"
-                  th:class="${d.nbrArticlesQ1Q2 >= 2} ? 'chk ok' : 'chk bad'">
-              <i th:class="${d.nbrArticlesQ1Q2 >= 2} ? 'fas fa-check-circle' : 'fas fa-times-circle'"></i>
-              <strong th:text="${d.nbrArticlesQ1Q2}"></strong>
-            </span>
-          <span th:unless="${d.nbrArticlesQ1Q2 != null}" style="color:var(--muted)">—</span>
-        </td>
+          <tr th:unless="${#lists.isEmpty(demandes)}" th:each="d, stat : ${demandes}" th:data-id="${d.id}"
+            th:data-articles="${d.nbrArticlesQ1Q2}" th:data-conf="${d.nbrConferences}"
+            th:data-heures="${d.heuresFormation}" th:data-manus="${d.demandeManus}" th:data-rapport="${d.rapportThese}"
+            th:data-plagiat="${d.rapportAntiPlagiat}" th:data-pub="${d.rapportPublications}"
+            th:data-attest="${d.attestations}" th:data-obs="${d.observations}">
 
-        <!-- Conférences -->
-        <td class="center">
-            <span th:if="${d.nbrConferences != null}"
-                  th:class="${d.nbrConferences >= 2} ? 'chk ok' : 'chk bad'">
-              <i th:class="${d.nbrConferences >= 2} ? 'fas fa-check-circle' : 'fas fa-times-circle'"></i>
-              <strong th:text="${d.nbrConferences}"></strong>
-            </span>
-          <span th:unless="${d.nbrConferences != null}" style="color:var(--muted)">—</span>
-        </td>
+            <td style="color:var(--muted);font-weight:600" th:text="${stat.count}"></td>
 
-        <!-- Formation -->
-        <td class="center">
-            <span th:if="${d.heuresFormation != null}"
-                  th:class="${d.heuresFormation >= 200} ? 'chk ok' : 'chk bad'">
-              <i th:class="${d.heuresFormation >= 200} ? 'fas fa-check-circle' : 'fas fa-times-circle'"></i>
-              <strong th:text="${d.heuresFormation} + 'h'"></strong>
-            </span>
-          <span th:unless="${d.heuresFormation != null}" style="color:var(--muted)">—</span>
-        </td>
+            <!-- Articles -->
+            <td class="center">
+              <span th:if="${d.nbrArticlesQ1Q2 != null}" th:class="${d.nbrArticlesQ1Q2 >= 2} ? 'chk ok' : 'chk bad'">
+                <i th:class="${d.nbrArticlesQ1Q2 >= 2} ? 'fas fa-check-circle' : 'fas fa-times-circle'"></i>
+                <strong th:text="${d.nbrArticlesQ1Q2}"></strong>
+              </span>
+              <span th:unless="${d.nbrArticlesQ1Q2 != null}" style="color:var(--muted)">—</span>
+            </td>
 
-        <!-- Documents -->
-        <td>
-          <div class="doc-icons">
-            <i th:class="${d.demandeManus != null} ? 'fas fa-file-alt ok' : 'fas fa-file-alt off'"
-               title="Demande manuscrite"></i>
-            <i th:class="${d.rapportThese != null} ? 'fas fa-book ok' : 'fas fa-book off'"
-               title="Rapport thèse"></i>
-            <i th:class="${d.rapportAntiPlagiat != null} ? 'fas fa-shield-alt ok' : 'fas fa-shield-alt off'"
-               title="Anti-plagiat"></i>
-            <i th:class="${d.rapportPublications != null} ? 'fas fa-newspaper ok' : 'fas fa-newspaper off'"
-               title="Publications"></i>
-            <i th:class="${d.attestations != null} ? 'fas fa-award ok' : 'fas fa-award off'"
-               title="Attestations"></i>
-          </div>
-        </td>
+            <!-- Conférences -->
+            <td class="center">
+              <span th:if="${d.nbrConferences != null}" th:class="${d.nbrConferences >= 2} ? 'chk ok' : 'chk bad'">
+                <i th:class="${d.nbrConferences >= 2} ? 'fas fa-check-circle' : 'fas fa-times-circle'"></i>
+                <strong th:text="${d.nbrConferences}"></strong>
+              </span>
+              <span th:unless="${d.nbrConferences != null}" style="color:var(--muted)">—</span>
+            </td>
 
-        <!-- Statut -->
-        <td>
-            <span class="badge"
-                  th:class="${d.statut?.name() == 'AUTORISEE'}    ? 'badge badge-success' :
+            <!-- Formation -->
+            <td class="center">
+              <span th:if="${d.heuresFormation != null}" th:class="${d.heuresFormation >= 200} ? 'chk ok' : 'chk bad'">
+                <i th:class="${d.heuresFormation >= 200} ? 'fas fa-check-circle' : 'fas fa-times-circle'"></i>
+                <strong th:text="${d.heuresFormation} + 'h'"></strong>
+              </span>
+              <span th:unless="${d.heuresFormation != null}" style="color:var(--muted)">—</span>
+            </td>
+
+            <!-- Documents -->
+            <td>
+              <div class="doc-icons">
+                <i th:class="${d.demandeManus != null} ? 'fas fa-file-alt ok' : 'fas fa-file-alt off'"
+                  title="Demande manuscrite"></i>
+                <i th:class="${d.rapportThese != null} ? 'fas fa-book ok' : 'fas fa-book off'"
+                  title="Rapport thèse"></i>
+                <i th:class="${d.rapportAntiPlagiat != null} ? 'fas fa-shield-alt ok' : 'fas fa-shield-alt off'"
+                  title="Anti-plagiat"></i>
+                <i th:class="${d.rapportPublications != null} ? 'fas fa-newspaper ok' : 'fas fa-newspaper off'"
+                  title="Publications"></i>
+                <i th:class="${d.attestations != null} ? 'fas fa-award ok' : 'fas fa-award off'"
+                  title="Attestations"></i>
+              </div>
+            </td>
+
+            <!-- Statut -->
+            <td>
+              <span class="badge" th:class="${d.statut?.name() == 'AUTORISEE'}    ? 'badge badge-success' :
                         (${d.statut?.name() == 'REFUSEE'}     ? 'badge badge-danger'  :
                         (${d.statut?.name() == 'VALIDEE_ADMIN'}    ? 'badge badge-info'    :
                         (${d.statut?.name() == 'VALIDEE_DIRECTEUR'} ? 'badge badge-info'   : 'badge badge-warning')))"
-                  th:text="${d.statut}">—</span>
-        </td>
+                th:text="${d.statut}">—</span>
+            </td>
 
-        <!-- Actions -->
-        <td>
-          <div class="act">
-            <button class="act-btn ok" title="Modifier"
-                    th:onclick="'openModal(' + ${d.id} + ', this)'">
-              <i class="fas fa-pencil"></i>
-            </button>
-            <button class="act-btn" style="border-color:#bfdbfe;color:var(--info)"
-                    title="Changer le statut"
-                    th:onclick="'openStatutModal(' + ${d.id} + ')'">
-              <i class="fas fa-arrow-rotate-right"></i>
-            </button>
-            <form th:action="@{/demandes/delete(id=${d.id})}" method="post" style="display:inline"
+            <!-- Actions -->
+            <td>
+              <div class="act">
+                <button class="act-btn ok" title="Modifier" th:onclick="'openModal(' + ${d.id} + ', this)'">
+                  <i class="fas fa-pencil"></i>
+                </button>
+                <button class="act-btn" style="border-color:#bfdbfe;color:var(--info)" title="Changer le statut"
+                  th:onclick="'openStatutModal(' + ${d.id} + ')'">
+                  <i class="fas fa-arrow-rotate-right"></i>
+                </button>
+                <form th:action="@{/demandes/delete(id=${d.id})}" method="post" style="display:inline"
                   onsubmit="return confirm('Supprimer cette demande ?')">
-              <button type="submit" class="act-btn no" title="Supprimer">
-                <i class="fas fa-trash"></i>
-              </button>
-            </form>
-          </div>
-        </td>
-      </tr>
-      </tbody>
-    </table>
-  </div>
+                  <button type="submit" class="act-btn no" title="Supprimer">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-  <!-- ═══════════════════════════════════════════════
+    <!-- ═══════════════════════════════════════════════
        MODAL — Nouvelle / Modifier demande
   ════════════════════════════════════════════════ -->
-  <div class="modal-backdrop" id="demandeModal" onclick="closeOnBackdrop(event,'demandeModal')">
-    <div class="modal-box">
-      <div class="modal-head">
-        <i class="fas fa-file-circle-plus" style="font-size:.82rem"></i>
-        <h5 id="modalTitleText">Nouvelle demande de soutenance</h5>
-        <button class="close-btn" onclick="closeModal('demandeModal')">
-          <i class="fas fa-xmark"></i>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="demandeForm" method="post" novalidate>
-          <input type="hidden" id="formId" name="id"/>
+    <div class="modal-backdrop" id="demandeModal" onclick="closeOnBackdrop(event,'demandeModal')">
+      <div class="modal-box">
+        <div class="modal-head">
+          <i class="fas fa-file-circle-plus" style="font-size:.82rem"></i>
+          <h5 id="modalTitleText">Nouvelle demande de soutenance</h5>
+          <button class="close-btn" onclick="closeModal('demandeModal')">
+            <i class="fas fa-xmark"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="demandeForm" method="post" novalidate>
+            <input type="hidden" id="formId" name="id" />
 
-          <p class="form-section-title"><i class="fas fa-list-check"></i> Prérequis scientifiques</p>
-          <div class="form-row cols-3">
-            <div class="form-group">
-              <label>Articles Q1/Q2 <span class="req">*</span></label>
-              <input type="number" id="formArticles" name="nbrArticlesQ1Q2" min="0" placeholder="min. 2" required/>
-              <span class="form-hint">Minimum 2 requis</span>
-            </div>
-            <div class="form-group">
-              <label>Conférences <span class="req">*</span></label>
-              <input type="number" id="formConf" name="nbrConferences" min="0" placeholder="min. 2" required/>
-              <span class="form-hint">Minimum 2 requises</span>
-            </div>
-            <div class="form-group">
-              <label>Heures de formation <span class="req">*</span></label>
-              <div class="input-suffix">
-                <input type="number" id="formHeures" name="heuresFormation" min="0" placeholder="min. 200" required/>
-                <span>h</span>
+            <p class="form-section-title"><i class="fas fa-list-check"></i> Prérequis scientifiques</p>
+            <div class="form-row cols-3">
+              <div class="form-group">
+                <label>Articles Q1/Q2 <span class="req">*</span></label>
+                <input type="number" id="formArticles" name="nbrArticlesQ1Q2" min="0" placeholder="min. 2" required />
+                <span class="form-hint">Minimum 2 requis</span>
               </div>
-              <span class="form-hint">Minimum 200h</span>
+              <div class="form-group">
+                <label>Conférences <span class="req">*</span></label>
+                <input type="number" id="formConf" name="nbrConferences" min="0" placeholder="min. 2" required />
+                <span class="form-hint">Minimum 2 requises</span>
+              </div>
+              <div class="form-group">
+                <label>Heures de formation <span class="req">*</span></label>
+                <div class="input-suffix">
+                  <input type="number" id="formHeures" name="heuresFormation" min="0" placeholder="min. 200" required />
+                  <span>h</span>
+                </div>
+                <span class="form-hint">Minimum 200h</span>
+              </div>
             </div>
-          </div>
 
-          <hr class="form-divider"/>
-          <p class="form-section-title"><i class="fas fa-folder-open"></i> Documents requis (CDC §3)</p>
-          <div class="form-row">
-            <div class="form-group">
-              <label><i class="fas fa-file-alt" style="margin-right:4px"></i> Demande manuscrite</label>
-              <input type="text" id="formManus" name="demandeManus" placeholder="Référence du document"/>
+            <hr class="form-divider" />
+            <p class="form-section-title"><i class="fas fa-folder-open"></i> Documents requis (CDC §3)</p>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-file-alt" style="margin-right:4px"></i> Demande manuscrite</label>
+                <input type="text" id="formManus" name="demandeManus" placeholder="Référence du document" />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-book" style="margin-right:4px"></i> Rapport de thèse</label>
+                <input type="text" id="formRapport" name="rapportThese" placeholder="Référence du document" />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-shield-alt" style="margin-right:4px"></i> Rapport anti-plagiat</label>
+                <input type="text" id="formPlagiat" name="rapportAntiPlagiat" placeholder="Référence du document" />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-newspaper" style="margin-right:4px"></i> Rapport publications</label>
+                <input type="text" id="formPub" name="rapportPublications" placeholder="Référence du document" />
+              </div>
             </div>
-            <div class="form-group">
-              <label><i class="fas fa-book" style="margin-right:4px"></i> Rapport de thèse</label>
-              <input type="text" id="formRapport" name="rapportThese" placeholder="Référence du document"/>
+            <div class="form-row cols-1">
+              <div class="form-group">
+                <label><i class="fas fa-award" style="margin-right:4px"></i> Attestations + autorisation</label>
+                <input type="text" id="formAttest" name="attestations" placeholder="Référence du document" />
+              </div>
+              <div class="form-group">
+                <label>Observations</label>
+                <textarea id="formObs" name="observations" rows="2"></textarea>
+              </div>
             </div>
-            <div class="form-group">
-              <label><i class="fas fa-shield-alt" style="margin-right:4px"></i> Rapport anti-plagiat</label>
-              <input type="text" id="formPlagiat" name="rapportAntiPlagiat" placeholder="Référence du document"/>
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-newspaper" style="margin-right:4px"></i> Rapport publications</label>
-              <input type="text" id="formPub" name="rapportPublications" placeholder="Référence du document"/>
-            </div>
-          </div>
-          <div class="form-row cols-1">
-            <div class="form-group">
-              <label><i class="fas fa-award" style="margin-right:4px"></i> Attestations + autorisation</label>
-              <input type="text" id="formAttest" name="attestations" placeholder="Référence du document"/>
-            </div>
-            <div class="form-group">
-              <label>Observations</label>
-              <textarea id="formObs" name="observations" rows="2"></textarea>
-            </div>
-          </div>
-        </form>
-      </div>
-      <div class="modal-foot">
-        <button class="btn-ghost" onclick="closeModal('demandeModal')">Annuler</button>
-        <button class="btn-primary" onclick="submitForm()">
-          <i class="fas fa-paper-plane"></i>
-          <span id="submitLabel">Soumettre</span>
-        </button>
+          </form>
+        </div>
+        <div class="modal-foot">
+          <button class="btn-ghost" onclick="closeModal('demandeModal')">Annuler</button>
+          <button class="btn-primary" onclick="submitForm()">
+            <i class="fas fa-paper-plane"></i>
+            <span id="submitLabel">Soumettre</span>
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- ═══════════════════════════════════════════════
+    <!-- ═══════════════════════════════════════════════
        MODAL — Changer le statut
   ════════════════════════════════════════════════ -->
-  <div class="modal-backdrop" id="statutModal" onclick="closeOnBackdrop(event,'statutModal')">
-    <div class="modal-box sm">
-      <div class="modal-head">
-        <i class="fas fa-arrow-rotate-right" style="font-size:.82rem"></i>
-        <h5>Changer le statut</h5>
-        <button class="close-btn" onclick="closeModal('statutModal')">
-          <i class="fas fa-xmark"></i>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="statutForm" action="/demandes/statut" method="post">
-          <input type="hidden" id="statutId" name="id"/>
-          <div class="form-group">
-            <label>Nouveau statut</label>
-            <select name="statut">
-              <option th:each="s : ${statuts}" th:value="${s}" th:text="${s}"></option>
-            </select>
-          </div>
-        </form>
-      </div>
-      <div class="modal-foot">
-        <button class="btn-ghost" onclick="closeModal('statutModal')">Annuler</button>
-        <button class="btn-primary" onclick="document.getElementById('statutForm').submit()">
-          <i class="fas fa-check"></i> Confirmer
-        </button>
+    <div class="modal-backdrop" id="statutModal" onclick="closeOnBackdrop(event,'statutModal')">
+      <div class="modal-box sm">
+        <div class="modal-head">
+          <i class="fas fa-arrow-rotate-right" style="font-size:.82rem"></i>
+          <h5>Changer le statut</h5>
+          <button class="close-btn" onclick="closeModal('statutModal')">
+            <i class="fas fa-xmark"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="statutForm" action="/demandes/statut" method="post">
+            <input type="hidden" id="statutId" name="id" />
+            <div class="form-group">
+              <label>Nouveau statut</label>
+              <select name="statut">
+                <option th:each="s : ${statuts}" th:value="${s}" th:text="${s}"></option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-foot">
+          <button class="btn-ghost" onclick="closeModal('statutModal')">Annuler</button>
+          <button class="btn-primary" onclick="document.getElementById('statutForm').submit()">
+            <i class="fas fa-check"></i> Confirmer
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <script>
-    function openModal(id, btn) {
-      const form = document.getElementById('demandeForm');
-      const fields = ['formId','formArticles','formConf','formHeures','formManus',
-        'formRapport','formPlagiat','formPub','formAttest','formObs'];
-      if (id && btn) {
-        const row = btn.closest('tr');
-        const vals = [id, row.dataset.articles, row.dataset.conf, row.dataset.heures,
-          row.dataset.manus, row.dataset.rapport, row.dataset.plagiat,
-          row.dataset.pub, row.dataset.attest, row.dataset.obs];
-        fields.forEach((f, i) => { const el = document.getElementById(f); if (el) el.value = vals[i] || ''; });
-        document.getElementById('modalTitleText').textContent = 'Modifier la demande';
-        document.getElementById('submitLabel').textContent   = 'Enregistrer';
-        form.action = '/demandes/update';
-      } else {
-        fields.forEach(f => { const el = document.getElementById(f); if (el) el.value = ''; });
-        document.getElementById('modalTitleText').textContent = 'Nouvelle demande de soutenance';
-        document.getElementById('submitLabel').textContent   = 'Soumettre';
-        form.action = '/demandes/save';
+    <script>
+      function openModal(id, btn) {
+        const form = document.getElementById('demandeForm');
+        const fields = ['formId', 'formArticles', 'formConf', 'formHeures', 'formManus',
+          'formRapport', 'formPlagiat', 'formPub', 'formAttest', 'formObs'];
+        if (id && btn) {
+          const row = btn.closest('tr');
+          const vals = [id, row.dataset.articles, row.dataset.conf, row.dataset.heures,
+            row.dataset.manus, row.dataset.rapport, row.dataset.plagiat,
+            row.dataset.pub, row.dataset.attest, row.dataset.obs];
+          fields.forEach((f, i) => { const el = document.getElementById(f); if (el) el.value = vals[i] || ''; });
+          document.getElementById('modalTitleText').textContent = 'Modifier la demande';
+          document.getElementById('submitLabel').textContent = 'Enregistrer';
+          form.action = '/demandes/update';
+        } else {
+          fields.forEach(f => { const el = document.getElementById(f); if (el) el.value = ''; });
+          document.getElementById('modalTitleText').textContent = 'Nouvelle demande de soutenance';
+          document.getElementById('submitLabel').textContent = 'Soumettre';
+          form.action = '/demandes/save';
+        }
+        document.getElementById('demandeModal').classList.add('open');
       }
-      document.getElementById('demandeModal').classList.add('open');
-    }
-    function openStatutModal(id) {
-      document.getElementById('statutId').value = id;
-      document.getElementById('statutModal').classList.add('open');
-    }
-    function closeModal(id) {
-      document.getElementById(id).classList.remove('open');
-    }
-    function closeOnBackdrop(e, id) {
-      if (e.target === e.currentTarget) closeModal(id);
-    }
-    function submitForm() {
-      const form = document.getElementById('demandeForm');
-      if (form.checkValidity()) { form.submit(); }
-      else { form.reportValidity(); }
-    }
-  </script>
+      function openStatutModal(id) {
+        document.getElementById('statutId').value = id;
+        document.getElementById('statutModal').classList.add('open');
+      }
+      function closeModal(id) {
+        document.getElementById(id).classList.remove('open');
+      }
+      function closeOnBackdrop(e, id) {
+        if (e.target === e.currentTarget) closeModal(id);
+      }
+      function submitForm() {
+        const form = document.getElementById('demandeForm');
+        if (form.checkValidity()) { form.submit(); }
+        else { form.reportValidity(); }
+      }
+    </script>
 
-</section>
+  </section>
 </body>
+
 </html>

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr"
+      th:replace="~{layouts/admin-layout :: layout(
+          'Communication',
+          'Messagerie interne entre les acteurs',
+          'messages'
+      )}">
+<head><title>Communication</title></head>
+<body>
+<section th:fragment="content">
+  <th:block th:replace="~{Communication/fragments :: messagesContent}"></th:block>
+</section>
+</body>
+</html>

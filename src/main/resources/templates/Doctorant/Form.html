@@ -1,77 +1,131 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="fr">
-<head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title th:text="${doctorant.id != 0 ? 'Modifier doctorant' : 'Ajouter doctorant'}">Doctorant</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
-</head>
-<body class="bg-light">
-<div th:replace="~{fragments/navbar :: navbar}"></div>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr"
+      th:replace="~{layouts/doctorant-layout :: layout(
+          'Modifier mon profil',
+          'Mettez à jour vos informations personnelles',
+          'profil'
+      )}">
+<head><title>Modifier mon profil</title></head>
+<body>
 
-<main class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h4 class="fw-bold mb-0" th:text="${doctorant.id != 0 ? 'Modifier doctorant' : 'Ajouter doctorant'}">Doctorant</h4>
-            <small class="text-muted">Informations du profil doctorant</small>
+<section th:fragment="section">
+  <style>
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-group label {
+      font-size: .71rem; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .06em;
+    }
+    .form-group input, .form-group textarea {
+      border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px;
+      font-size: .81rem; color: var(--text); background: var(--surface);
+      font-family: inherit; transition: border-color .12s;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+      outline: none; border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(124,58,237,.1);
+    }
+    .form-group textarea { resize: vertical; min-height: 70px; }
+    .full-width { grid-column: 1 / -1; }
+
+    .btn-primary {
+      background: var(--accent); color: #fff; border: none;
+      padding: 7px 14px; border-radius: 6px; font-size: .78rem; font-weight: 600;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: opacity .13s;
+    }
+    .btn-primary:hover { opacity: .88; }
+    .btn-ghost {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      padding: 5px 11px; border-radius: 6px; font-size: .75rem; font-weight: 500;
+      cursor: pointer; transition: all .13s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-ghost:hover { border-color: #ddd6fe; color: var(--accent); background: #f5f3ff; }
+  </style>
+
+  <form th:action="@{/doctorants/save}" th:object="${doctorant}" method="post" enctype="multipart/form-data">
+    <input type="hidden" th:field="*{id}"/>
+
+    <div class="card">
+      <div class="card-head">
+        <h6><i class="fas fa-address-card"></i> Informations personnelles</h6>
+      </div>
+      <div style="padding:18px 20px">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nom</label>
+            <input th:field="*{nom}" required/>
+          </div>
+          <div class="form-group">
+            <label>Prénom</label>
+            <input th:field="*{prenom}" required/>
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input th:field="*{email}" type="email" required/>
+          </div>
+          <div class="form-group">
+            <label>Téléphone</label>
+            <input th:field="*{telephone}"/>
+          </div>
+          <div class="form-group full-width">
+            <label>Adresse</label>
+            <input th:field="*{adresse}"/>
+          </div>
         </div>
-        <a th:href="@{/doctorants}" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-arrow-left me-1"></i>Retour
-        </a>
+      </div>
     </div>
 
-    <form th:action="@{/doctorants/save}" th:object="${doctorant}" method="post" class="card border-0 shadow-sm">
-        <div class="card-body">
-            <input type="hidden" th:field="*{id}"/>
-
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label">Nom</label>
-                    <input th:field="*{nom}" class="form-control" required/>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Prénom</label>
-                    <input th:field="*{prenom}" class="form-control" required/>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Email</label>
-                    <input th:field="*{email}" type="email" class="form-control" required/>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Téléphone</label>
-                    <input th:field="*{telephone}" class="form-control"/>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Adresse</label>
-                    <input th:field="*{adresse}" class="form-control"/>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Mot de passe</label>
-                    <input th:field="*{password}" type="password" class="form-control"/>
-                </div>
-                <div class="col-12">
-                    <label class="form-label">Sujet de thèse</label>
-                    <textarea th:field="*{sujetThese}" class="form-control" rows="3"></textarea>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">CV</label>
-                    <input th:field="*{CV}" class="form-control"/>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Lettre de motivation</label>
-                    <input th:field="*{lettreMotivation}" class="form-control"/>
-                </div>
-            </div>
+    <div class="card" style="margin-top:16px">
+      <div class="card-head">
+        <h6><i class="fas fa-graduation-cap"></i> Thèse</h6>
+      </div>
+      <div style="padding:18px 20px">
+        <div class="form-group full-width">
+          <label>Sujet de thèse</label>
+          <textarea th:field="*{sujetThese}" rows="3"></textarea>
         </div>
-        <div class="card-footer bg-white text-end">
-            <button type="submit" class="btn btn-primary">
-                <i class="bi bi-save me-1"></i>Enregistrer
-            </button>
-        </div>
-    </form>
-</main>
+      </div>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="card" style="margin-top:16px">
+      <div class="card-head">
+        <h6><i class="fas fa-folder-open"></i> Documents</h6>
+      </div>
+      <div style="padding:18px 20px">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>CV <span style="font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0" th:if="${doctorant.CV != null and !doctorant.CV.isBlank()}">(fichier actuel : <span th:text="${doctorant.CV}"></span>)</span></label>
+            <input type="file" name="cvFile" accept=".pdf,.doc,.docx"/>
+          </div>
+          <div class="form-group">
+            <label>Lettre de motivation <span style="font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0" th:if="${doctorant.lettreMotivation != null and !doctorant.lettreMotivation.isBlank()}">(fichier actuel : <span th:text="${doctorant.lettreMotivation}"></span>)</span></label>
+            <input type="file" name="lettreFile" accept=".pdf,.doc,.docx"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="card-head">
+        <h6><i class="fas fa-lock"></i> Sécurité</h6>
+      </div>
+      <div style="padding:18px 20px">
+        <div class="form-group" style="max-width:300px">
+          <label>Mot de passe</label>
+          <input th:field="*{password}" type="password" placeholder="Laisser vide pour conserver l'actuel"/>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:18px;display:flex;gap:8px">
+      <button type="submit" class="btn-primary">
+        <i class="fas fa-floppy-disk"></i> Enregistrer
+      </button>
+      <a th:href="@{/profil}" class="btn-ghost">
+        <i class="fas fa-xmark"></i> Annuler
+      </a>
+    </div>
+  </form>
+</section>
 </body>
 </html>

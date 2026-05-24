@@ -13,61 +13,59 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class PortailSuiviDoctoratApplication implements CommandLineRunner {
-
-    @Autowired UtilisateurRepo utilisateurRepo;
-    @Autowired EncadrantRepo   encadrantRepo;
-    @Autowired DoctorantRepo   doctorantRepo;
-
+    @Autowired
+    UtilisateurRepo utilisateurRepo;
+    @Autowired
+    DoctorantRepo doctorantRepo;
+    @Autowired
+    EncadrantRepo encadrantRepo;
     public static void main(String[] args) {
         SpringApplication.run(PortailSuiviDoctoratApplication.class, args);
     }
 
     @Override
-    public void run(String... args) throws Exception {
-
-            Utilisateur admin = new Utilisateur(
-                    "ADMIN",
-                    "admin123",
-                    "+212600000001",
-                    "Rabat",
-                    "Admin",
-                    "admin@portail.ma",
-                    "azerty"
-            );
+    public void run(String... args) {
+        if (utilisateurRepo.findByEmail("admin@portail.local").isEmpty()) {
+            Utilisateur admin = new Utilisateur();
+            admin.setNom("Admin");
+            admin.setPrenom("Portail");
+            admin.setEmail("admin@portail.local");
+            admin.setAdresse("Administration");
+            admin.setTelephone("+212600000000");
+            admin.setPassword("admin123");
+            admin.setRole("ADMIN");
             utilisateurRepo.save(admin);
+        }
 
-
-
-            Encadrant encadrant2 = new Encadrant();
-            encadrant2.setRole("ENCADRANT");   // ← must match switch case
-            encadrant2.setPassword("enc123");
-            encadrant2.setEmail("encadrant@portail.ma");
-            encadrant2.setNom("Alaoui");
-            encadrant2.setPrenom("Mohamed");
-            encadrant2.setTelephone("+212600000002");
-            encadrant2.setAdresse("Casablanca");
-            encadrant2.setSpecialite("Informatique");
-            encadrant2.setGrade("Professeur");
-            encadrant2.setEtablissement("FSTM");
-            encadrantRepo.save(encadrant2);
-
-
-
-            // fetch the encadrant to link
-            Encadrant encadrant = encadrantRepo.findByEmail("encadrant@portail.ma");
-
+        if (utilisateurRepo.findByEmail("doctorant@portail.local").isEmpty()) {
             Doctorant doctorant = new Doctorant();
-            doctorant.setRole("DOCTORANT");   // ← must match switch case
-            doctorant.setPassword("doc123");
-            doctorant.setEmail("doctorant@portail.ma");
-            doctorant.setNom("Bouttar");
-            doctorant.setPrenom("Brahim");
-            doctorant.setTelephone("+212677862028");
-            doctorant.setAdresse("Casablanca");
-            doctorant.setSujetThese("Intelligence artificielle appliquée");
-            doctorant.setStatut("ACTIF");
-            doctorant.setEncadrant(encadrant);  // ← linked to encadrant
+            doctorant.setNom("Doctorant");
+            doctorant.setPrenom("Demo");
+            doctorant.setEmail("doctorant@portail.local");
+            doctorant.setAdresse("Faculte des sciences");
+            doctorant.setTelephone("+212611111111");
+            doctorant.setPassword("doctorant123");
+            doctorant.setRole("DOCTORANT");
+            doctorant.setSujetThese("Portail de suivi doctoral");
+            doctorant.setCV("CV demo");
+            doctorant.setLettreMotivation("Lettre demo");
             doctorantRepo.save(doctorant);
+        }
 
+        if (encadrantRepo.findByEmail("encadrant@portail.local") == null) {
+            Encadrant encadrant = new Encadrant();
+            encadrant.setNom("Encadrant");
+            encadrant.setPrenom("Demo");
+            encadrant.setEmail("encadrant@portail.local");
+            encadrant.setAdresse("Faculte des sciences");
+            encadrant.setTelephone("+212622222222");
+            encadrant.setPassword("encadrant123");
+            encadrant.setRole("ENCADRANT");
+            encadrant.setSpecialite("Informatique");
+            encadrant.setGrade("Professeur");
+            encadrant.setEtablissement("Faculte des sciences");
+            encadrantRepo.save(encadrant);
+        }
     }
+
 }

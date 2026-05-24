@@ -297,21 +297,27 @@
     </a>
 
     <div class="sb-section">Mon dossier</div>
-    <a th:href="@{/dossiers}"
+    <a th:href="@{/Diplomes}"
        th:class="${activePage == 'dossiers'} ? 'sb-link active' : 'sb-link'">
       <i class="fas fa-folder-open"></i> Dossiers
     </a>
-    <a th:href="@{/manuscrit}"
-       th:class="${activePage == 'manuscrit'} ? 'sb-link active' : 'sb-link'">
-      <i class="fas fa-file-lines"></i> Manuscrit
-    </a>
-    <a th:href="@{/soutenance}"
+    <a th:href="@{/doctorants/soutenance}"
        th:class="${activePage == 'soutenance'} ? 'sb-link active' : 'sb-link'">
-      <i class="fas fa-calendar-check"></i> Soutenance
+      <i class="fas fa-calendar-check"></i> Ma soutenance
     </a>
-    <a th:href="@{doctorants/demandes}"
+    <a th:href="@{/doctorants/demandes}"
        th:class="${activePage == 'demandes'} ? 'sb-link active' : 'sb-link'">
       <i class="fas fa-inbox"></i> Mes demandes
+    </a>
+
+    <div class="sb-section">Compte</div>
+    <a th:href="@{/profil}"
+       th:class="${activePage == 'profil'} ? 'sb-link active' : 'sb-link'">
+      <i class="fas fa-circle-user"></i> Mon profil
+    </a>
+    <a th:href="@{/messages}"
+       th:class="${activePage == 'messages'} ? 'sb-link active' : 'sb-link'">
+      <i class="fas fa-comments"></i> Communication
     </a>
   </nav>
 
@@ -322,11 +328,9 @@
            th:text="${doctorant != null ? doctorant.prenom + ' ' + doctorant.nom : 'Doctorant'}">Nom Prénom</div>
       <div class="sb-urole">Doctorant</div>
     </div>
-    <form th:action="@{/logout}" method="post" style="display:inline">
-      <button type="submit" class="sb-logout" title="Déconnexion">
-        <i class="fas fa-right-from-bracket"></i>
-      </button>
-    </form>
+    <a th:href="@{/logout}" class="sb-logout" title="Déconnexion">
+      <i class="fas fa-right-from-bracket"></i>
+    </a>
   </div>
 </aside>
 

@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @RequestMapping("/Utilisateur")
 @Controller
@@ -30,16 +29,13 @@ public class UtilisateurController {
     }
 
     @PostMapping("/save")
-    public String save(@ModelAttribute Utilisateur utilisateur, RedirectAttributes ra) {
-        try {
-            utilisateurService.save(utilisateur);
-            boolean isNew = utilisateur.getId() == null || utilisateur.getId() == 0;
-            ra.addFlashAttribute("successMessage",
-                    isNew ? "Utilisateur créé avec succès !" : "Utilisateur modifié avec succès !");
-        } catch (Exception e) {
-            ra.addFlashAttribute("errorMessage", "Erreur : " + e.getMessage());
+    public String save(@ModelAttribute Utilisateur utilisateur) {
+        if (utilisateur.getId() != null) {
+            utilisateurService.updateUtilisateur(utilisateur, utilisateur.getId());
+        } else {
+            utilisateurService.createUtilisateur(utilisateur);
         }
-        return "redirect:/admin/users";
+        return "redirect:/Utilisateur/all";
     }
 
     @GetMapping({"/details/{id}", "/Details/{id}"})

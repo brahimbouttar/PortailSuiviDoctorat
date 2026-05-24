@@ -1,14 +1,14 @@
 package com.gestion.portailsuividoctorat.controllers;
 
 import com.gestion.portailsuividoctorat.entites.Demande;
-import com.gestion.portailsuividoctorat.entites.Doctorant;
-import com.gestion.portailsuividoctorat.entites.Encadrant;
 import com.gestion.portailsuividoctorat.repositories.DemandeRepo;
 import com.gestion.portailsuividoctorat.repositories.DoctorantRepo;
 import com.gestion.portailsuividoctorat.repositories.EncadrantRepo;
 import com.gestion.portailsuividoctorat.repositories.UtilisateurRepo;
-import com.gestion.portailsuividoctorat.services.*;
-import jakarta.servlet.http.HttpSession;
+import com.gestion.portailsuividoctorat.services.AdminService;
+import com.gestion.portailsuividoctorat.services.DemandeService;
+import com.gestion.portailsuividoctorat.services.JuryService;
+import com.gestion.portailsuividoctorat.services.SoutenanceService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,56 +19,47 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminController {
 
     private final AdminService adminService;
-    private final EncadrantService encadrantService;
     private final DemandeService demandeService;
+    private final SoutenanceService soutenanceService;
     private final JuryService juryService;
-    private final SoutenanceService Soutservice;
     private final UtilisateurRepo utilisateurRepo;
     private final DoctorantRepo doctorantRepo;
+    private final EncadrantRepo encadrantRepo;
     private final DemandeRepo demandeRepo;
 
-    public AdminController(AdminService adminService, EncadrantService encadrantService,
+    public AdminController(AdminService adminService,
                            DemandeService demandeService,
+                           SoutenanceService soutenanceService,
+                           JuryService juryService,
                            UtilisateurRepo utilisateurRepo,
                            DoctorantRepo doctorantRepo,
-                           DemandeRepo demandeRepo,
-                           JuryService juryService,
-                           SoutenanceService Soutservice) {
+                           EncadrantRepo encadrantRepo,
+                           DemandeRepo demandeRepo) {
         this.adminService = adminService;
-        this.encadrantService = encadrantService;
         this.demandeService = demandeService;
+        this.soutenanceService = soutenanceService;
+        this.juryService = juryService;
         this.utilisateurRepo = utilisateurRepo;
         this.doctorantRepo = doctorantRepo;
+        this.encadrantRepo = encadrantRepo;
         this.demandeRepo = demandeRepo;
-        this.juryService = juryService;
-        this.Soutservice = Soutservice;
     }
 
-    @GetMapping
+    @ModelAttribute
+    public void addCommonAttributes(Model model) {
+        model.addAttribute("demandesEnAttente", demandeRepo.countByStatut(Demande.StatutDemande.EN_ATTENTE));
+    }
+
+    @GetMapping({"", "/dashboard"})
     public String dashboard(Model model) {
         model.addAttribute("totalUsers", utilisateurRepo.count());
         model.addAttribute("totalDoctorants", doctorantRepo.count());
-        model.addAttribute("demandesEnAttente", demandeRepo.countByStatut(Demande.StatutDemande.EN_ATTENTE));
         model.addAttribute("demandesAutorisees", demandeRepo.countByStatut(Demande.StatutDemande.AUTORISEE));
         model.addAttribute("derniersDemandes",
                 demandeRepo.findTop5ByStatutOrderByDateDepotDescIdDesc(Demande.StatutDemande.EN_ATTENTE));
         return "Admin/dashboard";
     }
-    @GetMapping("/encadrants")
-    public String showListEncadrants(Model model) {
-        model.addAttribute("encadrants", encadrantService.findAllEncadrants());
-        return "Admin/encadrants";
-    }
-    @PostMapping("/encadrants/create")
-    public String createEncadrant(@ModelAttribute Encadrant encadrant, RedirectAttributes ra) {
-        try {
-            encadrantService.createEncadrant(encadrant);
-            ra.addFlashAttribute("successMessage", "Encadrant créé avec succès !");
-        } catch (Exception e) {
-            ra.addFlashAttribute("errorMessage", "Erreur lors de la création : " + e.getMessage());
-        }
-        return "redirect:/admin/encadrants";
-    }
+
     @GetMapping("/demandes")
     public String demandes(Model model) {
         model.addAttribute("demandes", demandeService.getAllDemandes());
@@ -91,9 +82,7 @@ public class AdminController {
                                         String message,
                                         RedirectAttributes ra) {
         try {
-            Demande demande = demandeService.getDemandeById(id);
-            demande.setStatut(statut);
-            demandeRepo.save(demande);
+            demandeService.changerStatut(id, statut);
             ra.addFlashAttribute("successMessage", message);
         } catch (RuntimeException e) {
             ra.addFlashAttribute("errorMessage", e.getMessage());
@@ -103,7 +92,7 @@ public class AdminController {
 
     @GetMapping("/users")
     public String users(Model model) {
-        model.addAttribute("Utilisateur", adminService.getAllUsers());
+        model.addAttribute("users", adminService.getAllUsers());
         return "Admin/utilisateurs";
     }
 
@@ -122,20 +111,22 @@ public class AdminController {
 
     @GetMapping("/doctorants")
     public String doctorants(Model model) {
-
         model.addAttribute("doctorants", adminService.getAllDoctorants());
-        model.addAttribute("newDoctorant", new Doctorant());
-
+        model.addAttribute("encadrants", encadrantRepo.findAll());
         return "Admin/doctorants";
     }
 
     @PostMapping("/doctorants/{id}/encadrant")
     public String assignEncadrant(@PathVariable Long id,
-                                  @RequestParam Long encadrantId,
+                                  @RequestParam(required = false) Long encadrantId,
                                   RedirectAttributes ra) {
         try {
             adminService.assignSupervisor(id, encadrantId);
-            ra.addFlashAttribute("successMessage", "Encadrant assigné avec succès.");
+            if (encadrantId == null || encadrantId == 0) {
+                ra.addFlashAttribute("successMessage", "Affectation retirée avec succès.");
+            } else {
+                ra.addFlashAttribute("successMessage", "Encadrant assigné avec succès.");
+            }
         } catch (Exception e) {
             ra.addFlashAttribute("errorMessage", e.getMessage());
         }
@@ -153,19 +144,27 @@ public class AdminController {
         }
         return "redirect:/admin/doctorants";
     }
-    @GetMapping("soutenances")
-    public String list(Model model) {
-        model.addAttribute("soutenances", Soutservice.getAllSoutenance());
+
+    @GetMapping("/encadrants")
+    public String encadrants(Model model) {
+        model.addAttribute("encadrants", encadrantRepo.findAll());
+        return "Admin/encadrants";
+    }
+
+    @GetMapping("/soutenances")
+    public String soutenances(Model model) {
+        model.addAttribute("soutenances", soutenanceService.getAllSoutenance());
         return "Admin/soutenances";
     }
+
     @GetMapping("/jury")
-    public String showList(Model model) {
+    public String jury(Model model) {
         model.addAttribute("jurys", juryService.findAllJuries());
         return "Admin/jury";
     }
-    @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        return "auth/login";
+
+    @GetMapping("/parametres")
+    public String parametres() {
+        return "Admin/parametres";
     }
 }

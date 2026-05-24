@@ -225,6 +225,10 @@
        th:class="${activePage == 'jury'} ? 'sb-link active' : 'sb-link'">
       <i class="fas fa-user-tie"></i> Jury
     </a>
+    <a th:href="@{/messages}"
+       th:class="${activePage == 'messages'} ? 'sb-link active' : 'sb-link'">
+      <i class="fas fa-comments"></i> Communication
+    </a>
   </nav>
 
   <div class="sb-footer">
@@ -233,11 +237,9 @@
       <div class="sb-uname">Administrateur</div>
       <div class="sb-urole">Accès complet</div>
     </div>
-    <form th:action="@{/logout}" method="post" style="display:inline">
-      <button type="submit" class="sb-logout" title="Déconnexion">
-        <i class="fas fa-right-from-bracket"></i>
-      </button>
-    </form>
+    <a th:href="@{/logout}" class="sb-logout" title="Déconnexion">
+      <i class="fas fa-right-from-bracket"></i>
+    </a>
   </div>
 </aside>
 
